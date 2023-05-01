@@ -7,7 +7,7 @@ Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with au
 ## Key Features
 
 1. Rust powered performance.
-2. Provide Masking, Tokenization, and Encyption/Decryption capabiltes.
+2. Provide Masking, Tokenization, and Encyption/Decryption capabilities.
 3. Auditable with build-in SQLite powered Audit table.
 4. SDK for RESTful API integration.
 
