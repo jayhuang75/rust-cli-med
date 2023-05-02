@@ -11,6 +11,18 @@ Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with au
 3. Auditable with build-in SQLite powered Audit table.
 4. SDK for RESTful API integration.
 
+## How to
+
+### Installation
+
+TODO
+
+- [ ] Linux
+- [ ] Windows
+- [ ] MacOS
+
+### User guide
+
 ## Documentation
 
 TODO
@@ -18,13 +30,7 @@ TODO
 - [ ] Application Architecture Design
 - [ ] Rust code level documentation
 
-## Installation
 
-TODO
-
-- [ ] Linux
-- [ ] Windows
-- [ ] MacOS
 
 ## Roadmap
 
