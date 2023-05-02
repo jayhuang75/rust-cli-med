@@ -4,6 +4,7 @@ use std::{fmt};
 pub enum MaskerErrorType {
     SystemError,
     DatabaseError,
+    ConfigError
 }
 
 #[derive(Debug, PartialEq)]
@@ -26,15 +27,15 @@ impl MaskerError {
     }
 }
 
-// impl From<tokio_postgres::Error> for MachineError {
-//     fn from(error: tokio_postgres::Error) -> MachineError {
-//         MachineError {
-//             message: Some(error.to_string()),
-//             cause: Some("postgres database error".to_string()),
-//             error_type: MachineErrorType::PgDatabaseError,
-//         }
-//     }
-// }
+impl From<serde_yaml::Error> for MaskerError {
+    fn from(error: serde_yaml::Error) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some("can not open the conf.yml".to_string()),
+            error_type: MaskerErrorType::ConfigError,
+        }
+    }
+}
 
 // impl From<sqlx::Error> for MachineError {
 //     fn from(error: sqlx::Error) -> MachineError {

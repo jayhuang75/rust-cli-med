@@ -1,0 +1,4 @@
+debug: true # runtime log level
+fields: # list of the cols/fields you want to mask 
+  - name
+aes: 128 # AES bit Encryption (64, 128, 192, 256) available for select
