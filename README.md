@@ -27,3 +27,8 @@ TODO
 - [ ] MacOS
 
 ## Roadmap
+
+TODO
+
+- [ ] csv
+- [ ] json
