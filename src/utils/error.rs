@@ -1,10 +1,10 @@
 use std::{fmt};
+use tokio::io;
 
 #[derive(Debug, PartialEq)]
 pub enum MaskerErrorType {
-    SystemError,
-    DatabaseError,
-    ConfigError
+    ConfigError,
+    IoError
 }
 
 #[derive(Debug, PartialEq)]
@@ -37,6 +37,17 @@ impl From<serde_yaml::Error> for MaskerError {
     }
 }
 
+impl From<io::Error> for MaskerError {
+    fn from(error: io::Error) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some(error.to_string()),
+            error_type: MaskerErrorType::IoError,
+        }
+    }
+}
+
+
 // impl From<sqlx::Error> for MachineError {
 //     fn from(error: sqlx::Error) -> MachineError {
 //         MachineError {
@@ -46,19 +57,15 @@ impl From<serde_yaml::Error> for MaskerError {
 //         }
 //     }
 // }
-// //
-// impl From<sqlx::migrate::MigrateError> for MachineError {
-//     fn from(error: sqlx::migrate::MigrateError) -> MachineError {
-//         MachineError {
-//             message: Some(error.to_string()),
-//             cause: Some("database migration error".to_string()),
-//             error_type: MachineErrorType::DatabaseError,
-//         }
-//     }
-// }
-// implement `
+// 
+
+
 impl fmt::Display for MaskerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{:?}", self)
     }
 }
+
+#[cfg(test)]
+#[path = "./tests/error_test.rs"]
+mod error_test;
