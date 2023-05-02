@@ -13,6 +13,26 @@ Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with au
 
 ## How to
 
+```bash
+$ masker --help
+A simple to use, rust powered data masking/encryption/decription cli tool
+
+Usage: masker <Options>
+
+Commands:
+  test  does testing things
+  help  Print this message or the help of the given subcommand(s)
+
+Arguments:
+  [name]  Optional name to operate on
+
+Options:
+  -c, --config <FILE>  Sets a custom config file
+  -d, --debug...       Turn debugging information on
+  -h, --help           Print help
+  -V, --version        Print version
+```
+
 ### Installation
 
 TODO
