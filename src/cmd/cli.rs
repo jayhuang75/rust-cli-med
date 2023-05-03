@@ -1,9 +1,17 @@
+use crate::utils::{
+    config::{self, Config},
+    error::MaskerError,
+};
+use clap::{arg, command, value_parser, ArgAction, Command};
 use csv::StringRecord;
 use serde_json::Value;
-use tracing::log::info;
-use std::{path::PathBuf, fmt};
-use clap::{arg, command, value_parser, ArgAction, Command};
+use std::{
+    fmt,
+    path::{Path, PathBuf},
+};
+use tracing::{log::info, warn};
 
+#[derive(Debug, Clone)]
 pub enum FileType {
     CSV,
     JSON,
@@ -41,7 +49,7 @@ impl fmt::Display for Action {
         match self {
             Action::MASK => write!(f, "mask"),
             Action::ENCRYPT => write!(f, "encrypt"),
-            Action::DECRYPT => write!(f, "decrypt")
+            Action::DECRYPT => write!(f, "decrypt"),
         }
     }
 }
@@ -52,68 +60,95 @@ pub struct CliApp {
     pub conf_path: String,
     pub output_path: String,
     pub action: Action,
+    pub conf: Config,
 }
 
 impl CliApp {
-
-    pub async fn new() -> Self {
-
-        let mut file_path: String = "".to_owned();
-        let mut file_type: FileType = FileType::default();
-        let mut conf_path: String = "".to_owned();
-        let mut output_path: String;
-        let mut action: Action = Action::default();
+    /// Returns a CliApp with the input config
+    ///
+    /// # Arguments
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let CliApp = CliApp::new().await?;
+    /// ```
+    pub async fn new() -> Result<Self, MaskerError> {
+        //
+        let mut file_path: String = String::default();
+        let file_type: FileType = FileType::default();
+        let mut conf_path: String = String::default();
+        let mut output_path: String = String::default();
+        let action: Action = Action::default();
 
         let matches = command!() // requires `cargo` feature
             .arg(
                 arg!(
-                    -c --config_path <CONFIG_LOCATION> "Sets a custom config yml path"
-                )
-                .required(true)
-                .default_value("./conf.yml")
-                .value_parser(value_parser!(PathBuf)),
-            )
-            .arg(
-                arg!(
-                    -f --file_path <FILE_LOCATION> "Sets a file/directory path"
-                )
-                .required(true)
-                .value_parser(value_parser!(PathBuf)),
-            )
-            .arg(
-                arg!(
-                    -o --output_path <OUTPUT_FILE_LOCATION> "Sets a file/directory path for output"
-                )
-                .required(true)
-                .default_value("./out")
-                .value_parser(value_parser!(PathBuf)),
-            )
-            .arg(
-                arg!(
-                    -t --file_type <FILE_TYPE> "Sets a process file type"
+                    -c --config <CONFIG> "Sets a custom config yml path"
                 )
                 .required(false)
-                .default_value("csv")
+                .default_value("conf.yml")
+                .value_parser(value_parser!(PathBuf)),
+            )
+            .arg(
+                arg!(
+                    -d --dir <DIR> "Sets a file/directory path"
+                )
+                .required(true)
+                .value_parser(value_parser!(PathBuf)),
+            )
+            .arg(
+                arg!(
+                    -o --output <OUTPUT> "Sets a file/directory path for output"
+                )
+                .required(false)
+                .default_value("output")
+                .value_parser(value_parser!(PathBuf))
+            )
+            .arg(
+                arg!(
+                    -t --type <TYPE> "Sets a process file type"
+                )
+                .required(false)
+                .default_value("csv"),
             )
             .get_matches();
 
-        if let Some(config_path) = matches.get_one::<PathBuf>("config") {
-            info!("conf.yml location {:?} : ", config_path.display());
-            conf_path = config_path.display().to_string();
+        if let Some(path) = matches.get_one::<PathBuf>("config") {
+            info!("conf.yml location {:?} : ", path.display());
+            conf_path = path.display().to_string();
         }
 
-        if let Some(output_path) = matches.get_one::<PathBuf>("output_path") {
-            info!("conf.yml location {:?} : ", output_path.display());
-            conf_path = output_path.display().to_string();
+        if let Some(path) = matches.get_one::<PathBuf>("dir") {
+            info!("file location {:?} : ", path.display());
+            file_path = path.display().to_string();
         }
 
-        CliApp{
+        if let Some(path) = matches.get_one::<PathBuf>("output") {
+            info!("output file location {:?} : ", path.display());
+            output_path = path.display().to_string();
+        }
+
+        // init the config
+        let path = Path::new(&conf_path);
+        let conf = Config::new(path).await?;
+
+        Ok(CliApp {
             file_path,
             file_type,
             conf_path,
             output_path,
             action,
-        }
+            conf,
+        })
+    }
 
+    /// Returns a file dir
+    /// ```
+    /// let app = CliApp::new().await?;
+    /// let file_dir = app.get_file_dir().await?;
+    /// ```
+    pub async fn get_file_dir(&self) -> Result<String, MaskerError> {
+        Ok(self.file_path.to_owned())
     }
 }

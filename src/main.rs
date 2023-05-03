@@ -5,16 +5,11 @@ use std::path::Path;
 use utils::{config::Config, error::MaskerError};
 use tracing::{info, debug};
 
+use crate::cmd::cli::CliApp;
+
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
     
-    // init the config
-    let path = Path::new("conf.yml");
-    let config = Config::new(path).await?;
-
-    // init the tracing for logging
-    config.tracing().await;
-
     // cmd load
     // design:
     // masker 
@@ -23,9 +18,10 @@ async fn main() -> Result<(), MaskerError> {
     // --conf_path=conf.yml [optional] default ./conf.yml
     // --action=[mask,encrypt,decrypt] [optional] default is mask
     // --output=
+    let app = CliApp::new().await?;
+    app.conf.tracing().await;
 
-
-    info!("test");
+    info!("file location {:?}", app.get_file_dir().await?);
     debug!("debug");
 
     Ok(())
