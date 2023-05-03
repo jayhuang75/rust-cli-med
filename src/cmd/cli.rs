@@ -1,6 +1,6 @@
 use csv::StringRecord;
 use serde_json::Value;
-use std::path::PathBuf;
+use std::{path::PathBuf, fmt};
 use clap::{arg, command, value_parser, ArgAction, Command};
 
 pub enum FileType {
@@ -14,6 +14,15 @@ impl Default for FileType {
     }
 }
 
+impl fmt::Display for FileType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            FileType::CSV => write!(f, "csv"),
+            FileType::JSON => write!(f, "json"),
+        }
+    }
+}
+
 pub enum Action {
     MASK,
     ENCRYPT,
@@ -23,6 +32,16 @@ pub enum Action {
 impl Default for Action {
     fn default() -> Self {
         Action::MASK
+    }
+}
+
+impl fmt::Display for Action {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Action::MASK => write!(f, "mask"),
+            Action::ENCRYPT => write!(f, "encrypt"),
+            Action::DECRYPT => write!(f, "decrypt")
+        }
     }
 }
 
@@ -66,7 +85,7 @@ impl CliApp {
                     -t --file_type <FILE_TYPE> "Sets a process file type"
                 )
                 .required(true)
-                .default_value(FileType)
+                .default_value("csv")
             )
             .get_matches();
 
