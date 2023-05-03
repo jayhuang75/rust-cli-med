@@ -7,7 +7,7 @@ use csv::StringRecord;
 use serde_json::Value;
 use std::{
     fmt,
-    path::{Path, PathBuf},
+    path::{Path, PathBuf}, ffi::OsStr,
 };
 use tracing::{log::info, warn};
 
@@ -65,7 +65,15 @@ pub struct CliApp {
 
 impl CliApp {
     /// Returns a CliApp with the input config
-    ///
+    /// 
+    /// - Usage: masker --dir <DIR>
+    /// 
+    /// - -c --config optional default is the conf.yml
+    /// - -d --dir  this is required which is point to the files directory
+    /// - -o --output optional default is /output
+    /// - -t --type optional default is csv, [csv, json] are the two optional choice
+    /// - -a 
+    /// 
     /// # Examples
     /// ```
     /// let CliApp = CliApp::new().await?;
@@ -81,7 +89,7 @@ impl CliApp {
         let matches = command!() // requires `cargo` feature
             .arg(
                 arg!(
-                    -c --config <CONFIG> "Sets a custom config yml path"
+                    -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
                 )
                 .required(false)
                 .default_value("conf.yml")
@@ -96,7 +104,7 @@ impl CliApp {
             )
             .arg(
                 arg!(
-                    -o --output <OUTPUT> "Sets a file/directory path for output"
+                    -o --output <OUTPUT> "Sets a file/directory path for output, default is /output"
                 )
                 .required(false)
                 .default_value("output")
@@ -104,10 +112,17 @@ impl CliApp {
             )
             .arg(
                 arg!(
-                    -t --type <TYPE> "Sets a process file type"
+                    -t --type <TYPE> "Sets a process file type [csv, json], csv is the default value"
                 )
                 .required(false)
                 .default_value("csv"),
+            )
+            .arg(
+                arg!(
+                    -a --action <ACTION> "Sets a process file type [csv, json], csv is the default value"
+                )
+                .required(true)
+                .default_value("mask"),
             )
             .get_matches();
 
@@ -135,7 +150,6 @@ impl CliApp {
 
         if let Some(action) = matches.get_one::<String>("action") {
             info!("action {:?} : ", action);
-            
         }
 
         // init the config
