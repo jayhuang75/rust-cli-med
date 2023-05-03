@@ -73,10 +73,10 @@ impl CliApp {
     pub async fn new() -> Result<Self, MaskerError> {
         //
         let mut file_path: String = String::default();
-        let file_type: FileType = FileType::default();
+        let mut file_type: FileType = FileType::default();
         let mut conf_path: String = String::default();
         let mut output_path: String = String::default();
-        let action: Action = Action::default();
+        let mut action: Action = Action::default();
 
         let matches = command!() // requires `cargo` feature
             .arg(
@@ -100,7 +100,7 @@ impl CliApp {
                 )
                 .required(false)
                 .default_value("output")
-                .value_parser(value_parser!(PathBuf))
+                .value_parser(value_parser!(PathBuf)),
             )
             .arg(
                 arg!(
@@ -124,6 +124,18 @@ impl CliApp {
         if let Some(path) = matches.get_one::<PathBuf>("output") {
             info!("output file location {:?} : ", path.display());
             output_path = path.display().to_string();
+        }
+
+        if let Some(f_type) = matches.get_one::<String>("type") {
+            info!("file type {:?} : ", f_type);
+            if f_type.to_owned() != FileType::CSV.to_string() {
+                file_type = FileType::JSON;
+            }
+        }
+
+        if let Some(action) = matches.get_one::<String>("action") {
+            info!("action {:?} : ", action);
+            
         }
 
         // init the config
