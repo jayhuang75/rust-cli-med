@@ -66,10 +66,7 @@ pub struct CliApp {
 impl CliApp {
     /// Returns a CliApp with the input config
     ///
-    /// # Arguments
-    ///
     /// # Examples
-    ///
     /// ```
     /// let CliApp = CliApp::new().await?;
     /// ```
