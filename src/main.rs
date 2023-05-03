@@ -22,6 +22,7 @@ async fn main() -> Result<(), MaskerError> {
     // --file_type= [csv,json] [required] 
     // --conf_path=conf.yml [optional] default ./conf.yml
     // --action=[mask,encrypt,decrypt] [optional] default is mask
+    // --output=
 
 
     info!("test");
