@@ -7,7 +7,7 @@ use csv::StringRecord;
 use serde_json::Value;
 use std::{
     fmt,
-    path::{Path, PathBuf}, ffi::OsStr,
+    path::{Path, PathBuf}, ffi::OsStr, os::unix::process,
 };
 use tracing::{log::info, warn};
 
@@ -59,7 +59,7 @@ pub struct CliApp {
     pub file_type: FileType,
     pub conf_path: String,
     pub output_path: String,
-    pub action: Action,
+    pub process_action: Action,
     pub conf: Config,
 }
 
@@ -84,7 +84,7 @@ impl CliApp {
         let mut file_type: FileType = FileType::default();
         let mut conf_path: String = String::default();
         let mut output_path: String = String::default();
-        let mut action: Action = Action::default();
+        let mut process_action: Action = Action::default();
 
         let matches = command!() // requires `cargo` feature
             .arg(
@@ -150,6 +150,9 @@ impl CliApp {
 
         if let Some(action) = matches.get_one::<String>("action") {
             info!("action {:?} : ", action);
+            if action.to_owned() == Action::ENCRYPT.to_string() {
+                process_action = Action::ENCRYPT;
+            }
         }
 
         // init the config
@@ -161,7 +164,7 @@ impl CliApp {
             file_type,
             conf_path,
             output_path,
-            action,
+            process_action,
             conf,
         })
     }
