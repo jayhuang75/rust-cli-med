@@ -1,15 +1,12 @@
-use clap::{arg, command, value_parser};
-use std::{
-    fmt,
-    path::{Path, PathBuf},
-};
-use tracing::{log::info};
+use clap::{arg, command, value_parser, ArgMatches};
+use std::{fmt, path::PathBuf};
+use tracing::log::info;
 
-use crate::cmd::process::FileProcess;
-use crate::utils::{
-    config::{Config},
-    error::MaskerError,
-};
+// use crate::cmd::process::FileProcess;
+// use crate::utils::{
+//     config::{Config},
+//     error::MaskerError,
+// };
 
 #[derive(Debug, Clone)]
 pub enum FileType {
@@ -32,6 +29,7 @@ impl fmt::Display for FileType {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Action {
     MASK,
     ENCRYPT,
@@ -54,40 +52,117 @@ impl fmt::Display for Action {
     }
 }
 
-pub struct CliApp {
+#[derive(Debug, Clone)]
+pub struct Cli {
     pub file_path: String,
     pub file_type: FileType,
     pub conf_path: String,
     pub output_path: String,
     pub process_action: Action,
-    pub conf: Config,
-    pub process_file: FileProcess,
-    key: Option<String>,
+    pub key: Option<String>,
+    pub debug: bool,
 }
 
-impl CliApp {
-    /// Returns a CliApp with the input config
+impl Default for Cli {
+    fn default() -> Self {
+        let file_path: String = String::default();
+        let file_type: FileType = FileType::default();
+        let conf_path: String = String::default();
+        let output_path: String = String::default();
+        let process_action: Action = Action::default();
+        let key: String = String::default();
+        let debug: bool = false;
+
+        Cli {
+            file_path,
+            file_type,
+            conf_path,
+            output_path,
+            process_action,
+            key: Some(key),
+            debug,
+        }    
+    }
+}
+
+impl Cli {
+    /// Returns a Cli with the input config
     ///
     /// - Usage: masker --dir <DIR>
     ///
     /// - -c --config optional default is the conf.yml
-    /// - -d --dir  this is required which is point to the files directory
+    /// - -f --file  this is required which is point to the files directory
     /// - -o --output optional default is /output
     /// - -t --type optional default is csv, [csv, json] are the two optional choice
     /// - -a --action optional default is mask, [mask, encrypt, decrypt]
     /// - -k --key optional, its only for encrypt, and decrypt
+    /// - 
     ///
     /// # Examples
     /// ```
     /// let CliApp = CliApp::new().await?;
     /// ```
-    pub async fn new() -> Result<Self, MaskerError> {
-        let mut file_path: String = String::default();
-        let mut file_type: FileType = FileType::default();
-        let mut conf_path: String = String::default();
-        let mut output_path: String = String::default();
-        let mut process_action: Action = Action::default();
+    pub async fn new(&self) -> Self {
+        // Get the cli input params
+        let matches = self.get_params().await;
 
+        // Initial Default CLI params
+        let new_cli = Cli::default();
+
+        // replace the default cli params by the cli input from the prompt
+        let fulfilled_cli = self.fulfill_cli(matches, new_cli).await;
+        
+        // return the fulfilled CLI Params
+        fulfilled_cli
+    }
+
+    async fn fulfill_cli(&self, matches: ArgMatches, mut cli: Cli) -> Cli {
+        if let Some(path) = matches.get_one::<PathBuf>("config") {
+            info!("conf.yml location {:?} : ", path.display());
+            cli.conf_path = path.display().to_string();
+        }
+
+        if let Some(path) = matches.get_one::<PathBuf>("dir") {
+            info!("file location {:?} : ", path.display());
+            cli.file_path = path.display().to_string();
+        }
+
+        if let Some(path) = matches.get_one::<PathBuf>("output") {
+            info!("output file location {:?} : ", path.display());
+            cli.output_path = path.display().to_string();
+        }
+
+        if let Some(f_type) = matches.get_one::<String>("type") {
+            info!("file type {:?} : ", f_type);
+            if f_type.to_owned() != FileType::CSV.to_string() {
+                cli.file_type = FileType::JSON;
+            }
+        }
+
+        if let Some(action) = matches.get_one::<String>("action") {
+            info!("action {:?} : ", action);
+            if action.to_owned() == Action::ENCRYPT.to_string() {
+                cli.process_action = Action::ENCRYPT;
+            } else if action.to_owned() == Action::DECRYPT.to_string() {
+                cli.process_action = Action::DECRYPT;
+            }
+        }
+
+        if let Some(key) = matches.get_one::<String>("key") {
+            info!("key {:?} : ", key);
+            cli.key = Some(key.to_owned());
+        }
+
+        if let Some(debug) = matches.get_one::<bool>("debug") {
+            info!("debug {:?} : ", debug);
+            cli.debug = debug.to_owned();
+        }
+
+        cli
+    }
+
+
+    async fn get_params(&self) -> ArgMatches {
         let matches = command!() // requires `cargo` feature
             .arg(
                 arg!(
@@ -99,7 +174,7 @@ impl CliApp {
             )
             .arg(
                 arg!(
-                    -d --dir <DIR> "Sets a file/directory path"
+                    -f --file <FILE> "Sets a file/directory path"
                 )
                 .required(true)
                 .value_parser(value_parser!(PathBuf)),
@@ -134,63 +209,6 @@ impl CliApp {
             )
             .get_matches();
 
-        if let Some(path) = matches.get_one::<PathBuf>("config") {
-            info!("conf.yml location {:?} : ", path.display());
-            conf_path = path.display().to_string();
-        }
-
-        if let Some(path) = matches.get_one::<PathBuf>("dir") {
-            info!("file location {:?} : ", path.display());
-            file_path = path.display().to_string();
-        }
-
-        if let Some(path) = matches.get_one::<PathBuf>("output") {
-            info!("output file location {:?} : ", path.display());
-            output_path = path.display().to_string();
-        }
-
-        if let Some(f_type) = matches.get_one::<String>("type") {
-            info!("file type {:?} : ", f_type);
-            if f_type.to_owned() != FileType::CSV.to_string() {
-                file_type = FileType::JSON;
-            }
-        }
-
-        if let Some(action) = matches.get_one::<String>("action") {
-            info!("action {:?} : ", action);
-            if action.to_owned() == Action::ENCRYPT.to_string() {
-                process_action = Action::ENCRYPT;
-            } else if action.to_owned() == Action::DECRYPT.to_string() {
-                process_action = Action::DECRYPT;
-            }
-        }
-
-        // init the config
-        let path = Path::new(&conf_path);
-        let conf = Config::new(path).await?;
-
-        match process_action {
-            Action::MASK => todo!(),
-            Action::ENCRYPT => todo!(),
-            Action::DECRYPT => todo!(),
-        }
-
-        Ok(CliApp {
-            file_path,
-            file_type,
-            conf_path,
-            output_path,
-            process_action,
-            conf,
-        })
-    }
-
-    /// Returns a file dir
-    /// ```
-    /// let app = CliApp::new().await?;
-    /// let file_dir = app.get_file_dir().await?;
-    /// ```
-    pub async fn get_file_dir(&self) -> Result<String, MaskerError> {
-        Ok(self.file_path.to_owned())
+        matches
     }
 }
