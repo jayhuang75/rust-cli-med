@@ -1,2 +1,3 @@
 pub mod cli;
-mod csv;
+pub mod csv;
+pub mod process;

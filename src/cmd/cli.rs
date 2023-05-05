@@ -1,15 +1,15 @@
-use crate::utils::{
-    config::{self, Config},
-    error::MaskerError,
-};
-use clap::{arg, command, value_parser, ArgAction, Command};
-use csv::StringRecord;
-use serde_json::Value;
+use clap::{arg, command, value_parser};
 use std::{
     fmt,
-    path::{Path, PathBuf}, ffi::OsStr, os::unix::process,
+    path::{Path, PathBuf},
 };
-use tracing::{log::info, warn};
+use tracing::{log::info};
+
+use crate::cmd::process::FileProcess;
+use crate::utils::{
+    config::{Config},
+    error::MaskerError,
+};
 
 #[derive(Debug, Clone)]
 pub enum FileType {
@@ -61,25 +61,27 @@ pub struct CliApp {
     pub output_path: String,
     pub process_action: Action,
     pub conf: Config,
+    pub process_file: FileProcess,
+    key: Option<String>,
 }
 
 impl CliApp {
     /// Returns a CliApp with the input config
-    /// 
+    ///
     /// - Usage: masker --dir <DIR>
-    /// 
+    ///
     /// - -c --config optional default is the conf.yml
     /// - -d --dir  this is required which is point to the files directory
     /// - -o --output optional default is /output
     /// - -t --type optional default is csv, [csv, json] are the two optional choice
-    /// - -a 
-    /// 
+    /// - -a --action optional default is mask, [mask, encrypt, decrypt]
+    /// - -k --key optional, its only for encrypt, and decrypt
+    ///
     /// # Examples
     /// ```
     /// let CliApp = CliApp::new().await?;
     /// ```
     pub async fn new() -> Result<Self, MaskerError> {
-        //
         let mut file_path: String = String::default();
         let mut file_type: FileType = FileType::default();
         let mut conf_path: String = String::default();
@@ -124,6 +126,12 @@ impl CliApp {
                 .required(true)
                 .default_value("mask"),
             )
+            .arg(
+                arg!(
+                    -k --key <KEY> "Sets Key for encryption and decryption"
+                )
+                .required(false),
+            )
             .get_matches();
 
         if let Some(path) = matches.get_one::<PathBuf>("config") {
@@ -152,12 +160,20 @@ impl CliApp {
             info!("action {:?} : ", action);
             if action.to_owned() == Action::ENCRYPT.to_string() {
                 process_action = Action::ENCRYPT;
+            } else if action.to_owned() == Action::DECRYPT.to_string() {
+                process_action = Action::DECRYPT;
             }
         }
 
         // init the config
         let path = Path::new(&conf_path);
         let conf = Config::new(path).await?;
+
+        match process_action {
+            Action::MASK => todo!(),
+            Action::ENCRYPT => todo!(),
+            Action::DECRYPT => todo!(),
+        }
 
         Ok(CliApp {
             file_path,
