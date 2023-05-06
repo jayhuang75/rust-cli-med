@@ -1,4 +1,4 @@
-use clap::{arg, command, value_parser, ArgMatches};
+use clap::{arg, command, value_parser, ArgMatches, Command};
 use std::{fmt, path::PathBuf};
 use tracing::log::info;
 
@@ -81,7 +81,7 @@ impl Default for Cli {
             process_action,
             key: Some(key),
             debug,
-        }    
+        }
     }
 }
 
@@ -96,33 +96,55 @@ impl Cli {
     /// - -t --type optional default is csv, [csv, json] are the two optional choice
     /// - -a --action optional default is mask, [mask, encrypt, decrypt]
     /// - -k --key optional, its only for encrypt, and decrypt
-    /// - 
+    /// - -d --debug optional, default false
     ///
     /// # Examples
     /// ```
     /// let CliApp = CliApp::new().await?;
     /// ```
-    pub async fn new(&self) -> Self {
-        // Get the cli input params
-        let matches = self.get_params().await;
+    pub async fn new() {
 
         // Initial Default CLI params
         let new_cli = Cli::default();
 
+        // Get the cli input params
+        let matches = Self::get_params().await;
+
         // replace the default cli params by the cli input from the prompt
-        let fulfilled_cli = self.fulfill_cli(matches, new_cli).await;
-        
+        let fulfilled_cli = Self::fulfill_cli(matches, new_cli).await;
+
         // return the fulfilled CLI Params
         fulfilled_cli
     }
 
-    async fn fulfill_cli(&self, matches: ArgMatches, mut cli: Cli) -> Cli {
+    async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) {
+        match matches.subcommand() {
+            Some(("mask", sub_matches)) =>{
+                println!("mask tigger");
+            },
+            Some(("encrypt", sub_matches)) => {
+                if let Some(key) = sub_matches.get_one::<String>("key") {
+                    println!("key {:?} : ", key);
+                    cli.key = Some(key.to_owned());
+                }
+            },
+            Some(("decrypt", sub_matches)) => { 
+                if let Some(key) = sub_matches.get_one::<String>("key") {
+                    info!("key {:?} : ", key);
+                    cli.key = Some(key.to_owned());
+                }
+            },
+            _ => unreachable!(
+                "Exhausted list of subcommands and subcommand_required prevents `None`"
+            ),
+        }
+
         if let Some(path) = matches.get_one::<PathBuf>("config") {
             info!("conf.yml location {:?} : ", path.display());
             cli.conf_path = path.display().to_string();
         }
 
-        if let Some(path) = matches.get_one::<PathBuf>("dir") {
+        if let Some(path) = matches.get_one::<PathBuf>("file") {
             info!("file location {:?} : ", path.display());
             cli.file_path = path.display().to_string();
         }
@@ -139,76 +161,79 @@ impl Cli {
             }
         }
 
-        if let Some(action) = matches.get_one::<String>("action") {
-            info!("action {:?} : ", action);
-            if action.to_owned() == Action::ENCRYPT.to_string() {
-                cli.process_action = Action::ENCRYPT;
-            } else if action.to_owned() == Action::DECRYPT.to_string() {
-                cli.process_action = Action::DECRYPT;
-            }
-        }
-
-        if let Some(key) = matches.get_one::<String>("key") {
-            info!("key {:?} : ", key);
-            cli.key = Some(key.to_owned());
-        }
-
         if let Some(debug) = matches.get_one::<bool>("debug") {
             info!("debug {:?} : ", debug);
             cli.debug = debug.to_owned();
         }
 
-        cli
+        // cli
     }
 
-
-    async fn get_params(&self) -> ArgMatches {
-        let matches = command!() // requires `cargo` feature
-            .arg(
-                arg!(
-                    -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
-                )
-                .required(false)
-                .default_value("conf.yml")
-                .value_parser(value_parser!(PathBuf)),
+    pub async fn get_params() -> ArgMatches {
+        command!() // requires `cargo` feature
+        .propagate_version(true)
+        .subcommand_required(true)
+        .arg_required_else_help(true)
+        .subcommand(
+            Command::new("mask")
+                .about("Mask file/files")
+        )
+        .subcommand(
+            Command::new("encrypt")
+                .about("Encrypt file/files")
+                .arg(
+                    arg!(
+                        -k --key <KEY> "Sets Key for encryption"
+                    )
+                    .required(true)
+                ),
+        )
+        .subcommand(
+            Command::new("decrypt")
+                .about("Decrypt file/files")
+                .arg(
+                    arg!(
+                        -k --key <KEY> "Sets Key for decryption"
+                    )
+                    .required(true)
+                ),
+        )
+        .arg(
+            arg!(
+                -t --type <TYPE> "Sets a process file type [csv, json], csv is the default value"
             )
-            .arg(
-                arg!(
-                    -f --file <FILE> "Sets a file/directory path"
-                )
-                .required(true)
-                .value_parser(value_parser!(PathBuf)),
+            .required(false)
+            .default_value("csv"),
+        )
+        .arg(
+            arg!(
+                -f --file <FILE> "Sets a file/directory path"
             )
-            .arg(
-                arg!(
-                    -o --output <OUTPUT> "Sets a file/directory path for output, default is /output"
-                )
-                .required(false)
-                .default_value("output")
-                .value_parser(value_parser!(PathBuf)),
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+            arg!(
+                -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
             )
-            .arg(
-                arg!(
-                    -t --type <TYPE> "Sets a process file type [csv, json], csv is the default value"
-                )
-                .required(false)
-                .default_value("csv"),
+            .required(false)
+            .default_value("conf.yml")
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+            arg!(
+                -o --output <OUTPUT> "Sets a file/directory path for output, default is /output"
             )
-            .arg(
-                arg!(
-                    -a --action <ACTION> "Sets a process file type [csv, json], csv is the default value"
-                )
-                .required(true)
-                .default_value("mask"),
+            .required(false)
+            .default_value("output")
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+            arg!(
+                -d --debug <DEBUG> "Sets debug flag [true, false]"
             )
-            .arg(
-                arg!(
-                    -k --key <KEY> "Sets Key for encryption and decryption"
-                )
-                .required(false),
-            )
-            .get_matches();
-
-        matches
+            .required(false)
+        )
+        .get_matches()
     }
 }
