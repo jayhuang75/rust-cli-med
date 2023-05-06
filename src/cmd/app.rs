@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::{cmd::cli::Cli, utils::error::MaskerError, utils::config::JobConfig};
-use tracing_subscriber::fmt::format;
+use tracing_subscriber::{fmt::format, prelude::__tracing_subscriber_field_MakeExt};
 
 pub struct App{
     pub params: Cli,
@@ -40,12 +40,6 @@ impl App {
     }
 
     pub async fn process(&self) -> Result<(), MaskerError> {
-
-        match self.params.mode {
-            crate::utils::enums::Mode::MASK => todo!(),
-            crate::utils::enums::Mode::ENCRYPT => todo!(),
-            crate::utils::enums::Mode::DECRYPT => todo!(),
-        }
 
         Ok(())
     }
