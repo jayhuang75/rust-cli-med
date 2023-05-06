@@ -22,7 +22,6 @@ pub struct ProcessJson {
 pub struct FileProcess {
     pub csv: Option<ProcessCsv>,
     pub json: Option<ProcessJson>,
-    // any type inside a Box must implement the Producer trait.
     pub producer: Box<dyn Producer>,
 }
 

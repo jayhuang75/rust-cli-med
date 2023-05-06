@@ -38,4 +38,16 @@ impl App {
             }
         }
     }
+
+    pub async fn process(&self) -> Result<(), MaskerError> {
+
+        match self.params.mode {
+            crate::utils::enums::Mode::MASK => todo!(),
+            crate::utils::enums::Mode::ENCRYPT => todo!(),
+            crate::utils::enums::Mode::DECRYPT => todo!(),
+        }
+
+        Ok(())
+    }
+
 }
