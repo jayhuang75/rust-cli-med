@@ -1,56 +1,7 @@
-use clap::{arg, command, value_parser, ArgMatches, Command};
-use std::{fmt, path::PathBuf};
+use crate::utils::enums::{FileType, Mode};
+use clap::{arg, command, value_parser, ArgMatches};
+use std::path::PathBuf;
 use tracing::log::info;
-
-// use crate::cmd::process::FileProcess;
-// use crate::utils::{
-//     config::{Config},
-//     error::MaskerError,
-// };
-
-#[derive(Debug, Clone)]
-pub enum FileType {
-    CSV,
-    JSON,
-}
-
-impl Default for FileType {
-    fn default() -> Self {
-        FileType::CSV
-    }
-}
-
-impl fmt::Display for FileType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            FileType::CSV => write!(f, "csv"),
-            FileType::JSON => write!(f, "json"),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum Action {
-    MASK,
-    ENCRYPT,
-    DECRYPT,
-}
-
-impl Default for Action {
-    fn default() -> Self {
-        Action::MASK
-    }
-}
-
-impl fmt::Display for Action {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Action::MASK => write!(f, "mask"),
-            Action::ENCRYPT => write!(f, "encrypt"),
-            Action::DECRYPT => write!(f, "decrypt"),
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct Cli {
@@ -58,7 +9,7 @@ pub struct Cli {
     pub file_type: FileType,
     pub conf_path: String,
     pub output_path: String,
-    pub process_action: Action,
+    pub mode: Mode,
     pub key: Option<String>,
     pub debug: bool,
 }
@@ -69,7 +20,7 @@ impl Default for Cli {
         let file_type: FileType = FileType::default();
         let conf_path: String = String::default();
         let output_path: String = String::default();
-        let process_action: Action = Action::default();
+        let mode: Mode = Mode::default();
         let key: String = String::default();
         let debug: bool = false;
 
@@ -78,7 +29,7 @@ impl Default for Cli {
             file_type,
             conf_path,
             output_path,
-            process_action,
+            mode,
             key: Some(key),
             debug,
         }
@@ -102,8 +53,7 @@ impl Cli {
     /// ```
     /// let CliApp = CliApp::new().await?;
     /// ```
-    pub async fn new() {
-
+    pub async fn new() -> Self {
         // Initial Default CLI params
         let new_cli = Cli::default();
 
@@ -117,26 +67,28 @@ impl Cli {
         fulfilled_cli
     }
 
-    async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) {
-        match matches.subcommand() {
-            Some(("mask", sub_matches)) =>{
-                println!("mask tigger");
-            },
-            Some(("encrypt", sub_matches)) => {
-                if let Some(key) = sub_matches.get_one::<String>("key") {
-                    println!("key {:?} : ", key);
+    async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) -> Cli{
+        // Note, it's safe to call unwrap() because the arg is required
+        match matches
+            .get_one::<Mode>("MODE")
+            .expect("'MODE' is required and parsing will fail if its missing")
+        {
+            Mode::MASK => {
+                cli.mode = Mode::MASK;
+                cli.key = None;
+            }
+            Mode::ENCRYPT => {
+                cli.mode = Mode::ENCRYPT;
+                if let Some(key) = matches.get_one::<String>("key") {
                     cli.key = Some(key.to_owned());
                 }
-            },
-            Some(("decrypt", sub_matches)) => { 
-                if let Some(key) = sub_matches.get_one::<String>("key") {
-                    info!("key {:?} : ", key);
+            }
+            Mode::DECRYPT => {
+                cli.mode = Mode::DECRYPT;
+                if let Some(key) = matches.get_one::<String>("key") {
                     cli.key = Some(key.to_owned());
                 }
-            },
-            _ => unreachable!(
-                "Exhausted list of subcommands and subcommand_required prevents `None`"
-            ),
+            }
         }
 
         if let Some(path) = matches.get_one::<PathBuf>("config") {
@@ -166,74 +118,61 @@ impl Cli {
             cli.debug = debug.to_owned();
         }
 
-        // cli
+        cli
     }
 
     pub async fn get_params() -> ArgMatches {
-        command!() // requires `cargo` feature
-        .propagate_version(true)
-        .subcommand_required(true)
-        .arg_required_else_help(true)
-        .subcommand(
-            Command::new("mask")
-                .about("Mask file/files")
-        )
-        .subcommand(
-            Command::new("encrypt")
-                .about("Encrypt file/files")
-                .arg(
-                    arg!(
-                        -k --key <KEY> "Sets Key for encryption"
-                    )
+        command!()
+            .propagate_version(true)
+            .arg_required_else_help(true)
+            .arg(
+                arg!(<MODE>)
                     .required(true)
-                ),
-        )
-        .subcommand(
-            Command::new("decrypt")
-                .about("Decrypt file/files")
-                .arg(
-                    arg!(
-                        -k --key <KEY> "Sets Key for decryption"
-                    )
-                    .required(true)
-                ),
-        )
-        .arg(
-            arg!(
-                -t --type <TYPE> "Sets a process file type [csv, json], csv is the default value"
+                    .help("What mode to run the program in")
+                    .value_parser(value_parser!(Mode)),
             )
-            .required(false)
-            .default_value("csv"),
-        )
-        .arg(
-            arg!(
-                -f --file <FILE> "Sets a file/directory path"
+            .arg(
+                arg!(
+                    -t --type <TYPE> "Sets a process file type [csv, json], csv is the default value"
+                )
+                .required(false)
+                .default_value("csv")
             )
-            .required(true)
-            .value_parser(value_parser!(PathBuf)),
-        )
-        .arg(
-            arg!(
-                -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
+            .arg(
+                arg!(
+                    -k --key <KEY> "Sets a KEY to process file"
+                )
+                .required_if_eq_any([("MODE", "decrypt"),("MODE", "encrypt")])
             )
-            .required(false)
-            .default_value("conf.yml")
-            .value_parser(value_parser!(PathBuf)),
-        )
-        .arg(
-            arg!(
-                -o --output <OUTPUT> "Sets a file/directory path for output, default is /output"
+            .arg(
+                arg!(
+                    -f --file <FILE> "Sets a file/directory path"
+                )
+                .required(true)
+                .value_parser(value_parser!(PathBuf)),
             )
-            .required(false)
-            .default_value("output")
-            .value_parser(value_parser!(PathBuf)),
-        )
-        .arg(
-            arg!(
-                -d --debug <DEBUG> "Sets debug flag [true, false]"
+            .arg(
+                arg!(
+                    -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
+                )
+                .required(false)
+                .default_value("conf.yml")
+                .value_parser(value_parser!(PathBuf)),
             )
-            .required(false)
-        )
-        .get_matches()
+            .arg(
+                arg!(
+                    -o --output <OUTPUT> "Sets a file/directory path for output, default is /output"
+                )
+                .required(false)
+                .default_value("output")
+                .value_parser(value_parser!(PathBuf)),
+            )
+            .arg(
+                arg!(
+                    -d --debug <DEBUG> "Sets debug flag [true, false]"
+                )
+                .required(false)
+            )
+            .get_matches()
     }
 }

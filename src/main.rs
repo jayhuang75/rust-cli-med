@@ -10,6 +10,9 @@ use crate::cmd::cli::Cli;
 async fn main() -> Result<(), MaskerError> {
     
     let app = Cli::new().await;
+
+    println!("cli : {:?}", app);
+
     // app.conf.tracing().await;
 
     // info!("file location {:?}", app.get_file_dir().await?);
