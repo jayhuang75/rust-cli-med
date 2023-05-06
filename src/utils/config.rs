@@ -18,23 +18,6 @@ impl JobConfig {
         let config: JobConfig = serde_yaml::from_reader(f)?;
         Ok(config)
     }
-
-    // pub async fn tracing(&self) {
-    //     let subscriber = tracing_subscriber::fmt() // disabling time is handy because CloudWatch will add the ingestion time.
-    //         .with_timer(tracing_subscriber::fmt::time::uptime())
-    //         .with_line_number(true)
-    //         .with_thread_names(true)
-    //         .event_format(format().compact());
-
-    //     match self.debug {
-    //         true => {
-    //             subscriber.with_max_level(tracing::Level::DEBUG).init();
-    //         }
-    //         false => {
-    //             subscriber.with_max_level(tracing::Level::INFO).init();
-    //         }
-    //     }
-    // }
 }
 
 #[cfg(test)]
