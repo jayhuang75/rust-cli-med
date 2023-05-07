@@ -39,9 +39,9 @@ impl Default for Cli {
 impl Cli {
     /// Returns a Cli with the input config
     ///
-    /// - Usage: masker [MODE] --file <FILE_PATH>
+    /// - Usage: masker [MODE] --file <FILE_PATH> <OPTIONS>
     ///
-    /// Other option available
+    /// OPTIONS available
     /// - -c --config optional default is the conf.yml
     /// - -f --file  this is required which is point to the files directory
     /// - -o --output optional default is /output
