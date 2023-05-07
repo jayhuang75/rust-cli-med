@@ -1,6 +1,6 @@
-use crate::utils::enums::{FileType, Mode};
+use crate::utils::{enums::{FileType, Mode}, error::{MaskerError, MaskerErrorType}};
 use clap::{arg, command, value_parser, ArgMatches};
-use std::path::PathBuf;
+use std::{path::PathBuf};
 use tracing::log::info;
 
 #[derive(Debug, Clone)]
@@ -10,6 +10,7 @@ pub struct Cli {
     pub conf_path: String,
     pub output_path: String,
     pub mode: Mode,
+    pub worker: usize,
     pub key: Option<String>,
     pub debug: bool,
 }
@@ -23,6 +24,7 @@ impl Default for Cli {
         let mode: Mode = Mode::default();
         let key: String = String::default();
         let debug: bool = false;
+        let worker = 2;
 
         Cli {
             file_path,
@@ -32,6 +34,7 @@ impl Default for Cli {
             mode,
             key: Some(key),
             debug,
+            worker
         }
     }
 }
@@ -48,12 +51,13 @@ impl Cli {
     /// - -t --type optional default is csv, [csv, json] are the two optional choice
     /// - -k --key optional, its only for encrypt, and decrypt
     /// - -d --debug optional, default false
+    /// - -w --worker optional, worker for processing, default is 2
     ///
     /// # Examples
     /// ```
-    /// let CliApp = CliApp::new().await;
+    /// let CliApp = CliApp::new().await?;
     /// ```
-    pub async fn new() -> Self {
+    pub async fn new() -> Result<Self, MaskerError> {
         // Initial Default CLI params
         let new_cli = Cli::default();
 
@@ -61,14 +65,14 @@ impl Cli {
         let matches = Self::get_params().await;
 
         // replace the default cli params by the cli input from the prompt
-        let fulfilled_cli = Self::fulfill_cli(matches, new_cli).await;
+        let fulfilled_cli = Self::fulfill_cli(matches, new_cli).await?;
 
         // return the fulfilled CLI Params
-        fulfilled_cli
+        Ok(fulfilled_cli)
     }
 
     /// Privite function fulfill the Cli Struct
-    async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) -> Cli{
+    async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) -> Result<Cli, MaskerError>{
         // Note, it's safe to call unwrap() because the arg is required
         match matches
             .get_one::<Mode>("MODE")
@@ -119,7 +123,22 @@ impl Cli {
             cli.debug = debug.to_owned();
         }
 
-        cli
+        if let Some(worker) = matches.get_one::<usize>("worker") {
+            info!("worker {:?} : ", worker);
+            let cpu_nums = num_cpus::get();
+            if worker > &cpu_nums {
+                return Err(MaskerError {
+                    message: Some(format!(
+                        "worker is over your current max CPU number: {:?}, consider lower the worker", cpu_nums
+                    )),
+                    cause: Some(format!("max worker reach {:?}", cpu_nums)),
+                    error_type: MaskerErrorType::ConfigError,
+                });
+            }
+            cli.worker = worker.to_owned();
+        }
+
+        Ok(cli)
     }
 
     /// Privite function get the Clap parsed params.
@@ -174,6 +193,13 @@ impl Cli {
                     -d --debug <DEBUG> "Sets debug flag [true, false]"
                 )
                 .required(false)
+            )
+            .arg(
+                arg!(
+                    -w --worker <WORKER> "Sets work flag, default is 2"
+                )
+                .required(false)
+                .value_parser(clap::value_parser!(usize)),
             )
             .get_matches()
     }

@@ -19,13 +19,13 @@ impl App {
     /// # Examples
     /// 
     /// ```
-    /// let new_app = App::new().await;
+    /// let new_app = App::new().await?;
     /// ```
     /// 
-    pub async fn new() -> Self {
-        let params = Cli::new().await;
+    pub async fn new() -> Result<Self, MaskerError> {
+        let params = Cli::new().await?;
         Self::logging(params.debug).await;
-        App {params}
+        Ok(App {params})
     }
 
     /// Privite function Returns job config
