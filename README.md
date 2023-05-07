@@ -17,20 +17,23 @@ Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with au
 $ masker --help
 A simple to use, rust powered data masking/encryption/decription cli tool
 
-Usage: masker <Options>
+Usage: masker [MODE] --file <FILE_PATH> <OPTIONS>
 
-Commands:
-  test  does testing things
-  help  Print this message or the help of the given subcommand(s)
+Commands [MODE]:
+  mask  mask the fields with *
+  encrypt encrypt fields with the key
+  decrypt encrypt fields with the key
 
-Arguments:
-  [name]  Optional name to operate on
+REQUIRED:
+  -f --file  this is required which is point to the files directory
 
-Options:
-  -c, --config <FILE>  Sets a custom config file
-  -d, --debug...       Turn debugging information on
-  -h, --help           Print help
-  -V, --version        Print version
+OPTIONS available
+  -c --config optional default is the conf.yml
+  -o --output optional default is /output
+  -t --type optional default is csv, [csv, json] are the two optional choice
+  -k --key optional, its only for encrypt, and decrypt
+  -d --debug optional, default false
+  -w --worker optional, worker for processing, default is 2
 ```
 
 ### Installation
@@ -49,8 +52,6 @@ TODO
 
 - [ ] Application Architecture Design
 - [ ] Rust code level documentation
-
-
 
 ## Roadmap
 

@@ -10,10 +10,6 @@ pub trait Producer {
     async fn write(&self) -> Result<(), MaskerError>;
 }
 
-// pub struct ProcessJson {
-//     pub data: Vec<serde_json::Value>
-// }
-
 pub struct FileProcessor {
     pub params: Cli,
     pub job_conf: JobConfig,
