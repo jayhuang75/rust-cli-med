@@ -1,43 +1,47 @@
 use async_trait::async_trait;
-use csv::StringRecord;
-
+use crate::utils::config::JobConfig;
 use crate::utils::error::MaskerError;
+use crate::cmd::cli::Cli;
 
 #[async_trait(?Send)]
 pub trait Producer {
     async fn load(&self) -> Result<(), MaskerError>;
-    async fn process(&self) -> Result<(), MaskerError>;
+    async fn run(&self) -> Result<(), MaskerError>;
     async fn write(&self) -> Result<(), MaskerError>;
 }
 
-pub struct ProcessCsv {
-    pub headers: StringRecord,
-    pub data: Vec<StringRecord>,
-}
+// pub struct ProcessJson {
+//     pub data: Vec<serde_json::Value>
+// }
 
-pub struct ProcessJson {
-    pub data: Vec<serde_json::Value>
-}
-
-pub struct FileProcess {
-    pub csv: Option<ProcessCsv>,
-    pub json: Option<ProcessJson>,
+pub struct FileProcessor {
+    pub params: Cli,
+    pub job_conf: JobConfig,
     pub producer: Box<dyn Producer>,
 }
 
-impl FileProcess {
-    pub async fn producer(&self) {
-        let _load = self.producer.load().await;
-        let _p = self.producer.process().await;
-        let _w = self.producer.write().await;
+impl FileProcessor {
+    pub async fn load(&self) -> Result<(), MaskerError> {
+        let _load = self.producer.load().await?;
+        Ok(())
     }
 
-    pub fn new_csv(file: ProcessCsv, producer: Box<dyn Producer>) -> Self {
-        FileProcess { csv: Some(file), json: None, producer }
+    pub async fn run(&self) -> Result<(), MaskerError> {
+        let _p = self.producer.run().await?;
+        Ok(())
     }
 
-    pub fn new_json(file: ProcessJson, producer: Box<dyn Producer>) -> Self {
-        FileProcess { csv: None, json: Some(file), producer }
+    pub async fn write(&self) -> Result<(), MaskerError> {
+        let _w = self.producer.write().await?;
+        Ok(())
+    }
+
+    pub async fn new(params: Cli, job_conf: JobConfig, producer: Box<dyn Producer>) -> Self {
+        FileProcessor { 
+            params: params, 
+            job_conf,
+            producer 
+        }
     }
 }
 

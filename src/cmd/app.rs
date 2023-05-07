@@ -1,7 +1,12 @@
 use std::path::Path;
 
 use crate::{cmd::cli::Cli, utils::error::MaskerError, utils::config::JobConfig};
-use tracing_subscriber::{fmt::format, prelude::__tracing_subscriber_field_MakeExt};
+use tracing_subscriber::{fmt::format};
+
+use crate::cmd::process::FileProcessor;
+use crate::utils::enums::FileType;
+use crate::cmd::csv::CsvFile;
+use crate::cmd::process::Producer;
 
 pub struct App{
     pub params: Cli,
@@ -9,11 +14,8 @@ pub struct App{
 
 impl App {
     pub async fn new() -> Self {
-
         let params = Cli::new().await;
-
         Self::logging(params.debug).await;
-
         App {params}
     }
 
@@ -41,7 +43,35 @@ impl App {
 
     pub async fn process(&self) -> Result<(), MaskerError> {
 
+        match &self.params.file_type {
+            FileType::CSV => {
+                let csv_file = CsvFile::default();
+                let csv_file_processor = self.file_processor(Box::new(csv_file)).await?;
+                let _ = csv_file_processor.load().await?;
+                let _ = csv_file_processor.run().await?;
+                let _ = csv_file_processor.write().await?;
+            },
+            FileType::JSON => {
+
+            },
+        }
         Ok(())
     }
+
+    async fn file_processor(&self, producer: Box<dyn Producer>) -> Result<FileProcessor, MaskerError> {
+        let job_conf = self.load_job_config().await?;
+        let file_processor = FileProcessor::new(self.params.clone(), job_conf, producer).await;
+        Ok(file_processor)
+    }
+
+    // async fn process_csv(&self) -> Result<(), MaskerError> {
+    //     let mut file: Box<_> = Box::new(CsvFile{
+            
+    //     });
+
+    //     let new_process = FileProcess::new(self.params, )
+
+    //     Ok(())
+    // }
 
 }
