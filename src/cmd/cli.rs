@@ -39,19 +39,19 @@ impl Default for Cli {
 impl Cli {
     /// Returns a Cli with the input config
     ///
-    /// - Usage: masker --dir <DIR>
+    /// - Usage: masker [MODE] --file <FILE_PATH>
     ///
+    /// Other option available
     /// - -c --config optional default is the conf.yml
     /// - -f --file  this is required which is point to the files directory
     /// - -o --output optional default is /output
     /// - -t --type optional default is csv, [csv, json] are the two optional choice
-    /// - -a --action optional default is mask, [mask, encrypt, decrypt]
     /// - -k --key optional, its only for encrypt, and decrypt
     /// - -d --debug optional, default false
     ///
     /// # Examples
     /// ```
-    /// let CliApp = CliApp::new().await?;
+    /// let CliApp = CliApp::new().await;
     /// ```
     pub async fn new() -> Self {
         // Initial Default CLI params
@@ -67,6 +67,7 @@ impl Cli {
         fulfilled_cli
     }
 
+    /// Privite function fulfill the Cli Struct
     async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) -> Cli{
         // Note, it's safe to call unwrap() because the arg is required
         match matches
@@ -121,7 +122,8 @@ impl Cli {
         cli
     }
 
-    pub async fn get_params() -> ArgMatches {
+    /// Privite function get the Clap parsed params.
+    async fn get_params() -> ArgMatches {
         command!()
             .propagate_version(true)
             .arg_required_else_help(true)

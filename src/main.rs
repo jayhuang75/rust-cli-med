@@ -2,15 +2,14 @@ mod utils;
 mod cmd;
 
 use utils::{error::MaskerError};
-use tracing::{info, debug};
+use crate::cmd::app::App;
 
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
     
-    
+    let new_app = App::new().await;
 
-    // info!("file location {:?}", app.get_file_dir().await?);
-    // debug!("debug");
+    let result = new_app.process().await?;
 
     Ok(())
 }
