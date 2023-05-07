@@ -9,6 +9,8 @@ use crate::utils::enums::FileType;
 use crate::cmd::csv::CsvFile;
 use crate::cmd::process::Producer;
 
+use super::worker::Worker;
+
 pub struct App{
     pub params: Cli,
 }
@@ -30,11 +32,9 @@ impl App {
 
     /// Privite function Returns job config
     async fn load_job_config(&self) -> Result<JobConfig, MaskerError>{
-        info!("loading the job config from : {:?}", self.params.conf_path);
         let conf = JobConfig::new(Path::new(&self.params.conf_path)).await?;
         Ok(conf)
     }
-
 
     /// Privite function init the tracing
     /// params: debug bool
@@ -65,7 +65,8 @@ impl App {
     /// 
     pub async fn process(&self) -> Result<(), MaskerError> {
 
-        info!("processing {:?} files start", self.params.file_type);
+        info!("processing {:?} files start", self.params.file_type );
+        info!("file directory {:?} ", self.params.file_path );
 
         match &self.params.file_type {
             FileType::CSV => {
@@ -88,8 +89,13 @@ impl App {
     /// 2. init the new FileProcessor
     /// 
     async fn file_processor(&self, producer: Box<dyn Producer>) -> Result<FileProcessor, MaskerError> {
+        info!("load job config from {:?}", self.params.conf_path );
         let job_conf = self.load_job_config().await?;
-        let file_processor = FileProcessor::new(self.params.clone(), job_conf, producer).await;
+
+        info!("processing worker number {:?} ", self.params.worker );
+        let worker = Worker::new(self.params.worker).await?;
+
+        let file_processor = FileProcessor::new(self.params.clone(), worker, job_conf, producer).await;
         Ok(file_processor)
     }
 

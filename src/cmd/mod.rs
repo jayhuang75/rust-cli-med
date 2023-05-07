@@ -3,3 +3,4 @@ mod cli;
 mod csv;
 mod process;
 mod json;
+mod worker;

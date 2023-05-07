@@ -1,7 +1,10 @@
 use async_trait::async_trait;
+use rayon::ThreadPool;
 use crate::utils::config::JobConfig;
 use crate::utils::error::MaskerError;
 use crate::cmd::cli::Cli;
+
+use super::worker::Worker;
 
 #[async_trait(?Send)]
 pub trait Producer {
@@ -13,6 +16,7 @@ pub trait Producer {
 pub struct FileProcessor {
     pub params: Cli,
     pub job_conf: JobConfig,
+    pub worker: Worker,
     pub producer: Box<dyn Producer>,
 }
 
@@ -32,10 +36,11 @@ impl FileProcessor {
         Ok(())
     }
 
-    pub async fn new(params: Cli, job_conf: JobConfig, producer: Box<dyn Producer>) -> Self {
+    pub async fn new(params: Cli, worker: Worker, job_conf: JobConfig, producer: Box<dyn Producer>) -> Self {
         FileProcessor { 
             params: params, 
             job_conf,
+            worker,
             producer 
         }
     }
