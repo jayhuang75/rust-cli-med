@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::utils::error::MaskerError;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct JobConfig {
     pub fields: Vec<String>,
     pub aes: i16,

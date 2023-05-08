@@ -8,7 +8,7 @@ use crate::cmd::worker::Worker;
 
 #[async_trait(?Send)]
 pub trait Producer {
-    async fn load(&self) -> Result<(), MaskerError>;
+    async fn load(&self, params: &Cli, job_conf: &JobConfig) -> Result<(), MaskerError>;
     async fn run(&self) -> Result<(), MaskerError>;
     async fn write(&self) -> Result<(), MaskerError>;
 }
@@ -22,7 +22,7 @@ pub struct FileProcessor {
 
 impl FileProcessor {
     pub async fn load(&self) -> Result<(), MaskerError> {
-        let _l = self.producer.load().await?;
+        let _l = self.producer.load(&self.params, &self.job_conf).await?;
         Ok(())
     }
 

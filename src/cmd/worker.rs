@@ -2,6 +2,7 @@ use rayon::ThreadPool;
 
 use crate::utils::error::MaskerError;
 
+#[derive(Debug)]
 pub struct Worker {
     pub pool: ThreadPool,
 }
