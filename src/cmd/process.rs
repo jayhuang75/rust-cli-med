@@ -1,10 +1,10 @@
-use async_trait::async_trait;
-use rayon::ThreadPool;
+use crate::cmd::cli::Cli;
 use crate::utils::config::JobConfig;
 use crate::utils::error::MaskerError;
-use crate::cmd::cli::Cli;
+use async_trait::async_trait;
+use walkdir::WalkDir;
 
-use super::worker::Worker;
+use crate::cmd::worker::Worker;
 
 #[async_trait(?Send)]
 pub trait Producer {
@@ -22,7 +22,7 @@ pub struct FileProcessor {
 
 impl FileProcessor {
     pub async fn load(&self) -> Result<(), MaskerError> {
-        let _load = self.producer.load().await?;
+        let _l = self.producer.load().await?;
         Ok(())
     }
 
@@ -36,13 +36,17 @@ impl FileProcessor {
         Ok(())
     }
 
-    pub async fn new(params: Cli, worker: Worker, job_conf: JobConfig, producer: Box<dyn Producer>) -> Self {
-        FileProcessor { 
-            params: params, 
+    pub async fn new(
+        params: Cli,
+        worker: Worker,
+        job_conf: JobConfig,
+        producer: Box<dyn Producer>,
+    ) -> Self {
+        FileProcessor {
+            params: params,
             job_conf,
             worker,
-            producer 
+            producer,
         }
     }
 }
-

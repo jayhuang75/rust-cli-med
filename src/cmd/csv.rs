@@ -26,7 +26,7 @@ impl Producer for CsvFile {
         info!("csv run");
         Ok(())
     }
-    async fn write(&self) -> Result<(), MaskerError> {
+   async fn write(&self) -> Result<(), MaskerError> {
         info!("csv write");
         Ok(())
     }
