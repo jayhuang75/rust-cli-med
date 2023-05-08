@@ -47,6 +47,15 @@ impl From<io::Error> for MaskerError {
     }
 }
 
+impl From<csv::Error> for MaskerError {
+    fn from(error: csv::Error) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some(error.to_string()),
+            error_type: MaskerErrorType::IoError,
+        }
+    }
+}
 
 // impl From<sqlx::Error> for MachineError {
 //     fn from(error: sqlx::Error) -> MachineError {

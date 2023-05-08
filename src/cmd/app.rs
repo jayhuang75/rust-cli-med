@@ -4,10 +4,8 @@ use crate::{cmd::cli::Cli, utils::error::MaskerError, utils::config::JobConfig};
 use tracing::info;
 use tracing_subscriber::{fmt::format};
 
-use crate::cmd::process::FileProcessor;
 use crate::utils::enums::FileType;
-use crate::cmd::csv::CsvFile;
-use crate::cmd::process::Producer;
+use crate::cmd::csv::CsvFileProcessor;
 
 use super::worker::Worker;
 
@@ -67,36 +65,20 @@ impl App {
 
         info!("processing {:?} files start", self.params.file_type );
         info!("file directory {:?} ", self.params.file_path );
+        
+        let job_conf = self.load_job_config().await?;
 
         match &self.params.file_type {
             FileType::CSV => {
-                let csv_file = CsvFile::default();
-                let csv_file_processor = self.file_processor(Box::new(csv_file)).await?;
-                let _ = csv_file_processor.load().await?;
-                let _ = csv_file_processor.run().await?;
-                let _ = csv_file_processor.write().await?;
+                let mut csv_processor = CsvFileProcessor::default();
+                csv_processor.load(&self.params).await?;
+                csv_processor.run(&job_conf).await?;
             },
             FileType::JSON => {
                 todo!()
             },
         }
         Ok(())
-    }
-
-    /// Privite function to build the new FileProcessor [`crate::cmd::utils::config::JobConfig`]
-    /// 
-    /// 1. load the job config
-    /// 2. init the new FileProcessor
-    /// 
-    async fn file_processor(&self, producer: Box<dyn Producer>) -> Result<FileProcessor, MaskerError> {
-        info!("load job config from {:?}", self.params.conf_path );
-        let job_conf = self.load_job_config().await?;
-
-        info!("processing worker number {:?} ", self.params.worker );
-        let worker = Worker::new(self.params.worker).await?;
-
-        let file_processor = FileProcessor::new(self.params.clone(), worker, job_conf, producer).await;
-        Ok(file_processor)
     }
 
 }
