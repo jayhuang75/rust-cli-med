@@ -28,4 +28,4 @@ flume = "0.10.14"
 walkdir = "2.3.3"
 threadpool = "1.8.1"
 magic-crypt = "3.1.12"
-
+colored = "2.0.0"

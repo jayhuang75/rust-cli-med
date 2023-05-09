@@ -1,17 +1,16 @@
-use std::clone;
-
-use crate::{cmd::cli::Cli, utils::enums::Mode};
 use crate::cmd::worker::Worker;
 use crate::utils::config::JobConfig;
+use crate::utils::crypto::CryptoData;
 use crate::utils::error::MaskerError;
+use crate::{cmd::cli::Cli};
 use csv::StringRecord;
-use rayon::prelude::{IntoParallelIterator, ParallelIterator, IntoParallelRefIterator};
-use tracing::info;
+use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use tracing::{debug};
 use walkdir::WalkDir;
-use crate::utils::crypto::{CryptoData, self};
 
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
+    pub path: String,
     pub headers: StringRecord,
     pub data: Vec<StringRecord>,
 }
@@ -47,24 +46,28 @@ impl CsvFileProcessor {
             self.result.push(item);
         });
 
-        info!("load completed: {:?}", self);
-
         Ok(())
     }
 
-    pub async fn run_mask(&self, job_conf: &JobConfig) -> Result<(), MaskerError> {
+    pub async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
+        let new_result: Vec<CsvFile> = self
+            .result
+            .par_iter()
+            .map(|item| {
+                let mut new_csv = CsvFile::default();
+                new_csv.headers = item.headers.clone();
 
-        self.result.par_iter().for_each(|item| {
-            let indexs = item
-                .headers
-                .iter()
-                .enumerate()
-                .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
-                .map(|(i, _)| i)
-                .collect::<Vec<_>>();
+                let indexs = item
+                    .headers
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
+                    .map(|(i, _)| i)
+                    .collect::<Vec<_>>();
 
-            let masked_data: Vec<StringRecord> =
-                item.clone().data
+                let masked_data: Vec<StringRecord> = item
+                    .clone()
+                    .data
                     .into_par_iter()
                     .map(|records| {
                         let mut masked_record: StringRecord = StringRecord::new();
@@ -81,26 +84,37 @@ impl CsvFileProcessor {
                         masked_record
                     })
                     .collect();
-            info!("after masked : {:?}", masked_data);
-        });
+                new_csv.data = masked_data;
+                new_csv
+            })
+            .collect::<Vec<CsvFile>>();
+
+        self.result = new_result;
+
         Ok(())
     }
 
-    pub async fn run_cipher(&self, key: &str, job_conf: &JobConfig) -> Result<(), MaskerError> {
-        
+    pub async fn run_cipher(&mut self, key: &str, job_conf: &JobConfig) -> Result<(), MaskerError> {
         let crypto = CryptoData::new(key);
 
-        self.result.par_iter().for_each(|item| {
-            let indexs = item
-                .headers
-                .iter()
-                .enumerate()
-                .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
-                .map(|(i, _)| i)
-                .collect::<Vec<_>>();
+        let new_result: Vec<CsvFile> = self
+            .result
+            .par_iter()
+            .map(|item| {
+                let mut new_csv = CsvFile::default();
+                new_csv.headers = item.headers.clone();
 
-            let masked_data: Vec<StringRecord> =
-                item.clone().data
+                let indexs = item
+                    .headers
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
+                    .map(|(i, _)| i)
+                    .collect::<Vec<_>>();
+
+                let masked_data: Vec<StringRecord> = item
+                    .clone()
+                    .data
                     .into_par_iter()
                     .map(|records| {
                         let mut masked_record: StringRecord = StringRecord::new();
@@ -117,10 +131,17 @@ impl CsvFileProcessor {
                         masked_record
                     })
                     .collect();
-            info!("after masked : {:?}", masked_data);
-        });
+                new_csv.data = masked_data;
+                new_csv
+            })
+            .collect();
+        self.result = new_result;
         Ok(())
     }
 
-
+    pub async fn write(&self) -> Result<(), MaskerError>{
+        debug!("write : {:?}", self);
+        
+        Ok(())
+    }
 }

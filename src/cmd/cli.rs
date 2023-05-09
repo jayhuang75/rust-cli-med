@@ -112,19 +112,16 @@ impl Cli {
         }
 
         if let Some(f_type) = matches.get_one::<String>("type") {
-            info!("file type {:?} : ", f_type);
             if f_type.to_owned() != FileType::CSV.to_string() {
                 cli.file_type = FileType::JSON;
             }
         }
 
         if let Some(debug) = matches.get_one::<bool>("debug") {
-            info!("debug {:?} : ", debug);
             cli.debug = debug.to_owned();
         }
 
         if let Some(worker) = matches.get_one::<usize>("worker") {
-            info!("worker {:?} : ", worker);
             let cpu_nums = num_cpus::get();
             if worker > &cpu_nums {
                 return Err(MaskerError {
@@ -193,6 +190,7 @@ impl Cli {
                     -d --debug <DEBUG> "Sets debug flag [true, false]"
                 )
                 .required(false)
+                .value_parser(clap::value_parser!(bool)),
             )
             .arg(
                 arg!(
