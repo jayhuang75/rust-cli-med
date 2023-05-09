@@ -4,7 +4,8 @@ use tokio::io;
 #[derive(Debug, PartialEq)]
 pub enum MaskerErrorType {
     ConfigError,
-    IoError
+    IoError,
+    CryptoError
 }
 
 #[derive(Debug, PartialEq)]
@@ -53,6 +54,16 @@ impl From<csv::Error> for MaskerError {
             message: Some(error.to_string()),
             cause: Some(error.to_string()),
             error_type: MaskerErrorType::IoError,
+        }
+    }
+}
+
+impl From<magic_crypt::MagicCryptError> for MaskerError {
+    fn from(error: magic_crypt::MagicCryptError) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some("magic_crypt error".to_string()),
+            error_type: MaskerErrorType::CryptoError,
         }
     }
 }

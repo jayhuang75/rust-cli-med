@@ -15,7 +15,8 @@ impl Worker {
         let pool = ThreadPool::new(num_cpus::get());
         Ok(Worker { pool })
     }
-    pub fn read(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MaskerError> {
+
+    pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MaskerError> {
         let mut reader = csv::Reader::from_path(path)?;
         let headers = reader.headers()?.to_owned();
         let mut data: Vec<StringRecord> = Vec::new();

@@ -1,6 +1,6 @@
 use std::clone;
 
-use crate::cmd::cli::Cli;
+use crate::{cmd::cli::Cli, utils::enums::Mode};
 use crate::cmd::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::error::MaskerError;
@@ -36,7 +36,7 @@ impl CsvFileProcessor {
         {
             let tx = tx.clone();
             new_worker.pool.execute(move || {
-                Worker::read(tx, entry.path().display().to_string()).unwrap();
+                Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
             })
         }
 
@@ -52,9 +52,7 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn run(&self, job_conf: &JobConfig) -> Result<(), MaskerError> {
-
-        let crypto = CryptoData::new(&"magickey".to_string());
+    pub async fn run_mask(&self, mode: Mode, job_conf: &JobConfig) -> Result<(), MaskerError> {
 
         self.result.par_iter().for_each(|item| {
             let indexs = item
@@ -73,7 +71,20 @@ impl CsvFileProcessor {
                         records.iter().enumerate().for_each(|(i, item)| {
                             match indexs.contains(&i) {
                                 true => {
-                                    let masked = crypto.encrypt(item).unwrap();
+                                    let mut masked = String::new();
+                                    match mode {
+                                        Mode::MASK => {
+                                            masked = "*****".to_string();
+                                        },
+                                        Mode::ENCRYPT => {
+                                            // TODO! better error handling
+                                            masked = crypto.encrypt(item).unwrap();
+                                        },
+                                        Mode::DECRYPT => {
+                                            // TODO! better error handling
+                                            masked = crypto.decrypt(item).unwrap();
+                                        },
+                                    }
                                     masked_record.push_field(&masked);
                                 }
                                 false => masked_record.push_field(item),
@@ -85,6 +96,7 @@ impl CsvFileProcessor {
                     .collect();
             info!("after encrypted : {:?}", masked_data);
         });
+
         Ok(())
     }
 }

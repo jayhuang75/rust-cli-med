@@ -72,7 +72,11 @@ impl App {
             FileType::CSV => {
                 let mut csv_processor = CsvFileProcessor::default();
                 csv_processor.load(&self.params).await?;
-                csv_processor.run(&job_conf).await?;
+                let key = self.params.key.clone().unwrap();
+                match  {
+                    
+                }
+                csv_processor.run(self.params.mode, key, &job_conf).await?;
             },
             FileType::JSON => {
                 todo!()
