@@ -177,7 +177,7 @@ impl Cli {
                     -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
                 )
                 .required(false)
-                .default_value("conf.yml")
+                .default_value("conf.yaml")
                 .value_parser(value_parser!(PathBuf)),
             )
             .arg(

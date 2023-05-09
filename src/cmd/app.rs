@@ -1,10 +1,11 @@
 use std::path::Path;
 
+use crate::utils::error::MaskerErrorType;
 use crate::{cmd::cli::Cli, utils::error::MaskerError, utils::config::JobConfig};
 use tracing::info;
 use tracing_subscriber::{fmt::format};
 
-use crate::utils::enums::FileType;
+use crate::utils::enums::{FileType, Mode};
 use crate::cmd::csv::CsvFileProcessor;
 
 use super::worker::Worker;
@@ -70,13 +71,29 @@ impl App {
 
         match &self.params.file_type {
             FileType::CSV => {
+        
                 let mut csv_processor = CsvFileProcessor::default();
+                
                 csv_processor.load(&self.params).await?;
-                let key = self.params.key.clone().unwrap();
-                match  {
-                    
+
+                match &self.params.mode {
+                    Mode::MASK => {
+                        csv_processor.run_mask(&job_conf).await?;
+                    },
+                    Mode::ENCRYPT | Mode::DECRYPT => {
+                        match &self.params.key {
+                            Some(key) => {
+                                csv_processor.run_cipher(key, &job_conf).await?;
+                            },
+                            None => return Err(MaskerError { 
+                                message: Some(format!("Missing key for Encyption and Decryption input!")),
+                                cause: Some(format!("cli missing -k | --key")),
+                                error_type: MaskerErrorType::ConfigError,
+                             }),
+                        }
+                    },
                 }
-                csv_processor.run(self.params.mode, key, &job_conf).await?;
+
             },
             FileType::JSON => {
                 todo!()

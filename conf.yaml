@@ -1,4 +1,4 @@
-debug: false # runtime log level
+mask_symbols: "#####" # mask symbols
 fields: # list of the cols/fields you want to mask 
   - name
 aes: 128 # AES bit Encryption (64, 128, 192, 256) available for select

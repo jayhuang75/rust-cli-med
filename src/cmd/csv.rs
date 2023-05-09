@@ -8,7 +8,7 @@ use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator, IntoParallelRefIterator};
 use tracing::info;
 use walkdir::WalkDir;
-use crate::utils::crypto::CryptoData;
+use crate::utils::crypto::{CryptoData, self};
 
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
@@ -52,7 +52,7 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn run_mask(&self, mode: Mode, job_conf: &JobConfig) -> Result<(), MaskerError> {
+    pub async fn run_mask(&self, job_conf: &JobConfig) -> Result<(), MaskerError> {
 
         self.result.par_iter().for_each(|item| {
             let indexs = item
@@ -71,20 +71,7 @@ impl CsvFileProcessor {
                         records.iter().enumerate().for_each(|(i, item)| {
                             match indexs.contains(&i) {
                                 true => {
-                                    let mut masked = String::new();
-                                    match mode {
-                                        Mode::MASK => {
-                                            masked = "*****".to_string();
-                                        },
-                                        Mode::ENCRYPT => {
-                                            // TODO! better error handling
-                                            masked = crypto.encrypt(item).unwrap();
-                                        },
-                                        Mode::DECRYPT => {
-                                            // TODO! better error handling
-                                            masked = crypto.decrypt(item).unwrap();
-                                        },
-                                    }
+                                    let masked = job_conf.mask_symbols.clone();
                                     masked_record.push_field(&masked);
                                 }
                                 false => masked_record.push_field(item),
@@ -94,9 +81,46 @@ impl CsvFileProcessor {
                         masked_record
                     })
                     .collect();
-            info!("after encrypted : {:?}", masked_data);
+            info!("after masked : {:?}", masked_data);
         });
-
         Ok(())
     }
+
+    pub async fn run_cipher(&self, key: &str, job_conf: &JobConfig) -> Result<(), MaskerError> {
+        
+        let crypto = CryptoData::new(key);
+
+        self.result.par_iter().for_each(|item| {
+            let indexs = item
+                .headers
+                .iter()
+                .enumerate()
+                .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
+                .map(|(i, _)| i)
+                .collect::<Vec<_>>();
+
+            let masked_data: Vec<StringRecord> =
+                item.clone().data
+                    .into_par_iter()
+                    .map(|records| {
+                        let mut masked_record: StringRecord = StringRecord::new();
+                        records.iter().enumerate().for_each(|(i, item)| {
+                            match indexs.contains(&i) {
+                                true => {
+                                    let masked = crypto.encrypt(item).unwrap();
+                                    masked_record.push_field(&masked);
+                                }
+                                false => masked_record.push_field(item),
+                            }
+                        });
+
+                        masked_record
+                    })
+                    .collect();
+            info!("after masked : {:?}", masked_data);
+        });
+        Ok(())
+    }
+
+
 }

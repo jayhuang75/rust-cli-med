@@ -6,6 +6,7 @@ use crate::utils::error::MaskerError;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct JobConfig {
+    pub mask_symbols: String,
     pub fields: Vec<String>,
     pub aes: i16,
 }
