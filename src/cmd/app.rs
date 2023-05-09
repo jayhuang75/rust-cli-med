@@ -51,10 +51,18 @@ impl App {
 
         match debug {
             true => {
-                subscriber.with_max_level(tracing::Level::DEBUG).init();
+                subscriber
+                    .with_line_number(true)
+                    .with_target(true)
+                    .with_file(true)
+                    .with_max_level(tracing::Level::DEBUG)
+                    .init();
             }
             false => {
-                subscriber.with_max_level(tracing::Level::INFO).init();
+                subscriber
+                    .with_target(false)
+                    .with_max_level(tracing::Level::INFO)
+                    .init();
             }
         }
     }
@@ -68,13 +76,26 @@ impl App {
     /// ```
     ///
     pub async fn process(&self) -> Result<(), MaskerError> {
-        info!("processing '{}' files start", self.params.file_type.to_string().bold().green());
-        info!("file root directory {} ", self.params.file_path.bold().green());
-        info!("number of {}", self.params.worker.to_string().bold().green());
-        
+        info!(
+            "processing '{}' files start",
+            self.params.file_type.to_string().bold().green()
+        );
+        info!(
+            "file root directory {} ",
+            self.params.file_path.bold().green()
+        );
+        info!(
+            "number of workers {}",
+            self.params.worker.to_string().bold().green()
+        );
+
         let now = Instant::now();
         let job_conf = self.load_job_config().await?;
-        info!("load job conf from {} elapsed time {:?}", self.params.conf_path.bold().green() ,now.elapsed());
+        info!(
+            "load job conf from {} elapsed time {:?}",
+            self.params.conf_path.bold().green(),
+            now.elapsed()
+        );
 
         match &self.params.file_type {
             FileType::CSV => {
@@ -82,19 +103,31 @@ impl App {
 
                 let now = Instant::now();
                 csv_processor.load(&self.params).await?;
-                info!("load files {} elapsed time {:?}", "completed".bold().green(), now.elapsed());
+                info!(
+                    "load files {} elapsed time {:?}",
+                    "completed".bold().green(),
+                    now.elapsed()
+                );
 
                 match &self.params.mode {
                     Mode::MASK => {
                         let now = Instant::now();
                         csv_processor.run_mask(&job_conf).await?;
-                        info!("{} mask data elapsed time {:?}", "completed".bold().green(), now.elapsed());
+                        info!(
+                            "{} data completed elapsed time {:?}",
+                            Mode::MASK.to_string().bold().green(),
+                            now.elapsed()
+                        );
                     }
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
                             let now = Instant::now();
                             csv_processor.run_cipher(key, &job_conf).await?;
-                            info!("{} cipher elapsed time {:?}", "completed".bold().green(), now.elapsed());
+                            info!(
+                                "{} completed elapsed time {:?}",
+                                "cipher".bold().green(),
+                                now.elapsed()
+                            );
                         }
                         None => {
                             return Err(MaskerError {
@@ -110,7 +143,11 @@ impl App {
 
                 let now = Instant::now();
                 csv_processor.write().await?;
-                info!("write to folder {} completed elapsed time {:?}", self.params.output_path.bold().green(), now.elapsed());
+                info!(
+                    "write to folder {} completed elapsed time {:?}",
+                    self.params.output_path.bold().green(),
+                    now.elapsed()
+                );
             }
             FileType::JSON => {
                 todo!()
