@@ -1,12 +1,15 @@
+use crate::cmd::cli::Cli;
 use crate::cmd::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
 use crate::utils::error::MaskerError;
-use crate::{cmd::cli::Cli};
+use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
-use tracing::{debug};
+use tracing::debug;
 use walkdir::WalkDir;
+
+const COUNT: u64 = 20;
 
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
@@ -27,6 +30,8 @@ impl CsvFileProcessor {
 
         let new_worker = Worker::new(params.worker).await?;
 
+        let bar = get_progress_bar(COUNT, "load files");
+
         for entry in WalkDir::new(&params.file_path)
             .follow_links(true)
             .into_iter()
@@ -34,6 +39,7 @@ impl CsvFileProcessor {
             .filter(|e| !e.path().is_dir())
         {
             let tx = tx.clone();
+            bar.inc(1);
             new_worker.pool.execute(move || {
                 Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
             })
@@ -46,17 +52,20 @@ impl CsvFileProcessor {
             self.result.push(item);
         });
 
+        bar.finish_and_clear();
+
         Ok(())
     }
 
     pub async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
+        let bar = get_progress_bar(self.result.len() as u64, "masking files");
+
         let new_result: Vec<CsvFile> = self
             .result
             .par_iter()
             .map(|item| {
                 let mut new_csv = CsvFile::default();
                 new_csv.headers = item.headers.clone();
-
                 let indexs = item
                     .headers
                     .iter()
@@ -69,6 +78,7 @@ impl CsvFileProcessor {
                     .clone()
                     .data
                     .into_par_iter()
+                    .inspect(|_| bar.inc(1))
                     .map(|records| {
                         let mut masked_record: StringRecord = StringRecord::new();
                         records.iter().enumerate().for_each(|(i, item)| {
@@ -90,12 +100,15 @@ impl CsvFileProcessor {
             .collect::<Vec<CsvFile>>();
 
         self.result = new_result;
+        bar.finish_and_clear();
 
         Ok(())
     }
 
     pub async fn run_cipher(&mut self, key: &str, job_conf: &JobConfig) -> Result<(), MaskerError> {
         let crypto = CryptoData::new(key);
+        let bar: indicatif::ProgressBar =
+            get_progress_bar(self.result.len() as u64, "cryptography files");
 
         let new_result: Vec<CsvFile> = self
             .result
@@ -103,7 +116,6 @@ impl CsvFileProcessor {
             .map(|item| {
                 let mut new_csv = CsvFile::default();
                 new_csv.headers = item.headers.clone();
-
                 let indexs = item
                     .headers
                     .iter()
@@ -116,6 +128,7 @@ impl CsvFileProcessor {
                     .clone()
                     .data
                     .into_par_iter()
+                    .inspect(|_| bar.inc(1))
                     .map(|records| {
                         let mut masked_record: StringRecord = StringRecord::new();
                         records.iter().enumerate().for_each(|(i, item)| {
@@ -136,12 +149,14 @@ impl CsvFileProcessor {
             })
             .collect();
         self.result = new_result;
+        bar.finish_and_clear();
+
         Ok(())
     }
 
-    pub async fn write(&self) -> Result<(), MaskerError>{
+    pub async fn write(&self) -> Result<(), MaskerError> {
         debug!("write : {:?}", self);
-        
+
         Ok(())
     }
 }
