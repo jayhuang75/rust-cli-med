@@ -6,10 +6,10 @@ use crate::utils::error::MaskerError;
 use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use std::fs;
 use tracing::debug;
 use walkdir::WalkDir;
 
-const COUNT: u64 = 20;
 
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
@@ -30,7 +30,9 @@ impl CsvFileProcessor {
 
         let new_worker = Worker::new(params.worker).await?;
 
-        let bar = get_progress_bar(COUNT, "load files");
+        let folder_count = WalkDir::new(&params.file_path).into_iter().count();
+
+        let bar = get_progress_bar(folder_count as u64, "load files to processor");
 
         for entry in WalkDir::new(&params.file_path)
             .follow_links(true)
@@ -40,6 +42,7 @@ impl CsvFileProcessor {
         {
             let tx = tx.clone();
             bar.inc(1);
+            // debug!("load path: {:?}", entry.path().display().to_string());
             new_worker.pool.execute(move || {
                 Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
             })
@@ -48,6 +51,7 @@ impl CsvFileProcessor {
         drop(tx);
 
         rx.iter().for_each(|item| {
+            // debug!("rx path: {:?}", item.path);
             self.total_file += 1;
             self.result.push(item);
         });
@@ -94,6 +98,7 @@ impl CsvFileProcessor {
                         masked_record
                     })
                     .collect();
+                new_csv.path = item.path.clone();
                 new_csv.data = masked_data;
                 new_csv
             })
@@ -144,6 +149,7 @@ impl CsvFileProcessor {
                         masked_record
                     })
                     .collect();
+                new_csv.path = item.path.clone();
                 new_csv.data = masked_data;
                 new_csv
             })
@@ -154,8 +160,16 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn write(&self) -> Result<(), MaskerError> {
-        debug!("write : {:?}", self);
+    pub async fn write(&self, output_dir: &str) -> Result<(), MaskerError> {
+        // debug!("write file: {:?}", self.total_file);
+        // debug!("write records set: {:?}", self.result.len());
+        
+        let _ = fs::create_dir(output_dir)?;
+
+        // create the path
+        self.result.par_iter().for_each(|item| {
+            Worker::write_csv(item, &item.path).unwrap();
+        });
 
         Ok(())
     }
