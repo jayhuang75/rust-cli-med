@@ -4,7 +4,7 @@ use crate::utils::error::MaskerErrorType;
 use crate::{cmd::cli::Cli, utils::config::JobConfig, utils::error::MaskerError};
 use colored::Colorize;
 use tokio::time::Instant;
-use tracing::info;
+use tracing::{info, debug};
 use tracing_subscriber::fmt::format;
 
 use crate::cmd::csv::CsvFileProcessor;
@@ -34,12 +34,15 @@ impl App {
     pub async fn new() -> Result<Self, MaskerError> {
         let params = Cli::new().await?;
         Self::logging(params.debug).await;
+        debug!("app {} {:?}", "runtime params".bold().green(),params);
         Ok(App { params })
     }
 
     /// Privite function Returns job config
     async fn load_job_config(&self) -> Result<JobConfig, MaskerError> {
         let conf = JobConfig::new(Path::new(&self.params.conf_path)).await?;
+        debug!("{} {:?}", "job config".bold().green(), conf);
+
         Ok(conf)
     }
 

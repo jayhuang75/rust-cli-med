@@ -13,6 +13,7 @@ use walkdir::WalkDir;
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
     pub path: String,
+    pub total_records: usize,
     pub headers: StringRecord,
     pub data: Vec<StringRecord>,
 }
@@ -20,6 +21,7 @@ pub struct CsvFile {
 #[derive(Debug, Default, Clone)]
 pub struct CsvFileProcessor {
     pub total_file: usize,
+    pub total_records: usize,
     pub result: Vec<CsvFile>,
 }
 
@@ -41,7 +43,7 @@ impl CsvFileProcessor {
         {
             let tx = tx.clone();
             bar.inc(1);
-            // debug!("load path: {:?}", entry.path().display().to_string());
+            debug!("load files: {:?}", entry.path().display().to_string());
             new_worker.pool.execute(move || {
                 Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
             })
@@ -50,8 +52,8 @@ impl CsvFileProcessor {
         drop(tx);
 
         rx.iter().for_each(|item| {
-            // debug!("rx path: {:?}", item.path);
             self.total_file += 1;
+            self.total_records += item.total_records;
             self.result.push(item);
         });
 
@@ -159,36 +161,28 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    fn create_output_dir(
-        &self,
-        output_dir: &str,
-        file_dir: &str,
-    ) -> Result<(), MaskerError> {
+    fn create_output_dir(&self, output_dir: &str, file_dir: &str) -> Result<(), MaskerError> {
         WalkDir::new(file_dir)
             .follow_links(true)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| e.path().is_dir())
             .for_each(|e| {
-                let out = format!("{}/{}", output_dir, e.path().display().to_string());
-                debug!("create dir name: {:?}", out);
-                let _ = fs::create_dir_all(out).unwrap();
+                let output_path = format!("{}/{}", output_dir, e.path().display().to_string());
+                let _ = fs::create_dir_all(output_path).unwrap();
             });
         Ok(())
     }
 
     pub async fn write(&self, output_dir: &str, file_dir: &str) -> Result<(), MaskerError> {
-        // debug!("write file: {:?}", self.total_file);
-        // debug!("write records set: {:?}", self.result.len());
-
         let _ = self.create_output_dir(output_dir, file_dir)?;
-        // create the path
+        let bar: indicatif::ProgressBar = get_progress_bar(self.total_records as u64, "write files");
         self.result.par_iter().for_each(|item| {
-            let out = format!("{}/{}", output_dir, item.path);
-            debug!("write to path: {:?}", out);
-            Worker::write_csv(item, &out).unwrap();
+            let output_files = format!("{}/{}", output_dir, item.path);
+            debug!("write to path: {:?}", output_files);
+            Worker::write_csv(item, &output_files, &bar).unwrap();
         });
-
+        bar.finish_and_clear();
         Ok(())
     }
 }

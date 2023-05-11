@@ -4,7 +4,6 @@ use threadpool::ThreadPool;
 use crate::utils::error::MaskerError;
 
 use crate::cmd::csv::CsvFile;
-use crate::utils::progress_bar::get_progress_bar;
 
 #[derive(Debug)]
 pub struct Worker {
@@ -22,11 +21,14 @@ impl Worker {
         let mut reader = csv::Reader::from_path(path.clone())?;
         let headers = reader.headers()?.to_owned();
         let mut data: Vec<StringRecord> = Vec::new();
+        let mut total_records: usize = 0;
         reader.records().into_iter().for_each(|record| {
+            total_records += 1;
             data.push(record.unwrap());
         });
         tx.send(CsvFile {
             path: path,
+            total_records: total_records,
             headers: headers,
             data: data,
         })
@@ -34,20 +36,17 @@ impl Worker {
         Ok(())
     }
 
-    pub fn write_csv(masked_data: &CsvFile, output_path: &str) -> Result<(), MaskerError> {
-        let bar: indicatif::ProgressBar =
-            get_progress_bar(masked_data.data.len() as u64, "write files");
+    pub fn write_csv(masked_data: &CsvFile, output_file: &str, bar: &indicatif::ProgressBar) -> Result<(), MaskerError> {
 
-        let mut wtr = Writer::from_path(output_path)?;
+        let mut wtr = Writer::from_path(output_file)?;
         // write the header
         wtr.write_record(&masked_data.headers)?;
 
-        masked_data.data.iter().inspect(|_|bar.inc(1)).for_each(|item| {
-            // write_event_to_csv(&mut wtr, item).unwrap();
+        masked_data.data.iter().for_each(|item| {
+            bar.inc(1);
             wtr.write_record(item).unwrap();
         });
         wtr.flush()?;
-        bar.finish_and_clear();
         Ok(())
     }
 }
