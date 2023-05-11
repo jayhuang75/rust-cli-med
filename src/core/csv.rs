@@ -1,5 +1,5 @@
-use crate::cmd::cli::Cli;
-use crate::cmd::worker::Worker;
+use crate::core::cli::Cli;
+use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
 use crate::utils::error::MaskerError;

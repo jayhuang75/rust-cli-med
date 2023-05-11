@@ -1,10 +1,10 @@
 mod utils;
-mod cmd;
+mod core;
 
 use tokio::time::Instant;
 use tracing::info;
 use utils::{error::MaskerError};
-use crate::cmd::app::App;
+use crate::core::app::App;
 
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {

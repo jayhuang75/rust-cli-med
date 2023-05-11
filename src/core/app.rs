@@ -1,13 +1,13 @@
 use std::path::Path;
 
 use crate::utils::error::MaskerErrorType;
-use crate::{cmd::cli::Cli, utils::config::JobConfig, utils::error::MaskerError};
+use crate::{core::cli::Cli, utils::config::JobConfig, utils::error::MaskerError};
 use colored::Colorize;
 use tokio::time::Instant;
 use tracing::{info, debug};
 use tracing_subscriber::fmt::format;
 
-use crate::cmd::csv::CsvFileProcessor;
+use crate::core::csv::CsvFileProcessor;
 use crate::utils::enums::{FileType, Mode};
 
 pub struct App {

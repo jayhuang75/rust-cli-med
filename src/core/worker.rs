@@ -3,7 +3,7 @@ use threadpool::ThreadPool;
 
 use crate::utils::error::MaskerError;
 
-use crate::cmd::csv::CsvFile;
+use crate::core::csv::CsvFile;
 
 #[derive(Debug)]
 pub struct Worker {
