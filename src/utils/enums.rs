@@ -81,3 +81,34 @@ impl std::fmt::Debug for Mode {
         }
     }
 }
+
+#[derive(Clone)]
+#[allow(dead_code)]
+pub enum AppMode {
+    CLI,
+    SDK
+}
+
+impl Default for AppMode {
+    fn default() -> Self {
+        AppMode::CLI
+    }
+}
+
+impl std::fmt::Debug for AppMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::CLI => write!(f, "cli"),
+            Self::SDK => write!(f, "sdj"),
+        }
+    }
+}
+
+impl fmt::Display for AppMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            AppMode::CLI => write!(f, "cli"),
+            AppMode::SDK => write!(f, "sdk"),
+        }
+    }
+}

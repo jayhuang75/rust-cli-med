@@ -1,22 +1,24 @@
 use std::path::Path;
 
 use crate::utils::error::MaskerErrorType;
-use crate::{core::cli::Cli, utils::config::JobConfig, utils::error::MaskerError};
+use crate::{utils::config::JobConfig, utils::error::MaskerError};
+use crate::cli::app::Cli;
 use colored::Colorize;
 use tokio::time::Instant;
 use tracing::{info, debug};
 use tracing_subscriber::fmt::format;
 
 use crate::core::csv::CsvFileProcessor;
-use crate::utils::enums::{FileType, Mode};
+use crate::core::models::Params;
+use crate::utils::enums::{FileType, Mode, AppMode};
 
 pub struct App {
-    pub params: Cli,
+    pub params: Params,
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct AuditSummary {
-    pub params: Cli,
+    pub params: Params,
     pub total_file: usize,
     pub total_line: usize,
     pub elapsed: String,
@@ -26,16 +28,25 @@ impl App {
     /// Returns an App struct
     ///
     /// # Examples
-    ///
+    /// 
     /// ```
-    /// let new_app = App::new().await?;
+    /// let new_app = App::new(AppMode::CLI).await?;
     /// ```
     ///
-    pub async fn new() -> Result<Self, MaskerError> {
-        let params = Cli::new().await?;
+    pub async fn new(app_mode: AppMode) -> Result<Self, MaskerError> {
+        let params: Params;
+        match app_mode {
+            AppMode::CLI => {
+                let new_cli  = Cli::new().await?;
+                params = new_cli.params;
+            },
+            AppMode::SDK => todo!(),
+        };
         Self::logging(params.debug).await;
+        info!("app run on {} mode", params.app_mode.to_string().bold().green());
+
         debug!("app {} {:?}", "runtime params".bold().green(),params);
-        Ok(App { params })
+        Ok(App { params: params })
     }
 
     /// Privite function Returns job config
@@ -105,9 +116,9 @@ impl App {
                 let mut csv_processor = CsvFileProcessor::default();
 
                 let now = Instant::now();
-                csv_processor.load(&self.params).await?;
+                csv_processor.load(&self).await?;
                 info!(
-                    "load files {} elapsed time {:?}",
+                    "load files to processor {} elapsed time {:?}",
                     "completed".bold().green(),
                     now.elapsed()
                 );

@@ -1,42 +1,14 @@
-use crate::utils::{enums::{FileType, Mode}, error::{MaskerError, MaskerErrorType}};
+use crate::core::models::Params;
+use crate::utils::{
+    enums::{FileType, Mode},
+    error::{MaskerError, MaskerErrorType},
+};
 use clap::{arg, command, value_parser, ArgMatches};
-use std::{path::PathBuf};
+use std::path::PathBuf;
 use tracing::log::info;
 
-#[derive(Debug, Clone)]
 pub struct Cli {
-    pub file_path: String,
-    pub file_type: FileType,
-    pub conf_path: String,
-    pub output_path: String,
-    pub mode: Mode,
-    pub worker: usize,
-    pub key: Option<String>,
-    pub debug: bool,
-}
-
-impl Default for Cli {
-    fn default() -> Self {
-        let file_path: String = String::default();
-        let file_type: FileType = FileType::default();
-        let conf_path: String = String::default();
-        let output_path: String = String::default();
-        let mode: Mode = Mode::default();
-        let key: String = String::default();
-        let debug: bool = false;
-        let worker = 2;
-
-        Cli {
-            file_path,
-            file_type,
-            conf_path,
-            output_path,
-            mode,
-            key: Some(key),
-            debug,
-            worker
-        }
-    }
+    pub params: Params,
 }
 
 impl Cli {
@@ -55,70 +27,70 @@ impl Cli {
     ///
     /// # Examples
     /// ```
-    /// let CliApp = CliApp::new().await?;
+    /// let CliApp = Cli::new().await?;
     /// ```
     pub async fn new() -> Result<Self, MaskerError> {
         // Initial Default CLI params
-        let new_cli = Cli::default();
+        let new_cli = Params::default();
 
         // Get the cli input params
         let matches = Self::get_params().await;
 
         // replace the default cli params by the cli input from the prompt
-        let fulfilled_cli = Self::fulfill_cli(matches, new_cli).await?;
+        let params = Self::fulfill_cli(matches, new_cli).await?;
 
         // return the fulfilled CLI Params
-        Ok(fulfilled_cli)
+        Ok(Cli { params })
     }
 
     /// Privite function fulfill the Cli Struct
-    async fn fulfill_cli(matches: ArgMatches, mut cli: Cli) -> Result<Cli, MaskerError>{
+    async fn fulfill_cli(matches: ArgMatches, mut params: Params) -> Result<Params, MaskerError> {
         // Note, it's safe to call unwrap() because the arg is required
         match matches
             .get_one::<Mode>("MODE")
             .expect("'MODE' is required and parsing will fail if its missing")
         {
             Mode::MASK => {
-                cli.mode = Mode::MASK;
-                cli.key = None;
+                params.mode = Mode::MASK;
+                params.key = None;
             }
             Mode::ENCRYPT => {
-                cli.mode = Mode::ENCRYPT;
+                params.mode = Mode::ENCRYPT;
                 if let Some(key) = matches.get_one::<String>("key") {
-                    cli.key = Some(key.to_owned());
+                    params.key = Some(key.to_owned());
                 }
             }
             Mode::DECRYPT => {
-                cli.mode = Mode::DECRYPT;
+                params.mode = Mode::DECRYPT;
                 if let Some(key) = matches.get_one::<String>("key") {
-                    cli.key = Some(key.to_owned());
+                    params.key = Some(key.to_owned());
                 }
             }
         }
 
         if let Some(path) = matches.get_one::<PathBuf>("config") {
             info!("conf.yml location {:?} : ", path.display());
-            cli.conf_path = path.display().to_string();
+            params.conf_path = path.display().to_string();
         }
 
         if let Some(path) = matches.get_one::<PathBuf>("file") {
             info!("file location {:?} : ", path.display());
-            cli.file_path = path.display().to_string();
+            params.file_path = path.display().to_string();
         }
 
         if let Some(path) = matches.get_one::<PathBuf>("output") {
             info!("output file location {:?} : ", path.display());
-            cli.output_path = path.display().to_string();
+            params.output_path = path.display().to_string();
         }
 
         if let Some(f_type) = matches.get_one::<String>("type") {
             if f_type.to_owned() != FileType::CSV.to_string() {
-                cli.file_type = FileType::JSON;
+                params.file_type = FileType::JSON;
             }
         }
 
         if let Some(debug) = matches.get_one::<bool>("debug") {
-            cli.debug = debug.to_owned();
+            params.debug = debug.to_owned();
         }
 
         if let Some(worker) = matches.get_one::<usize>("worker") {
@@ -132,10 +104,10 @@ impl Cli {
                     error_type: MaskerErrorType::ConfigError,
                 });
             }
-            cli.worker = worker.to_owned();
+            params.worker = worker.to_owned();
         }
 
-        Ok(cli)
+        Ok(params)
     }
 
     /// Privite function get the Clap parsed params.

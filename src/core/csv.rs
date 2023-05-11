@@ -1,4 +1,4 @@
-use crate::core::cli::Cli;
+use crate::core::app::App;
 use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
@@ -26,16 +26,16 @@ pub struct CsvFileProcessor {
 }
 
 impl CsvFileProcessor {
-    pub async fn load(&mut self, params: &Cli) -> Result<(), MaskerError> {
+    pub async fn load(&mut self, app: &App) -> Result<(), MaskerError> {
         let (tx, rx) = flume::unbounded();
 
-        let new_worker = Worker::new(params.worker).await?;
+        let new_worker = Worker::new(app.params.worker).await?;
 
-        let folder_count = WalkDir::new(&params.file_path).into_iter().count();
+        let folder_count = WalkDir::new(&app.params.file_path).into_iter().count();
 
         let bar = get_progress_bar(folder_count as u64, "load files to processor");
 
-        for entry in WalkDir::new(&params.file_path)
+        for entry in WalkDir::new(&app.params.file_path)
             .follow_links(true)
             .into_iter()
             .filter_map(|e| e.ok())

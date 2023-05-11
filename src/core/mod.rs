@@ -1,5 +1,5 @@
 pub mod app;
-mod cli;
+pub mod models;
 mod csv;
 // mod json;
 mod worker;
