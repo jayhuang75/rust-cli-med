@@ -10,7 +10,6 @@ use std::fs;
 use tracing::debug;
 use walkdir::WalkDir;
 
-
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
     pub path: String,
@@ -160,15 +159,34 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn write(&self, output_dir: &str) -> Result<(), MaskerError> {
+    fn create_output_dir(
+        &self,
+        output_dir: &str,
+        file_dir: &str,
+    ) -> Result<(), MaskerError> {
+        WalkDir::new(file_dir)
+            .follow_links(true)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_dir())
+            .for_each(|e| {
+                let out = format!("{}/{}", output_dir, e.path().display().to_string());
+                debug!("create dir name: {:?}", out);
+                let _ = fs::create_dir_all(out).unwrap();
+            });
+        Ok(())
+    }
+
+    pub async fn write(&self, output_dir: &str, file_dir: &str) -> Result<(), MaskerError> {
         // debug!("write file: {:?}", self.total_file);
         // debug!("write records set: {:?}", self.result.len());
-        
-        let _ = fs::create_dir(output_dir)?;
 
+        let _ = self.create_output_dir(output_dir, file_dir)?;
         // create the path
         self.result.par_iter().for_each(|item| {
-            Worker::write_csv(item, &item.path).unwrap();
+            let out = format!("{}/{}", output_dir, item.path);
+            debug!("write to path: {:?}", out);
+            Worker::write_csv(item, &out).unwrap();
         });
 
         Ok(())

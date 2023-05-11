@@ -142,9 +142,7 @@ impl App {
                 }
 
                 let now = Instant::now();
-
-                let output_dir = format!("{}/{}", &self.params.output_path, &self.params.file_path);
-                csv_processor.write(&output_dir).await?;
+                csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),

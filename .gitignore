@@ -17,4 +17,4 @@ Cargo.lock
 # Added by cargo
 
 /target
-/inputs/**/*.csv
+*.csv
