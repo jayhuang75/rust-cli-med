@@ -1,12 +1,12 @@
+use crate::cli::custom_validation::{dir_exist, worker_in_range};
 use crate::core::models::Params;
 use crate::utils::{
     enums::{FileType, Mode},
-    error::{MaskerError},
+    error::MaskerError,
 };
 use clap::{arg, command, value_parser, ArgMatches};
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use tracing::log::info;
-use crate::cli::custom_validation::{worker_in_range, dir_exist};
 
 pub struct Cli {
     pub params: Params,
@@ -15,16 +15,39 @@ pub struct Cli {
 impl Cli {
     /// Returns a Cli with the input config
     ///
-    /// - Usage: masker [MODE] --file <FILE_PATH> <OPTIONS>
+    /// Usage: masker <MODE> --file <FILE> [OPTIONS]
     ///
-    /// OPTIONS available
-    /// - -c --config optional default is the conf.yml
-    /// - -f --file  this is required which is point to the files directory
-    /// - -o --output optional default is /output
-    /// - -t --type optional default is csv, [csv, json] are the two optional choice
-    /// - -k --key optional, its only for encrypt, and decrypt
-    /// - -d --debug optional, default false
-    /// - -w --worker optional, worker for processing, default is 2
+    /// Arguments:
+    ///     <MODE>
+    ///         What mode to run the program in
+    ///         Possible values:
+    ///             - mask:    Mask the data by *
+    ///             - encrypt: Encrypt the data with provided KEY
+    ///             - decrypt: Decrypt the data with provided KEY
+    ///    
+    /// Options:
+    ///     -t, --type <TYPE>
+    ///         type of file we will process, available option [csv, json]
+    ///         [default: csv]
+    ///     -k, --key <KEY>
+    ///         key for Encrypt and Decrypt the file.
+    ///     -f, --file <FILE>
+    ///         file path for the
+    ///     -c, --config <CONFIG>
+    ///         Sets a custom config yml path
+    ///         [default: conf.yaml]
+    ///     -o, --output <OUTPUT>
+    ///         Sets a file/directory path for output
+    ///         [default: output]
+    ///     -d, --debug <DEBUG>
+    ///         Sets debug flag
+    ///         [possible values: true, false]
+    ///     -w, --worker <WORKER>
+    ///         Sets work flag
+    ///     -h, --help
+    ///         Print help (see a summary with '-h')
+    ///     -V, --version
+    ///         Print version
     ///
     /// # Examples
     /// ```
@@ -118,14 +141,14 @@ impl Cli {
                 )
                 .required(false)
                 .help("type of file we will process, available option [csv, json]")
-                .default_value("csv")
+                .default_value("csv"),
             )
             .arg(
                 arg!(
                     -k --key <KEY> "Sets a KEY to process file"
                 )
                 .help("key for Encrypt and Decrypt the file.")
-                .required_if_eq_any([("MODE", "decrypt"),("MODE", "encrypt")])
+                .required_if_eq_any([("MODE", "decrypt"), ("MODE", "encrypt")]),
             )
             .arg(
                 arg!(
