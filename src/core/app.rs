@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::core::audit::AuditSummary;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
 use crate::cli::app::Cli;
@@ -14,14 +15,6 @@ use crate::utils::enums::{FileType, Mode, AppMode};
 
 pub struct App {
     pub params: Params,
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct AuditSummary {
-    pub params: Params,
-    pub total_file: usize,
-    pub total_line: usize,
-    pub elapsed: String,
 }
 
 impl App {
@@ -89,7 +82,7 @@ impl App {
     /// let result = new_app.process().await?;
     /// ```
     ///
-    pub async fn process(&self) -> Result<(), MaskerError> {
+    pub async fn process(&mut self) -> Result<(), MaskerError> {
         info!(
             "processing '{}' files start",
             self.params.file_type.to_string().bold().green()
@@ -156,12 +149,28 @@ impl App {
                 }
 
                 let now = Instant::now();
-                csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
+                let csv_metrics = csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),
                     now.elapsed()
                 );
+                
+                match &self.params.key {
+                    Some(_) => {
+                        self.params.key = Some("***".to_string());
+                    },
+                    None => {
+                        self.params.key = None;
+                    },
+                }
+
+                let audit_summary = AuditSummary{
+                    params: self.params.clone(),
+                    metrics: csv_metrics,
+                    elapsed: now.elapsed(),
+                };
+                info!("{} info : {:?}", "audit".bold().green(), audit_summary)
             }
             FileType::JSON => {
                 todo!()

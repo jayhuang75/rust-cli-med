@@ -5,7 +5,8 @@ use tokio::io;
 pub enum MaskerErrorType {
     ConfigError,
     IoError,
-    CryptoError
+    CryptoError,
+    WorkerError,
 }
 
 #[derive(Debug, PartialEq)]
@@ -67,6 +68,17 @@ impl From<magic_crypt::MagicCryptError> for MaskerError {
         }
     }
 }
+
+impl From<rayon::ThreadPoolBuildError> for MaskerError {
+    fn from(error: rayon::ThreadPoolBuildError) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some("rayon worker error".to_string()),
+            error_type: MaskerErrorType::WorkerError,
+        }
+    }
+}
+
 
 // impl From<sqlx::Error> for MachineError {
 //     fn from(error: sqlx::Error) -> MachineError {

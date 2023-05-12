@@ -1,4 +1,5 @@
 use crate::core::app::App;
+use crate::core::audit::Metrics;
 use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
@@ -20,8 +21,7 @@ pub struct CsvFile {
 
 #[derive(Debug, Default, Clone)]
 pub struct CsvFileProcessor {
-    pub total_file: usize,
-    pub total_records: usize,
+    pub metrics: Metrics,
     pub result: Vec<CsvFile>,
 }
 
@@ -52,8 +52,8 @@ impl CsvFileProcessor {
         drop(tx);
 
         rx.iter().for_each(|item| {
-            self.total_file += 1;
-            self.total_records += item.total_records;
+            self.metrics.total_file += 1;
+            self.metrics.total_records += item.total_records;
             self.result.push(item);
         });
 
@@ -174,15 +174,16 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn write(&self, output_dir: &str, file_dir: &str) -> Result<(), MaskerError> {
+    pub async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
         let _ = self.create_output_dir(output_dir, file_dir)?;
-        let bar: indicatif::ProgressBar = get_progress_bar(self.total_records as u64, "write files");
+        let bar: indicatif::ProgressBar =
+            get_progress_bar(self.metrics.total_records as u64, "write files");
         self.result.par_iter().for_each(|item| {
             let output_files = format!("{}/{}", output_dir, item.path);
             debug!("write to path: {:?}", output_files);
             Worker::write_csv(item, &output_files, &bar).unwrap();
         });
         bar.finish_and_clear();
-        Ok(())
+        Ok(self.metrics.clone())
     }
 }

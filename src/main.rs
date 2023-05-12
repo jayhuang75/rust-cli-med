@@ -13,7 +13,7 @@ async fn main() -> Result<(), MaskerError> {
 
     let now = Instant::now();
 
-    let new_app = App::new(AppMode::CLI).await?;
+    let mut new_app = App::new(AppMode::CLI).await?;
 
     let _ = new_app.process().await?;
 
