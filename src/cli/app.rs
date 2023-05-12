@@ -4,7 +4,7 @@ use crate::utils::{
     error::{MaskerError, MaskerErrorType},
 };
 use clap::{arg, command, value_parser, ArgMatches};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use tracing::log::info;
 
 pub struct Cli {
@@ -75,7 +75,22 @@ impl Cli {
 
         if let Some(path) = matches.get_one::<PathBuf>("file") {
             info!("file location {:?} : ", path.display());
-            params.file_path = path.display().to_string();
+
+            match Path::new(path).is_dir() {
+                true => {
+                     params.file_path = path.display().to_string();
+                },
+                false => {
+                    return Err(
+                        MaskerError { 
+                             message: Some(format!("{:?} dir not exist, please check the -f or --file args!", path
+                            )),
+                            cause: Some(format!("missing file path")),
+                            error_type: MaskerErrorType::ConfigError,
+                         }
+                    )
+                },
+            }
         }
 
         if let Some(path) = matches.get_one::<PathBuf>("output") {
