@@ -1,11 +1,12 @@
 use crate::core::models::Params;
 use crate::utils::{
     enums::{FileType, Mode},
-    error::{MaskerError, MaskerErrorType},
+    error::{MaskerError},
 };
 use clap::{arg, command, value_parser, ArgMatches};
-use std::path::{PathBuf, Path};
+use std::path::{PathBuf};
 use tracing::log::info;
+use crate::cli::custom_validation::{worker_in_range, dir_exist};
 
 pub struct Cli {
     pub params: Params,
@@ -75,22 +76,7 @@ impl Cli {
 
         if let Some(path) = matches.get_one::<PathBuf>("file") {
             info!("file location {:?} : ", path.display());
-
-            match Path::new(path).is_dir() {
-                true => {
-                     params.file_path = path.display().to_string();
-                },
-                false => {
-                    return Err(
-                        MaskerError { 
-                             message: Some(format!("{:?} dir not exist, please check the -f or --file args!", path
-                            )),
-                            cause: Some(format!("missing file path")),
-                            error_type: MaskerErrorType::ConfigError,
-                         }
-                    )
-                },
-            }
+            params.file_path = path.display().to_string();
         }
 
         if let Some(path) = matches.get_one::<PathBuf>("output") {
@@ -109,16 +95,6 @@ impl Cli {
         }
 
         if let Some(worker) = matches.get_one::<usize>("worker") {
-            let cpu_nums = num_cpus::get();
-            if worker > &cpu_nums {
-                return Err(MaskerError {
-                    message: Some(format!(
-                        "worker is over your current max CPU number: {:?}, consider lower the worker", cpu_nums
-                    )),
-                    cause: Some(format!("max worker reach {:?}", cpu_nums)),
-                    error_type: MaskerErrorType::ConfigError,
-                });
-            }
             params.worker = worker.to_owned();
         }
 
@@ -138,15 +114,17 @@ impl Cli {
             )
             .arg(
                 arg!(
-                    -t --type <TYPE> "Sets a process file type [csv, json], csv is the default value"
+                    -t --type <TYPE> "Sets a process file type [csv, json]"
                 )
                 .required(false)
+                .help("type of file we will process, available option [csv, json]")
                 .default_value("csv")
             )
             .arg(
                 arg!(
                     -k --key <KEY> "Sets a KEY to process file"
                 )
+                .help("key for Encrypt and Decrypt the file.")
                 .required_if_eq_any([("MODE", "decrypt"),("MODE", "encrypt")])
             )
             .arg(
@@ -154,11 +132,12 @@ impl Cli {
                     -f --file <FILE> "Sets a file/directory path"
                 )
                 .required(true)
-                .value_parser(value_parser!(PathBuf)),
+                .help("file path for the ")
+                .value_parser(dir_exist),
             )
             .arg(
                 arg!(
-                    -c --config <CONFIG> "Sets a custom config yml path, optional default is conf.yml"
+                    -c --config <CONFIG> "Sets a custom config yml path"
                 )
                 .required(false)
                 .default_value("conf.yaml")
@@ -166,7 +145,7 @@ impl Cli {
             )
             .arg(
                 arg!(
-                    -o --output <OUTPUT> "Sets a file/directory path for output, default is /output"
+                    -o --output <OUTPUT> "Sets a file/directory path for output"
                 )
                 .required(false)
                 .default_value("output")
@@ -174,17 +153,17 @@ impl Cli {
             )
             .arg(
                 arg!(
-                    -d --debug <DEBUG> "Sets debug flag [true, false]"
+                    -d --debug <DEBUG> "Sets debug flag"
                 )
                 .required(false)
                 .value_parser(clap::value_parser!(bool)),
             )
             .arg(
                 arg!(
-                    -w --worker <WORKER> "Sets work flag, default is 2"
+                    -w --worker <WORKER> "Sets work flag"
                 )
                 .required(false)
-                .value_parser(clap::value_parser!(usize)),
+                .value_parser(worker_in_range),
             )
             .get_matches()
     }

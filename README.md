@@ -15,25 +15,41 @@ Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with au
 
 ```bash
 $ masker --help
-A simple to use, rust powered data masking/encryption/decription cli tool
+A simple to use, enterprise ready, rust powered data masking/encryption/decription cli tool
 
-Usage: masker [MODE] --file <FILE_PATH> <OPTIONS>
+Usage: masker <MODE> --file <FILE> [OPTIONS]
 
-Commands [MODE]:
-  mask  mask the fields with *
-  encrypt encrypt fields with the key
-  decrypt encrypt fields with the key
+Arguments:
+  <MODE>
+          What mode to run the program in
+          Possible values:
+          - mask:    Mask the data by *
+          - encrypt: Encrypt the data with provided KEY
+          - decrypt: Decrypt the data with provided KEY
 
-REQUIRED:
-  -f --file  this is required which is point to the files directory
-
-OPTIONS available
-  -c --config optional default is the conf.yml
-  -o --output optional default is /output
-  -t --type optional default is csv, [csv, json] are the two optional choice
-  -k --key optional, its only for encrypt, and decrypt
-  -d --debug optional, default false
-  -w --worker optional, worker for processing, default is 2
+Options:
+  -t, --type <TYPE>
+          type of file we will process, available option [csv, json]
+          [default: csv]
+  -k, --key <KEY>
+          key for Encrypt and Decrypt the file.
+  -f, --file <FILE>
+          file path for the
+  -c, --config <CONFIG>
+          Sets a custom config yml path
+          [default: conf.yaml]
+  -o, --output <OUTPUT>
+          Sets a file/directory path for output
+          [default: output]
+  -d, --debug <DEBUG>
+          Sets debug flag
+          [possible values: true, false]
+  -w, --worker <WORKER>
+          Sets work flag
+  -h, --help
+          Print help (see a summary with '-h')
+  -V, --version
+          Print version
 ```
 
 ### Installation
