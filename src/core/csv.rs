@@ -3,6 +3,7 @@ use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
 use crate::utils::error::MaskerError;
+use crate::core::models::Metrics;
 use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -22,12 +23,6 @@ pub struct CsvFile {
 pub struct CsvFileProcessor {
     pub metrics: Metrics,
     pub result: Vec<CsvFile>,
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct Metrics {
-    pub total_file: usize,
-    pub total_records: usize,
 }
 
 impl CsvFileProcessor {

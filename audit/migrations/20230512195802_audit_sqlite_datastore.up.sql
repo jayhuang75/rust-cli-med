@@ -1,0 +1,8 @@
+-- Add migration script here
+CREATE TABLE IF NOT EXISTS audit (
+    id INTEGER PRIMARY KEY,
+    item TEXT NOT NULL,
+    successed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+

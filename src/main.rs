@@ -1,6 +1,7 @@
 mod utils;
 mod core;
 mod cli;
+mod audit;
 
 use tokio::time::Instant;
 use tracing::info;
@@ -15,7 +16,12 @@ async fn main() -> Result<(), MaskerError> {
 
     let mut new_app = App::new(AppMode::CLI).await?;
 
-    let _ = new_app.process().await?;
+    let summary = new_app.process().await?;
+
+    info!(
+        "completed summary {:?}",
+        summary
+    );
 
     info!(
         "total elapsed time {:?}",

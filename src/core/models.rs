@@ -1,6 +1,8 @@
+use serde::Serialize;
+
 use crate::utils::enums::{FileType, Mode, AppMode};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Params {
     pub app_mode: AppMode,
     pub file_path: String,
@@ -39,3 +41,14 @@ impl Default for Params {
     }
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct Metrics {
+    pub total_file: usize,
+    pub total_records: usize,
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Summary {
+    pub metrics: Metrics,
+    pub params: String,
+}

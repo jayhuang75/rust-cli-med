@@ -1,8 +1,9 @@
 use std::fmt;
 
 use clap::{ValueEnum, builder::PossibleValue};
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum FileType {
     CSV,
     JSON,
@@ -23,7 +24,7 @@ impl fmt::Display for FileType {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum Mode {
     MASK,
     ENCRYPT,
@@ -82,7 +83,7 @@ impl std::fmt::Debug for Mode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 #[allow(dead_code)]
 pub enum AppMode {
     CLI,

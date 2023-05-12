@@ -1,5 +1,4 @@
 use std::path::Path;
-
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
 use crate::cli::app::Cli;
@@ -9,7 +8,7 @@ use tracing::{info, debug};
 use tracing_subscriber::fmt::format;
 
 use crate::core::csv::CsvFileProcessor;
-use crate::core::models::Params;
+use crate::core::models::{Params, Metrics, Summary};
 use crate::utils::enums::{FileType, Mode, AppMode};
 
 pub struct App {
@@ -45,7 +44,6 @@ impl App {
     async fn load_job_config(&self) -> Result<JobConfig, MaskerError> {
         let conf = JobConfig::new(Path::new(&self.params.conf_path)).await?;
         debug!("{} {:?}", "job config".bold().green(), conf);
-
         Ok(conf)
     }
 
@@ -81,7 +79,7 @@ impl App {
     /// let result = new_app.process().await?;
     /// ```
     ///
-    pub async fn process(&mut self) -> Result<(), MaskerError> {
+    pub async fn process(&mut self) -> Result<Summary, MaskerError> {
         info!(
             "processing '{}' files start",
             self.params.file_type.to_string().bold().green()
@@ -102,6 +100,9 @@ impl App {
             self.params.conf_path.bold().green(),
             now.elapsed()
         );
+
+        let mut summary: Summary = Summary::default();
+        summary.params = serde_json::to_string(&self.params)?;
 
         match &self.params.file_type {
             FileType::CSV => {
@@ -148,7 +149,7 @@ impl App {
                 }
 
                 let now = Instant::now();
-                let csv_metrics = csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
+                summary.metrics = csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),
@@ -163,18 +164,12 @@ impl App {
                         self.params.key = None;
                     },
                 }
-
-                // let audit_summary = AuditSummary{
-                //     params: self.params.clone(),
-                //     metrics: csv_metrics,
-                //     elapsed: now.elapsed(),
-                // };
-                // info!("{} info : {:?}", "audit".bold().green(), audit_summary)
             }
             FileType::JSON => {
                 todo!()
             }
         }
-        Ok(())
+
+        Ok(summary)
     }
 }

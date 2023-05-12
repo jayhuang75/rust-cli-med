@@ -7,6 +7,7 @@ pub enum MaskerErrorType {
     IoError,
     CryptoError,
     WorkerError,
+    SerdeJsonError,
 }
 
 #[derive(Debug, PartialEq)]
@@ -78,6 +79,17 @@ impl From<rayon::ThreadPoolBuildError> for MaskerError {
         }
     }
 }
+
+impl From<serde_json::Error> for MaskerError {
+    fn from(error: serde_json::Error) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some("serde json error".to_string()),
+            error_type: MaskerErrorType::SerdeJsonError,
+        }
+    }
+}
+
 
 
 // impl From<sqlx::Error> for MachineError {
