@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use crate::core::audit::AuditSummary;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
 use crate::cli::app::Cli;
@@ -165,12 +164,12 @@ impl App {
                     },
                 }
 
-                let audit_summary = AuditSummary{
-                    params: self.params.clone(),
-                    metrics: csv_metrics,
-                    elapsed: now.elapsed(),
-                };
-                info!("{} info : {:?}", "audit".bold().green(), audit_summary)
+                // let audit_summary = AuditSummary{
+                //     params: self.params.clone(),
+                //     metrics: csv_metrics,
+                //     elapsed: now.elapsed(),
+                // };
+                // info!("{} info : {:?}", "audit".bold().green(), audit_summary)
             }
             FileType::JSON => {
                 todo!()

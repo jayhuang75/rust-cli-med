@@ -1,5 +1,4 @@
 use crate::core::app::App;
-use crate::core::audit::Metrics;
 use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
@@ -23,6 +22,12 @@ pub struct CsvFile {
 pub struct CsvFileProcessor {
     pub metrics: Metrics,
     pub result: Vec<CsvFile>,
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Metrics {
+    pub total_file: usize,
+    pub total_records: usize,
 }
 
 impl CsvFileProcessor {
