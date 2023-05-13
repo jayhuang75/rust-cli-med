@@ -52,7 +52,7 @@ impl CsvFileProcessor {
         drop(tx);
 
         rx.iter().for_each(|item| {
-            self.metrics.total_file += 1;
+            self.metrics.total_files += 1;
             self.metrics.total_records += item.total_records;
             self.result.push(item);
         });

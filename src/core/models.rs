@@ -1,6 +1,8 @@
+use std::fmt;
+
 use serde::Serialize;
 
-use crate::utils::enums::{FileType, Mode, AppMode};
+use crate::utils::enums::{AppMode, FileType, Mode};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Params {
@@ -13,6 +15,16 @@ pub struct Params {
     pub worker: usize,
     pub key: Option<String>,
     pub debug: bool,
+}
+
+impl fmt::Display for Params {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "app_mode: {}, file_path: {}, file_type: {}, conf_path: {}, output_path: {}, mode: {}, key: {:?}, debug: {}, worker: {}",
+            self.app_mode, self.file_path, self.file_type, self.conf_path, self.output_path, self.mode, self.key, self.debug, self.worker
+        )
+    }
 }
 
 impl Default for Params {
@@ -36,19 +48,13 @@ impl Default for Params {
             mode,
             key: Some(key),
             debug,
-            worker
+            worker,
         }
     }
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct Metrics {
-    pub total_file: usize,
+    pub total_files: usize,
     pub total_records: usize,
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct Summary {
-    pub metrics: Metrics,
-    pub params: String,
 }

@@ -8,7 +8,7 @@ use tracing::{info, debug};
 use tracing_subscriber::fmt::format;
 
 use crate::core::csv::CsvFileProcessor;
-use crate::core::models::{Params, Metrics, Summary};
+use crate::core::models::{Params, Metrics};
 use crate::utils::enums::{FileType, Mode, AppMode};
 
 pub struct App {
@@ -79,7 +79,7 @@ impl App {
     /// let result = new_app.process().await?;
     /// ```
     ///
-    pub async fn process(&mut self) -> Result<Summary, MaskerError> {
+    pub async fn process(&mut self) -> Result<Metrics, MaskerError> {
         info!(
             "processing '{}' files start",
             self.params.file_type.to_string().bold().green()
@@ -101,8 +101,7 @@ impl App {
             now.elapsed()
         );
 
-        let mut summary: Summary = Summary::default();
-        summary.params = serde_json::to_string(&self.params)?;
+        let metrics: Metrics;
 
         match &self.params.file_type {
             FileType::CSV => {
@@ -149,7 +148,7 @@ impl App {
                 }
 
                 let now = Instant::now();
-                summary.metrics = csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
+                metrics = csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),
@@ -158,7 +157,7 @@ impl App {
                 
                 match &self.params.key {
                     Some(_) => {
-                        self.params.key = Some("***".to_string());
+                        self.params.key = Some("*****".to_string());
                     },
                     None => {
                         self.params.key = None;
@@ -170,6 +169,6 @@ impl App {
             }
         }
 
-        Ok(summary)
+        Ok(metrics)
     }
 }

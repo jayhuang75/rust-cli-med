@@ -8,6 +8,7 @@ pub enum MaskerErrorType {
     CryptoError,
     WorkerError,
     SerdeJsonError,
+    DatabaseError,
 }
 
 #[derive(Debug, PartialEq)]
@@ -92,17 +93,25 @@ impl From<serde_json::Error> for MaskerError {
 
 
 
-// impl From<sqlx::Error> for MachineError {
-//     fn from(error: sqlx::Error) -> MachineError {
-//         MachineError {
-//             message: Some(error.to_string()),
-//             cause: Some("database error".to_string()),
-//             error_type: MachineErrorType::DatabaseError,
-//         }
-//     }
-// }
-// 
+impl From<sqlx::Error> for MaskerError {
+    fn from(error: sqlx::Error) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some("database error".to_string()),
+            error_type: MaskerErrorType::DatabaseError,
+        }
+    }
+}
 
+impl From<sqlx::migrate::MigrateError> for MaskerError {
+    fn from(error: sqlx::migrate::MigrateError) -> MaskerError {
+        MaskerError {
+            message: Some(error.to_string()),
+            cause: Some("database migration error".to_string()),
+            error_type: MaskerErrorType::DatabaseError,
+        }
+    }
+}
 
 impl fmt::Display for MaskerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
