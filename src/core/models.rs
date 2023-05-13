@@ -12,7 +12,7 @@ pub struct Params {
     pub conf_path: String,
     pub output_path: String,
     pub mode: Mode,
-    pub worker: usize,
+    pub worker: u16,
     pub key: Option<String>,
     pub debug: bool,
 }

@@ -14,8 +14,7 @@ tokio = { version = "1.28.0", features = ["full"] }
 rayon = "1.7.0"
 clap = { version = "4.2.5", features = ["cargo"]}
 num_cpus = "1.15.0"
-sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "sqlite", "postgres"] }
-dotenv = "0.15.0"
+sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "offline"] }
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
@@ -24,7 +23,6 @@ serde_yaml = "0.9.21"
 tracing = { version = "0.1.37", features = ["log"] }
 tracing-subscriber = { version = "0.3.17", default-features = false, features = ["fmt"]}
 
-async-trait = "0.1.68"
 csv = "1.2.1"
 flume = "0.10.14"
 walkdir = "2.3.3"

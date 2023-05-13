@@ -5,28 +5,26 @@ mod audit;
 
 use tokio::time::Instant;
 use tracing::info;
-use dotenv::dotenv;
 use utils::{error::MaskerError};
 use crate::audit::db::AuditSummary;
 use crate::core::app::App;
 use crate::utils::enums::AppMode;
+
+const DATABASE_URL: &str = "./audit/data.db";
 
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
 
     let now = Instant::now();
 
-    // load env
-    dotenv().ok();
-
-    // load audit db
-    let mut audit_db = audit::db::Database::new("./audit/data.db").await?;
-
     let mut new_app = App::new(AppMode::CLI).await?;
 
     let mut audit_summary = AuditSummary::default();
-    info!("test serde: {:?} ", new_app.params.to_string());
-    audit_summary.runtime_conf = serde_json::from_str(&new_app.params.to_string())?;
+    audit_summary.runtime_conf = serde_json::to_string(&new_app.params)?;
+
+    // load audit db
+    let mut audit_db = audit::db::Database::new(DATABASE_URL).await?;
+    audit_db.migrate("./audit/migrations").await?;
 
     match new_app.process().await {
         Ok(metrics) => {

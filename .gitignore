@@ -21,3 +21,4 @@ Cargo.lock
 
 .env
 *.db
+*.db-*

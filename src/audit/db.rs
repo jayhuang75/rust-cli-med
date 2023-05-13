@@ -1,7 +1,12 @@
-use std::env;
+use std::{str::FromStr, time::Duration};
 
-use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
-use tracing::{info, log::warn};
+use colored::Colorize;
+use sqlx::{
+    migrate::MigrateDatabase,
+    sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions, SqliteSynchronous},
+    Sqlite
+};
+use tracing::{info};
 
 use crate::utils::error::MaskerError;
 
@@ -21,13 +26,27 @@ pub struct AuditSummary {
 impl Database {
     pub async fn new(db_url: &str) -> Result<Database, MaskerError> {
         if !Sqlite::database_exists(db_url).await.unwrap_or(false) {
-            info!("[Database] create database...");
             Sqlite::create_database(db_url).await?;
+            info!("audit database {} created", db_url.bold().green());
         } else {
-            warn!("[Database] database already exists");
+            info!("audit database {} exist", db_url.bold().green());
         }
-        info!("[Database] connect to database...");
-        let pool = SqlitePool::connect(&env::var("DATABASE_URL").unwrap()).await?;
+        info!("audit database {}", db_url.bold().green());
+
+        let pool_timeout = Duration::from_secs(30);
+
+        let connection_options =
+            SqliteConnectOptions::from_str(db_url)?
+                .create_if_missing(true)
+                .journal_mode(SqliteJournalMode::Wal)
+                .synchronous(SqliteSynchronous::Normal)
+                .busy_timeout(pool_timeout);
+
+        let pool = SqlitePoolOptions::new()
+            .max_connections(2)
+            .connect_with(connection_options)
+            .await?;
+
         Ok(Database { pool })
     }
 
@@ -55,7 +74,7 @@ impl Database {
         // successed BOOLEAN NOT NULL DEFAULT FALSE,
         let total_files = summary.total_files as i64;
         let total_records = summary.total_records as i64;
-
+        
         let id = sqlx::query!(
             r#"
                 INSERT INTO audit ( total_files, total_records, runtime_conf, failure_reason, successed )

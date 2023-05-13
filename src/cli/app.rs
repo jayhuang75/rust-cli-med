@@ -117,7 +117,7 @@ impl Cli {
             params.debug = debug.to_owned();
         }
 
-        if let Some(worker) = matches.get_one::<usize>("worker") {
+        if let Some(worker) = matches.get_one::<u16>("worker") {
             params.worker = worker.to_owned();
         }
 

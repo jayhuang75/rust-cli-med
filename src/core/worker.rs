@@ -7,14 +7,14 @@ use crate::core::csv::CsvFile;
 
 #[derive(Debug)]
 pub struct Worker {
-    pub cpu_num: usize,
+    pub cpu_num: u16,
     pub pool: ThreadPool,
 }
 
 impl Worker {
-    pub async fn new(cpu_num: usize) -> Result<Self, MaskerError> {
-        let pool = ThreadPool::new(cpu_num);
-        rayon::ThreadPoolBuilder::new().num_threads(cpu_num).build_global()?;
+    pub async fn new(cpu_num: u16) -> Result<Self, MaskerError> {
+        let pool = ThreadPool::new(cpu_num as usize);
+        rayon::ThreadPoolBuilder::new().num_threads(cpu_num as usize).build_global()?;
         Ok(Worker { cpu_num, pool })
     }
 
