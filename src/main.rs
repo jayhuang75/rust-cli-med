@@ -25,6 +25,7 @@ async fn main() -> Result<(), MaskerError> {
     let mut new_app = App::new(AppMode::CLI).await?;
 
     let mut audit_summary = AuditSummary::default();
+    info!("test serde: {:?} ", new_app.params.to_string());
     audit_summary.runtime_conf = serde_json::from_str(&new_app.params.to_string())?;
 
     match new_app.process().await {
@@ -38,11 +39,12 @@ async fn main() -> Result<(), MaskerError> {
         }
     }
 
-    let id = audit_db.insert(&audit_summary).await?;
+    let audit_id = audit_db.insert(&audit_summary).await?;
 
     info!(
-        "total elapsed time {:?}",
-        now.elapsed()
+        "total elapsed time {:?} with audit record_id {:?}",
+        now.elapsed(),
+        audit_id
     );
 
     Ok(())

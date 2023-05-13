@@ -1,6 +1,6 @@
 use std::env;
 
-use sqlx::{Sqlite, migrate::MigrateDatabase, SqlitePool};
+use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 use tracing::{info, log::warn};
 
 use crate::utils::error::MaskerError;
@@ -53,12 +53,15 @@ impl Database {
         // runtime_conf TEXT NOT NULL,
         // failure_reason TEXT,
         // successed BOOLEAN NOT NULL DEFAULT FALSE,
+        let total_files = summary.total_files as i64;
+        let total_records = summary.total_records as i64;
+
         let id = sqlx::query!(
             r#"
                 INSERT INTO audit ( total_files, total_records, runtime_conf, failure_reason, successed )
                 VALUES ( ?1, ?2, ?3, ?4, ?5 )
         "#,
-            summary.total_files, summary.total_records, summary.params, summary.failure_reason, summary.successed
+        total_files, total_records, summary.runtime_conf, summary.failure_reason, summary.successed
         )
         .execute(&self.pool)
         .await?
