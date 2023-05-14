@@ -53,7 +53,6 @@ impl Database {
         let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
         let migrations = std::path::Path::new(&crate_dir).join(migrations_path);
 
-        info!("[Database] migration...");
         sqlx::migrate::Migrator::new(migrations)
             .await
             .unwrap()

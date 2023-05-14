@@ -12,7 +12,7 @@ use crate::core::app::App;
 use crate::utils::enums::AppMode;
 
 const DATABASE_URL: &str = "./audit/data.db";
-const DATABASE_MIGRATIONS: &str = "./audit/migrations";
+// const DATABASE_MIGRATIONS: &str = "./audit/migrations";
 
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
@@ -26,7 +26,7 @@ async fn main() -> Result<(), MaskerError> {
 
     // load audit db
     let mut audit_db = audit::db::Database::new(DATABASE_URL).await?;
-    audit_db.migrate(DATABASE_MIGRATIONS).await?;
+    // audit_db.migrate(DATABASE_MIGRATIONS).await?;
 
     match new_app.process().await {
         Ok(metrics) => {

@@ -46,7 +46,7 @@ impl CsvFileProcessor {
 
         drop(tx);
 
-        let bar = get_progress_bar(files_number as u64, "folder to processor");
+        let bar = get_progress_bar(files_number as u64, "load files to processor");
         rx.iter().for_each(|item| {
             bar.inc(1);
             self.metrics.total_files += 1;
