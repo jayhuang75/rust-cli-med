@@ -21,7 +21,6 @@ impl Worker {
     }
 
     pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MaskerError> {
-
         let mut reader = csv::Reader::from_path(path.clone())?;
         let headers = reader.headers()?.to_owned();
         let mut data: Vec<StringRecord> = Vec::new();

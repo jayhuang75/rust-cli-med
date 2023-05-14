@@ -1,14 +1,14 @@
 use crate::core::app::App;
+use crate::core::models::Metrics;
 use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
 use crate::utils::error::{MaskerError, MaskerErrorType};
-use crate::core::models::Metrics;
 use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use tracing::debug;
+use tracing::{debug};
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Default)]
@@ -28,12 +28,8 @@ pub struct CsvFileProcessor {
 impl CsvFileProcessor {
     pub async fn load(&mut self, app: &App) -> Result<(), MaskerError> {
         let (tx, rx) = flume::unbounded();
-
         let new_worker = Worker::new(app.params.worker).await?;
-
-        let folder_count = WalkDir::new(&app.params.file_path).into_iter().count();
-
-        let bar = get_progress_bar(folder_count as u64, "load files to processor");
+        let mut files_number: u64 = 0;
         for entry in WalkDir::new(&app.params.file_path)
             .follow_links(true)
             .into_iter()
@@ -41,21 +37,22 @@ impl CsvFileProcessor {
             .filter(|e| !e.path().is_dir())
         {
             let tx = tx.clone();
-            bar.inc(1);
             debug!("load files: {:?}", entry.path().display().to_string());
+            files_number += 1;
             new_worker.pool.execute(move || {
                 Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
             });
         }
 
         drop(tx);
-
+        
+        let bar = get_progress_bar(files_number as u64, "folder to processor");
         rx.iter().for_each(|item| {
+            bar.inc(1);
             self.metrics.total_files += 1;
             self.metrics.total_records += item.total_records;
             self.result.push(item);
         });
-
         bar.finish_and_clear();
 
         Ok(())
@@ -63,18 +60,20 @@ impl CsvFileProcessor {
 
     fn check_if_field_exist_in_job_conf(&self, indexs: Vec<usize>) {
         if indexs.is_empty() {
-            eprintln!("{:?}", MaskerError{
-                cause: Some("no field match".to_owned()),
-                error_type: MaskerErrorType::ConfigError,
-                message: Some("please check your job conf".to_owned()),
-            });
+            eprintln!(
+                "{:?}",
+                MaskerError {
+                    cause: Some("no field match".to_owned()),
+                    error_type: MaskerErrorType::ConfigError,
+                    message: Some("please check your job conf".to_owned()),
+                }
+            );
             std::process::exit(1);
         }
     }
 
     pub async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
         let bar = get_progress_bar(self.result.len() as u64, "masking files");
-
         let new_result: Vec<CsvFile> = self
             .result
             .par_iter()
@@ -95,7 +94,7 @@ impl CsvFileProcessor {
                     .clone()
                     .data
                     .into_par_iter()
-                    .inspect(|_| bar.inc(1) )
+                    .inspect(|_| bar.inc(1))
                     .map(|records| {
                         let mut masked_record: StringRecord = StringRecord::new();
                         records.iter().enumerate().for_each(|(i, item)| {
