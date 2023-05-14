@@ -33,7 +33,9 @@ async fn main() -> Result<(), MaskerError> {
             audit_summary.successed = true;
         },
         Err(err) => {
-            audit_summary.failure_reason = serde_json::from_str(Err(err)?)?;
+            audit_summary.failure_reason = Some(serde_json::to_string(&err.clone())?);
+            eprintln!("Error: {:?}", err.to_string());
+            std::process::exit(1);
         }
     }
 

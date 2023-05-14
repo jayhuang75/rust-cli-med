@@ -1,7 +1,8 @@
 use std::{fmt};
+use serde::Serialize;
 use tokio::io;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub enum MaskerErrorType {
     ConfigError,
     IoError,
@@ -11,12 +12,13 @@ pub enum MaskerErrorType {
     DatabaseError,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct MaskerError {
     pub message: Option<String>,
     pub cause: Option<String>,
     pub error_type: MaskerErrorType,
 }
+
 
 impl MaskerError {
     #[allow(dead_code)]

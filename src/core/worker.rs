@@ -19,13 +19,23 @@ impl Worker {
     }
 
     pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MaskerError> {
+
         let mut reader = csv::Reader::from_path(path.clone())?;
         let headers = reader.headers()?.to_owned();
         let mut data: Vec<StringRecord> = Vec::new();
         let mut total_records: usize = 0;
         reader.records().into_iter().for_each(|record| {
             total_records += 1;
-            data.push(record.unwrap());
+            match record {
+                Ok(r) => {
+                    data.push(r)
+                },
+                Err(err) => {
+                    eprintln!("Error: {:?}", err.to_string());
+                    std::process::exit(1);
+                },
+            }
+            ;
         });
         tx.send(CsvFile {
             path: path,

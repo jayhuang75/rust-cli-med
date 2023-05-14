@@ -2,7 +2,7 @@ use crate::core::app::App;
 use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::CryptoData;
-use crate::utils::error::MaskerError;
+use crate::utils::error::{MaskerError, MaskerErrorType};
 use crate::core::models::Metrics;
 use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
@@ -62,6 +62,17 @@ impl CsvFileProcessor {
         Ok(())
     }
 
+    fn check_if_field_exist_in_job_conf(&self, indexs: Vec<usize>) {
+        if indexs.is_empty() {
+            eprintln!("{:?}", MaskerError{
+                cause: Some("no field match".to_owned()),
+                error_type: MaskerErrorType::ConfigError,
+                message: Some("please check your job conf".to_owned()),
+            });
+            std::process::exit(1);
+        }
+    }
+
     pub async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
         let bar = get_progress_bar(self.result.len() as u64, "masking files");
 
@@ -78,6 +89,8 @@ impl CsvFileProcessor {
                     .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
                     .map(|(i, _)| i)
                     .collect::<Vec<_>>();
+
+                self.check_if_field_exist_in_job_conf(indexs.clone());
 
                 let masked_data: Vec<StringRecord> = item
                     .clone()
@@ -129,6 +142,8 @@ impl CsvFileProcessor {
                     .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
                     .map(|(i, _)| i)
                     .collect::<Vec<_>>();
+
+                self.check_if_field_exist_in_job_conf(indexs.clone());
 
                 let masked_data: Vec<StringRecord> = item
                     .clone()
