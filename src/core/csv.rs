@@ -34,7 +34,6 @@ impl CsvFileProcessor {
         let folder_count = WalkDir::new(&app.params.file_path).into_iter().count();
 
         let bar = get_progress_bar(folder_count as u64, "load files to processor");
-
         for entry in WalkDir::new(&app.params.file_path)
             .follow_links(true)
             .into_iter()
@@ -46,7 +45,7 @@ impl CsvFileProcessor {
             debug!("load files: {:?}", entry.path().display().to_string());
             new_worker.pool.execute(move || {
                 Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
-            })
+            });
         }
 
         drop(tx);
@@ -96,7 +95,7 @@ impl CsvFileProcessor {
                     .clone()
                     .data
                     .into_par_iter()
-                    .inspect(|_| bar.inc(1))
+                    .inspect(|_| bar.inc(1) )
                     .map(|records| {
                         let mut masked_record: StringRecord = StringRecord::new();
                         records.iter().enumerate().for_each(|(i, item)| {

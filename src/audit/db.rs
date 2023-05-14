@@ -31,8 +31,6 @@ impl Database {
         } else {
             info!("audit database {} exist", db_url.bold().green());
         }
-        info!("audit database {}", db_url.bold().green());
-
         let pool_timeout = Duration::from_secs(30);
 
         let connection_options =
