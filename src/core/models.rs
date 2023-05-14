@@ -57,4 +57,5 @@ impl Default for Params {
 pub struct Metrics {
     pub total_files: usize,
     pub total_records: usize,
+    pub failed_records: usize, 
 }

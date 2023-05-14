@@ -25,6 +25,8 @@ impl Worker {
         let headers = reader.headers()?.to_owned();
         let mut data: Vec<StringRecord> = Vec::new();
         let mut total_records: usize = 0;
+        let mut failed_records: usize = 0;
+
         reader.records().into_iter().for_each(|record| {
             match record {
                 Ok(r) => {
@@ -37,6 +39,7 @@ impl Worker {
                         cause: Some(err.to_string()),
                         error_type: MaskerErrorType::CsvError,
                     }).unwrap();
+                    failed_records += 1;
                     info!("{}: {}", "warning".bold().yellow(), error_str);
                 },
             };
@@ -44,6 +47,7 @@ impl Worker {
         tx.send(CsvFile {
             path: path,
             total_records: total_records,
+            failed_records: failed_records,
             headers: headers,
             data: data,
         })

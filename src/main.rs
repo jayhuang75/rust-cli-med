@@ -32,6 +32,7 @@ async fn main() -> Result<(), MaskerError> {
         Ok(metrics) => {
             audit_summary.total_files = metrics.total_files;
             audit_summary.total_records = metrics.total_records;
+            audit_summary.failed_records = metrics.failed_records;
             audit_summary.successed = true;
         },
         Err(err) => {
@@ -43,9 +44,10 @@ async fn main() -> Result<(), MaskerError> {
     let audit_id = audit_db.insert(&audit_summary).await?;
 
     info!(
-        "total processed {:?} files and {:?}, elapsed time {:?} with audit record_id {:?}",
+        "total processed {:?} files, {:?} records, and with {:?} records failed, elapsed time {:?} with audit record_id {:?}",
         audit_summary.total_files,
         audit_summary.total_records,
+        audit_summary.failed_records,
         now.elapsed(),
         audit_id
     );

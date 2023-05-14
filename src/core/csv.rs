@@ -8,13 +8,14 @@ use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use tracing::debug;
+use tracing::{debug, info};
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Default)]
 pub struct CsvFile {
     pub path: String,
     pub total_records: usize,
+    pub failed_records: usize,
     pub headers: StringRecord,
     pub data: Vec<StringRecord>,
 }
@@ -51,6 +52,7 @@ impl CsvFileProcessor {
             bar.inc(1);
             self.metrics.total_files += 1;
             self.metrics.total_records += item.total_records;
+            self.metrics.failed_records += item.failed_records;
             self.result.push(item);
         });
         bar.finish_and_clear();

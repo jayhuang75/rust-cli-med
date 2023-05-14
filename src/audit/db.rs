@@ -18,6 +18,7 @@ pub struct Database {
 pub struct AuditSummary {
     pub total_files: usize,
     pub total_records: usize,
+    pub failed_records: usize,
     pub runtime_conf: String,
     pub failure_reason: Option<String>,
     pub successed: bool,
@@ -72,13 +73,14 @@ impl Database {
         // successed BOOLEAN NOT NULL DEFAULT FALSE,
         let total_files = summary.total_files as i64;
         let total_records = summary.total_records as i64;
+        let failed_records: i64 = summary.failed_records as i64;
         
         let id = sqlx::query!(
             r#"
-                INSERT INTO audit ( total_files, total_records, runtime_conf, failure_reason, successed )
-                VALUES ( ?1, ?2, ?3, ?4, ?5 )
+                INSERT INTO audit ( total_files, total_records, failed_records, runtime_conf, failure_reason, successed )
+                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6 )
         "#,
-        total_files, total_records, summary.runtime_conf, summary.failure_reason, summary.successed
+        total_files, total_records, failed_records, summary.runtime_conf, summary.failure_reason, summary.successed
         )
         .execute(&self.pool)
         .await?
