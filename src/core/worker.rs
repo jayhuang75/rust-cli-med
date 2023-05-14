@@ -27,10 +27,10 @@ impl Worker {
         let mut data: Vec<StringRecord> = Vec::new();
         let mut total_records: usize = 0;
         reader.records().into_iter().for_each(|record| {
-            total_records += 1;
             match record {
                 Ok(r) => {
-                    data.push(r)
+                    total_records += 1;
+                    data.push(r);
                 },
                 Err(err) => {
                     let error_str = serde_json::to_string(&MaskerError{
