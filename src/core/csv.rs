@@ -8,7 +8,7 @@ use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use tracing::{debug};
+use tracing::debug;
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Default)]
@@ -45,7 +45,7 @@ impl CsvFileProcessor {
         }
 
         drop(tx);
-        
+
         let bar = get_progress_bar(files_number as u64, "folder to processor");
         rx.iter().for_each(|item| {
             bar.inc(1);
@@ -73,7 +73,8 @@ impl CsvFileProcessor {
     }
 
     pub async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
-        let bar = get_progress_bar(self.result.len() as u64, "masking files");
+        let bar = get_progress_bar(self.metrics.total_records as u64, "masking files");
+
         let new_result: Vec<CsvFile> = self
             .result
             .par_iter()
@@ -125,7 +126,7 @@ impl CsvFileProcessor {
     pub async fn run_cipher(&mut self, key: &str, job_conf: &JobConfig) -> Result<(), MaskerError> {
         let crypto = CryptoData::new(key);
         let bar: indicatif::ProgressBar =
-            get_progress_bar(self.result.len() as u64, "cryptography files");
+            get_progress_bar(self.metrics.total_records as u64, "cryptography files");
 
         let new_result: Vec<CsvFile> = self
             .result
