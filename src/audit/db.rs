@@ -48,6 +48,7 @@ impl Database {
         Ok(Database { pool })
     }
 
+    #[allow(dead_code)]
     pub async fn migrate(&mut self, migrations_path: &str) -> Result<(), MaskerError> {
         // "./data/migrations"
         let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
