@@ -1,5 +1,6 @@
 use std::{fmt};
 use serde::Serialize;
+use serde_json::Error;
 use tokio::io;
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
@@ -10,6 +11,7 @@ pub enum MaskerErrorType {
     WorkerError,
     SerdeJsonError,
     DatabaseError,
+    CsvError,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
@@ -58,7 +60,7 @@ impl From<csv::Error> for MaskerError {
         MaskerError {
             message: Some(error.to_string()),
             cause: Some(error.to_string()),
-            error_type: MaskerErrorType::IoError,
+            error_type: MaskerErrorType::CsvError,
         }
     }
 }
@@ -83,8 +85,8 @@ impl From<rayon::ThreadPoolBuildError> for MaskerError {
     }
 }
 
-impl From<serde_json::Error> for MaskerError {
-    fn from(error: serde_json::Error) -> MaskerError {
+impl From<Error> for MaskerError {
+    fn from(error: Error) -> MaskerError {
         MaskerError {
             message: Some(error.to_string()),
             cause: Some("serde json error".to_string()),
@@ -92,8 +94,6 @@ impl From<serde_json::Error> for MaskerError {
         }
     }
 }
-
-
 
 impl From<sqlx::Error> for MaskerError {
     fn from(error: sqlx::Error) -> MaskerError {

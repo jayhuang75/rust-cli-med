@@ -1,7 +1,9 @@
+use colored::Colorize;
 use csv::{StringRecord, Writer};
 use threadpool::ThreadPool;
+use tracing::{info};
 
-use crate::utils::error::MaskerError;
+use crate::utils::error::{MaskerError, MaskerErrorType};
 
 use crate::core::csv::CsvFile;
 
@@ -31,8 +33,12 @@ impl Worker {
                     data.push(r)
                 },
                 Err(err) => {
-                    eprintln!("Error: {:?}", err.to_string());
-                    std::process::exit(1);
+                    let error_str = serde_json::to_string(&MaskerError{
+                        message: Some(format!("please check {} csv format", path)),
+                        cause: Some(err.to_string()),
+                        error_type: MaskerErrorType::CsvError,
+                    }).unwrap();
+                    info!("{}: {:?}", "warning".bold().yellow(), error_str);
                 },
             };
         });
