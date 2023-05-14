@@ -38,7 +38,7 @@ impl Worker {
                         cause: Some(err.to_string()),
                         error_type: MaskerErrorType::CsvError,
                     }).unwrap();
-                    info!("{}: {:?}", "warning".bold().yellow(), error_str);
+                    info!("{}: {}", "warning".bold().yellow(), error_str);
                 },
             };
         });
