@@ -3,6 +3,7 @@ mod core;
 mod cli;
 mod audit;
 
+use colored::Colorize;
 use tokio::time::Instant;
 use tracing::info;
 use utils::{error::MaskerError};
@@ -34,8 +35,7 @@ async fn main() -> Result<(), MaskerError> {
         },
         Err(err) => {
             audit_summary.failure_reason = Some(serde_json::to_string(&err.clone())?);
-            eprintln!("Error: {:?}", err.to_string());
-            std::process::exit(1);
+            info!("{} {:?}", "error".bold().red(), err.to_string());
         }
     }
 

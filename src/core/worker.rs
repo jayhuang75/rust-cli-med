@@ -34,8 +34,7 @@ impl Worker {
                     eprintln!("Error: {:?}", err.to_string());
                     std::process::exit(1);
                 },
-            }
-            ;
+            };
         });
         tx.send(CsvFile {
             path: path,
