@@ -26,6 +26,7 @@ impl Worker {
         let mut data: Vec<StringRecord> = Vec::new();
         let mut total_records: usize = 0;
         let mut failed_records: usize = 0;
+        let mut record_failed_reason: Vec<MaskerError> = Vec::new();
 
         reader.records().into_iter().for_each(|record| {
             match record {
@@ -34,11 +35,13 @@ impl Worker {
                     data.push(r);
                 },
                 Err(err) => {
-                    let error_str = serde_json::to_string(&MaskerError{
+                    let record_error = MaskerError{
                         message: Some(format!("please check {} csv format", path)),
                         cause: Some(err.to_string()),
                         error_type: MaskerErrorType::CsvError,
-                    }).unwrap();
+                    };
+                    let error_str = serde_json::to_string(&record_error).unwrap();
+                    record_failed_reason.push(record_error);
                     failed_records += 1;
                     info!("{}: {}", "warning".bold().yellow(), error_str);
                 },
@@ -48,6 +51,7 @@ impl Worker {
             path: path,
             total_records: total_records,
             failed_records: failed_records,
+            record_failed_reason: record_failed_reason,
             headers: headers,
             data: data,
         })

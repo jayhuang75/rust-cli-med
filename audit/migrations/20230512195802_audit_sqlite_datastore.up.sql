@@ -4,8 +4,9 @@ CREATE TABLE IF NOT EXISTS audit (
     total_files INTEGER NOT NULL,
     total_records INTEGER NOT NULL,
     failed_records INTEGER NOT NULL,
+    record_failed_reason TEXT,
     runtime_conf TEXT NOT NULL,
-    failure_reason TEXT,
+    process_failure_reason TEXT,
     successed BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
 );

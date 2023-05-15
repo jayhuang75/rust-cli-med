@@ -4,9 +4,9 @@ use colored::Colorize;
 use sqlx::{
     migrate::MigrateDatabase,
     sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions, SqliteSynchronous},
-    Sqlite
+    Sqlite,
 };
-use tracing::{info};
+use tracing::info;
 
 use crate::utils::error::MaskerError;
 
@@ -19,8 +19,9 @@ pub struct AuditSummary {
     pub total_files: usize,
     pub total_records: usize,
     pub failed_records: usize,
+    pub record_failed_reason: Vec<MaskerError>,
     pub runtime_conf: String,
-    pub failure_reason: Option<String>,
+    pub process_failure_reason: Option<String>,
     pub successed: bool,
 }
 
@@ -34,12 +35,11 @@ impl Database {
         }
         let pool_timeout = Duration::from_secs(30);
 
-        let connection_options =
-            SqliteConnectOptions::from_str(db_url)?
-                .create_if_missing(true)
-                .journal_mode(SqliteJournalMode::Wal)
-                .synchronous(SqliteSynchronous::Normal)
-                .busy_timeout(pool_timeout);
+        let connection_options = SqliteConnectOptions::from_str(db_url)?
+            .create_if_missing(true)
+            .journal_mode(SqliteJournalMode::Wal)
+            .synchronous(SqliteSynchronous::Normal)
+            .busy_timeout(pool_timeout);
 
         let pool = SqlitePoolOptions::new()
             .max_connections(2)
@@ -65,22 +65,17 @@ impl Database {
     }
 
     pub async fn insert(&mut self, summary: &AuditSummary) -> Result<i64, MaskerError> {
-        // Insert the audit item, then obtain the ID of this row
-        // total_files INTEGER NOT NULL,
-        // total_records INTEGER NOT NULL,
-        // runtime_conf TEXT NOT NULL,
-        // failure_reason TEXT,
-        // successed BOOLEAN NOT NULL DEFAULT FALSE,
         let total_files = summary.total_files as i64;
         let total_records = summary.total_records as i64;
         let failed_records: i64 = summary.failed_records as i64;
-        
+        let record_failed_reason = serde_json::to_string(&summary.record_failed_reason)?;
+
         let id = sqlx::query!(
             r#"
-                INSERT INTO audit ( total_files, total_records, failed_records, runtime_conf, failure_reason, successed )
-                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6 )
+                INSERT INTO audit ( total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )
+                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7)
         "#,
-        total_files, total_records, failed_records, summary.runtime_conf, summary.failure_reason, summary.successed
+        total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed
         )
         .execute(&self.pool)
         .await?

@@ -33,10 +33,11 @@ async fn main() -> Result<(), MaskerError> {
             audit_summary.total_files = metrics.total_files;
             audit_summary.total_records = metrics.total_records;
             audit_summary.failed_records = metrics.failed_records;
+            audit_summary.record_failed_reason = metrics.record_failed_reason;
             audit_summary.successed = true;
         },
         Err(err) => {
-            audit_summary.failure_reason = Some(serde_json::to_string(&err.clone())?);
+            audit_summary.process_failure_reason = Some(serde_json::to_string(&err.clone())?);
             info!("{} {:?}", "error".bold().red(), err.to_string());
         }
     }
