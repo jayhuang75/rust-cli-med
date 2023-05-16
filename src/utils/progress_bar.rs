@@ -11,7 +11,8 @@ const TICK_SETTINGS: (&str, u64) = (r"+-x| ", 200);
 pub fn get_progress_bar(length: u64, msg: &str) -> ProgressBar {
     let progressbar_style =  ProgressStyle::default_spinner()
             .tick_chars(TICK_SETTINGS.0)
-            .template(" {spinner} {msg} {pos:>7}/{len} ETA {elapsed}")
+            .progress_chars("=> ")
+            .template(" {spinner} {msg} [{bar:40}] {pos}/{len} ETA {elapsed}")
             .expect("no template error");
 
     let progress_bar =ProgressBar::new(length);
