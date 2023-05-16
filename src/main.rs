@@ -22,9 +22,13 @@ async fn main() -> Result<(), MaskerError> {
     let mut new_app = App::new(AppMode::CLI).await?;
 
     let mut audit_summary = AuditSummary::default();
+
+    if !new_app.params.key.is_none() { 
+        new_app.params.key = Some("****".to_owned());
+    }
+
     audit_summary.runtime_conf = serde_json::to_string(&new_app.params)?;
 
-    // load audit db
     let mut audit_db = audit::db::Database::new(DATABASE_URL).await?;
     // audit_db.migrate(DATABASE_MIGRATIONS).await?;
 

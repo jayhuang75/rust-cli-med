@@ -21,14 +21,7 @@ pub fn worker_in_range(s: &str) -> Result<u16, String> {
 pub fn dir_exist(s: &str) -> Result<PathBuf, String> {
     let path = PathBuf::from(s);
     match path.is_dir() {
-        true => {
-             Ok(path)
-        },
-        false => {
-            return Err(format!(
-                "{} not exist", 
-                s
-            ))
-        }
+        true => Ok(path),
+        false => return Err(format!("{} not exist", s)),
     }
 }

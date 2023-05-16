@@ -2,7 +2,7 @@ use std::fmt;
 
 use serde::Serialize;
 
-use crate::utils::{enums::{AppMode, FileType, Mode}, error::MaskerError};
+use crate::utils::{enums::{AppMode, FileType, Mode, Standard}, error::MaskerError};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Params {
@@ -14,6 +14,7 @@ pub struct Params {
     pub mode: Mode,
     pub worker: u16,
     pub key: Option<String>,
+    pub standard: Standard,
     pub debug: bool,
 }
 
@@ -38,6 +39,7 @@ impl Default for Params {
         let key: String = String::default();
         let debug: bool = false;
         let worker = 2;
+        let standard = Standard::default();
 
         Params {
             app_mode,
@@ -47,6 +49,7 @@ impl Default for Params {
             output_path,
             mode,
             key: Some(key),
+            standard,
             debug,
             worker,
         }

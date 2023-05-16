@@ -1,7 +1,7 @@
 use crate::cli::custom_validation::{dir_exist, worker_in_range};
 use crate::core::models::Params;
 use crate::utils::{
-    enums::{FileType, Mode},
+    enums::{FileType, Mode, Standard},
     error::MaskerError,
 };
 use clap::{arg, command, value_parser, ArgMatches};
@@ -30,7 +30,9 @@ impl Cli {
     ///         type of file we will process, available option [csv, json]
     ///         [default: csv]
     ///     -k, --key <KEY>
-    ///         key for Encrypt and Decrypt the file.
+    ///         key for Encrypt and Decrypt the file
+    ///     -s, --standard <STANDARD>
+    ///         encryption standard, available option [DES64, AES128, AES192, AES256]
     ///     -f, --file <FILE>
     ///         file path for the
     ///     -c, --config <CONFIG>
@@ -121,6 +123,24 @@ impl Cli {
             params.worker = worker.to_owned();
         }
 
+        match matches
+            .get_one::<Standard>("standard")
+            .expect("'STANDARD' is required when Encryption and Decryption")
+        {
+            Standard::AES128 => {
+                params.standard = Standard::AES128;
+            }
+            Standard::AES192 => {
+                params.standard = Standard::AES192;
+            }
+            Standard::AES256 => {
+                params.standard = Standard::AES256;
+            }
+            Standard::DES64 => {
+                params.standard = Standard::DES64;
+            }
+        }
+
         Ok(params)
     }
 
@@ -148,7 +168,15 @@ impl Cli {
                     -k --key <KEY> "Sets a KEY to process file"
                 )
                 .help("key for Encrypt and Decrypt the file.")
-                .required_if_eq_any([("MODE", "decrypt"), ("MODE", "encrypt")]),
+                .required_if_eq_any([("MODE", "decrypt"), ("MODE", "encrypt")])
+                .requires("standard"),
+            )
+            .arg(
+                arg!(
+                    -s --standard <STANDARD> "Sets a Encrypt or Decrypt Standard"
+                )
+                .help("set the Encrypt and Decrypt standard")
+                .value_parser(value_parser!(Standard)),
             )
             .arg(
                 arg!(

@@ -113,3 +113,66 @@ impl fmt::Display for AppMode {
         }
     }
 }
+
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+pub enum Standard {
+    DES64 = 64,
+    AES128 = 128,
+    AES192 = 192,
+    AES256 = 256,
+}
+
+impl Default for Standard {
+    fn default() -> Self {
+        Standard::DES64
+    }
+}
+
+// Can also be derived with feature flag `derive`
+impl ValueEnum for Standard {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Standard::DES64, Standard::AES128, Standard::AES192, Standard::AES256]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
+        Some(match self {
+            Standard::DES64 => PossibleValue::new("des64").help("DES standard 64"),
+            Standard::AES128 => PossibleValue::new("aes128").help("AES standard 128"),
+            Standard::AES192 => PossibleValue::new("aes192").help("AES standard 192"),
+            Standard::AES256 => PossibleValue::new("aes256").help("AES standard 256"),
+        })
+    }
+}
+
+impl std::fmt::Display for Standard {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.to_possible_value()
+            .expect("no values are skipped")
+            .get_name()
+            .fmt(f)
+    }
+}
+
+impl std::str::FromStr for Standard {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        for variant in Self::value_variants() {
+            if variant.to_possible_value().unwrap().matches(s, false) {
+                return Ok(*variant);
+            }
+        }
+        Err(format!("invalid variant: {}", s))
+    }
+}
+
+impl std::fmt::Debug for Standard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::DES64 => write!(f, "DES64"),
+            Self::AES128 => write!(f, "AES128"),
+            Self::AES192 => write!(f, "AES192"),
+            Self::AES256 => write!(f, "AES256"),
+        }
+    }
+}

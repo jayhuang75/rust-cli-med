@@ -128,7 +128,7 @@ impl App {
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
                             let now = Instant::now();
-                            csv_processor.run_cipher(key, &job_conf).await?;
+                            csv_processor.run_cipher(key, &self.params.mode, &self.params.standard, &job_conf).await?;
                             info!(
                                 "{} completed elapsed time {:?}",
                                 "cipher".bold().green(),

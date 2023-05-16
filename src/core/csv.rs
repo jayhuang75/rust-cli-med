@@ -2,7 +2,8 @@ use crate::core::app::App;
 use crate::core::models::Metrics;
 use crate::core::worker::Worker;
 use crate::utils::config::JobConfig;
-use crate::utils::crypto::CryptoData;
+use crate::utils::crypto::Cypher;
+use crate::utils::enums::{Mode, Standard};
 use crate::utils::error::{MaskerError, MaskerErrorType};
 use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
@@ -127,8 +128,8 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn run_cipher(&mut self, key: &str, job_conf: &JobConfig) -> Result<(), MaskerError> {
-        let crypto = CryptoData::new(key);
+    pub async fn run_cipher(&mut self, key: &str, mode: &Mode, standard: &Standard, job_conf: &JobConfig) -> Result<(), MaskerError> {
+        let cypher = Cypher::new(key);
         let bar: indicatif::ProgressBar =
             get_progress_bar(self.metrics.total_records as u64, "cryptography files");
 
@@ -158,7 +159,12 @@ impl CsvFileProcessor {
                         records.iter().enumerate().for_each(|(i, item)| {
                             match indexs.contains(&i) {
                                 true => {
-                                    let masked = crypto.encrypt(item).unwrap();
+                                    let mut masked: String;;
+                                    match mode {
+                                        Mode::MASK => {unimplemented!()},
+                                        Mode::ENCRYPT => masked = cypher.encrypt(item, standard).unwrap(),
+                                        Mode::DECRYPT => masked = cypher.decrypt(item, standard).unwrap(),
+                                    }
                                     masked_record.push_field(&masked);
                                 }
                                 false => masked_record.push_field(item),
