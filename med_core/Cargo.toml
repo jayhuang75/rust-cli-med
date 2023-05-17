@@ -1,0 +1,30 @@
+[package]
+name = "med_core"
+version = "0.1.0"
+authors = ["wei <jayhuang75@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+colored = { workspace=true }
+num_cpus = { workspace = true }
+serde_json = { workspace = true}
+
+rayon = "1.7.0"
+sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "offline"] }
+
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9.21"
+
+csv = "1.2.1"
+flume = "0.10.14"
+walkdir = "2.3.3"
+threadpool = "1.8.1"
+magic-crypt = "3.1.12"
+indicatif = {version = "*", features = ["rayon"]}
+whoami = "1.4.0"

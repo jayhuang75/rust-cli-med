@@ -1,6 +1,6 @@
-use crate::core::app::App;
-use crate::core::models::Metrics;
-use crate::core::worker::Worker;
+use crate::app::core::App;
+use crate::models::metrics::Metrics;
+use crate::app::worker::Worker;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
 use crate::utils::enums::{Mode, Standard};

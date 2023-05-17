@@ -1,6 +1,6 @@
 use crate::cli::custom_validation::{dir_exist, worker_in_range};
-use crate::core::models::Params;
-use crate::utils::{
+use med_core::models::params::Params;
+use med_core::utils::{
     enums::{FileType, Mode, Standard},
     error::MaskerError,
 };

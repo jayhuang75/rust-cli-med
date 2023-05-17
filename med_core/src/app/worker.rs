@@ -5,7 +5,7 @@ use tracing::{info};
 
 use crate::utils::error::{MaskerError, MaskerErrorType};
 
-use crate::core::csv::CsvFile;
+use crate::app::csv::CsvFile;
 
 #[derive(Debug)]
 pub struct Worker {

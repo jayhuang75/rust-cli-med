@@ -1,25 +1,26 @@
-mod utils;
-mod core;
-mod cli;
-mod audit;
-
 use colored::Colorize;
+use med_core::audit;
 use tokio::time::Instant;
 use tracing::info;
-use utils::{error::MaskerError};
-use crate::audit::db::AuditSummary;
-use crate::core::app::App;
-use crate::utils::enums::AppMode;
+mod cli;
 
-const DATABASE_URL: &str = "./audit/data.db";
-// const DATABASE_MIGRATIONS: &str = "./audit/migrations";
+use med_core::utils::{error::MaskerError};
+use med_core::audit::db::AuditSummary;
+use med_core::app::core::App;
+
+use cli::app::Cli;
+
+const DATABASE_URL: &str = "../audit/data.db";
+// const DATABASE_MIGRATIONS: &str = "../audit/migrations";
 
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
 
     let now = Instant::now();
+    let new_cli = Cli::new().await?;
+    let params = new_cli.params;
 
-    let mut new_app = App::new(AppMode::CLI).await?;
+    let mut new_app = App::new(params).await?;
 
     let mut audit_summary = AuditSummary::default();
 

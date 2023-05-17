@@ -1,33 +1,49 @@
-[package]
-name = "rust-cli-med"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = [
+    "med_cli",
+    "med_core",
+    "med_sdk",
+]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace.dependencies]  
+tokio = { version = "^1.28.0", features = ["full"] }
+clap = { version = "^4.2.5", features = ["cargo"]}
+tracing = { version = "^0.1.37", features = ["log"] }
+tracing-subscriber = { version = "^0.3.17", default-features = false, features = ["fmt"]}
+colored = "^2.0.0"
+num_cpus = "^1.15.0"
+serde_json = "^1.0.96"
 
-[[bin]]
-name = "med"
-path = "src/main.rs"
+# [package]
+# name = "rust-cli-med"
+# version = "0.1.0"
+# edition = "2021"
 
-[dependencies]
-tokio = { version = "1.28.0", features = ["full"] }
-rayon = "1.7.0"
-clap = { version = "4.2.5", features = ["cargo"]}
-num_cpus = "1.15.0"
-sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "offline"] }
+# # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1"
-serde_yaml = "0.9.21"
+# [[bin]]
+# name = "med"
+# path = "src/main.rs"
 
-tracing = { version = "0.1.37", features = ["log"] }
-tracing-subscriber = { version = "0.3.17", default-features = false, features = ["fmt"]}
+# [dependencies]
+# tokio = { version = "1.28.0", features = ["full"] }
+# rayon = "1.7.0"
+# clap = { version = "4.2.5", features = ["cargo"]}
+# num_cpus = "1.15.0"
+# sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "offline"] }
 
-csv = "1.2.1"
-flume = "0.10.14"
-walkdir = "2.3.3"
-threadpool = "1.8.1"
-magic-crypt = "3.1.12"
-colored = "2.0.0"
-indicatif = {version = "*", features = ["rayon"]}
-whoami = "1.4.0"
+# serde = { version = "1.0", features = ["derive"] }
+# serde_json = "1"
+# serde_yaml = "0.9.21"
+
+# tracing = { version = "0.1.37", features = ["log"] }
+# tracing-subscriber = { version = "0.3.17", default-features = false, features = ["fmt"]}
+
+# csv = "1.2.1"
+# flume = "0.10.14"
+# walkdir = "2.3.3"
+# threadpool = "1.8.1"
+# magic-crypt = "3.1.12"
+# colored = "2.0.0"
+# indicatif = {version = "*", features = ["rayon"]}
+# whoami = "1.4.0"

@@ -2,7 +2,7 @@ use std::fmt;
 
 use serde::Serialize;
 
-use crate::utils::{enums::{AppMode, FileType, Mode, Standard}, error::MaskerError};
+use crate::utils::{enums::{AppMode, FileType, Mode, Standard}};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Params {
@@ -54,12 +54,4 @@ impl Default for Params {
             worker,
         }
     }
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct Metrics {
-    pub total_files: usize,
-    pub total_records: usize,
-    pub failed_records: usize, 
-    pub record_failed_reason: Vec<MaskerError>,
 }

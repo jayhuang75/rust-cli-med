@@ -5,7 +5,7 @@ pub fn worker_in_range(s: &str) -> Result<u16, String> {
         .parse()
         .map_err(|_| format!("`{}` isn't a worker number", s))?;
 
-    let worker_range: RangeInclusive<usize> = 2..=num_cpus::get();
+    let worker_range: RangeInclusive<usize> = 2..= num_cpus::get();
 
     if worker_range.contains(&worker) {
         Ok(worker as u16)

@@ -1,0 +1,20 @@
+[package]
+name = "med_cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "med"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+colored = { workspace = true }
+num_cpus = { workspace = true }
+serde_json = { workspace = true}
+med_core = { path = "../med_core" }
+

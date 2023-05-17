@@ -1,4 +1,3 @@
-use crate::cli::app::Cli;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
 use colored::Colorize;
@@ -7,9 +6,9 @@ use tokio::time::Instant;
 use tracing::{debug, info};
 use tracing_subscriber::fmt::format;
 
-use crate::core::csv::CsvFileProcessor;
-use crate::core::models::{Metrics, Params};
-use crate::utils::enums::{AppMode, FileType, Mode};
+use crate::app::csv::CsvFileProcessor;
+use crate::models::{metrics::Metrics, params::Params};
+use crate::utils::enums::{FileType, Mode};
 
 pub struct App {
     pub params: Params,
@@ -26,16 +25,16 @@ impl App {
     /// let new_app = App::new(AppMode::CLI).await?;
     /// ```
     ///
-    pub async fn new(app_mode: AppMode) -> Result<Self, MaskerError> {
-        let params: Params;
+    pub async fn new(params: Params) -> Result<Self, MaskerError> {
+        // let params: Params;
 
-        match app_mode {
-            AppMode::CLI => {
-                let new_cli = Cli::new().await?;
-                params = new_cli.params;
-            }
-            AppMode::SDK => todo!(),
-        };
+        // match app_mode {
+        //     AppMode::CLI => {
+        //         let new_cli = Cli::new().await?;
+        //         params = new_cli.params;
+        //     }
+        //     AppMode::SDK => todo!(),
+        // };
 
         Self::logging(params.debug).await;
 
