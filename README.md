@@ -1,8 +1,8 @@
-# rust-cli-masker
+# rust-cli-med
 
-## Background & Motivation
+## Background & Motivation about the M.E.D
 
-Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with auditable capabilities for Data Masking/Tokenization/Encyption.
+Sometimes in the Enterprise Level, we need a simple enough CLI tool with auditable capabilities for Data Masking/Encyption/Decryption.
 
 ## Key Features
 
@@ -14,10 +14,10 @@ Sometimes in the Enterprise Level SDLC, we need a simple enough CLI tool with au
 ## How to
 
 ```bash
-$ masker --help
+$ med --help
 A simple to use, enterprise ready, rust powered data masking/encryption/decription cli tool
 
-Usage: masker <MODE> --file <FILE> [OPTIONS]
+Usage: med <MODE> --file <FILE> [OPTIONS]
 
 Arguments:
   <MODE>
