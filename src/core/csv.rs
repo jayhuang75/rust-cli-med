@@ -9,7 +9,7 @@ use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use tracing::{debug, info};
+use tracing::{debug};
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Default)]
