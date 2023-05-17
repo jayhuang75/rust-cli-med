@@ -33,6 +33,16 @@ Options:
           [default: csv]
   -k, --key <KEY>
           key for Encrypt and Decrypt the file.
+  
+  -s, --standard <STANDARD>
+          set the Encrypt and Decrypt standard
+
+          Possible values:
+          - des64:  DES standard 64
+          - aes128: AES standard 128
+          - aes192: AES standard 192
+          - aes256: AES standard 256
+
   -f, --file <FILE>
           file path for the
   -c, --config <CONFIG>
