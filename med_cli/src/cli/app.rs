@@ -159,14 +159,14 @@ impl Cli {
                     -t --type <TYPE> "Sets a process file type [csv, json]"
                 )
                 .required(false)
-                .help("type of file we will process, available option [csv, json]")
+                .help("Type of file we will process, available option [csv, json]")
                 .default_value("csv"),
             )
             .arg(
                 arg!(
                     -k --key <KEY> "Sets a KEY to process file"
                 )
-                .help("key for Encrypt and Decrypt the file.")
+                .help("Key for Encrypt and Decrypt the file.")
                 .required_if_eq_any([("MODE", "decrypt"), ("MODE", "encrypt")])
                 .requires("standard"),
             )
@@ -174,7 +174,7 @@ impl Cli {
                 arg!(
                     -s --standard <STANDARD> "Sets a Encrypt or Decrypt Standard"
                 )
-                .help("set the Encrypt and Decrypt standard")
+                .help("Set the Encrypt and Decrypt standard")
                 .value_parser(value_parser!(Standard)),
             )
             .arg(
@@ -182,7 +182,7 @@ impl Cli {
                     -f --file <FILE> "Sets a file/directory path"
                 )
                 .required(true)
-                .help("file path for the ")
+                .help("Path for the process target files")
                 .value_parser(dir_exist),
             )
             .arg(
