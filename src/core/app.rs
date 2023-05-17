@@ -1,45 +1,61 @@
-use std::path::Path;
+use crate::cli::app::Cli;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
-use crate::cli::app::Cli;
 use colored::Colorize;
+use std::path::Path;
 use tokio::time::Instant;
-use tracing::{info, debug};
+use tracing::{debug, info};
 use tracing_subscriber::fmt::format;
 
 use crate::core::csv::CsvFileProcessor;
-use crate::core::models::{Params, Metrics};
-use crate::utils::enums::{FileType, Mode, AppMode};
+use crate::core::models::{Metrics, Params};
+use crate::utils::enums::{AppMode, FileType, Mode};
 
 pub struct App {
     pub params: Params,
     pub user: String,
+    pub hostname: String,
 }
 
 impl App {
     /// Returns an App struct
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// let new_app = App::new(AppMode::CLI).await?;
     /// ```
     ///
     pub async fn new(app_mode: AppMode) -> Result<Self, MaskerError> {
         let params: Params;
+
         match app_mode {
             AppMode::CLI => {
-                let new_cli  = Cli::new().await?;
+                let new_cli = Cli::new().await?;
                 params = new_cli.params;
-            },
+            }
             AppMode::SDK => todo!(),
         };
-        Self::logging(params.debug).await;
-        let user = whoami::username();
-        info!("{} run on {} mode for {}", user.bold().green(), params.app_mode.to_string().bold().green(), params.mode.to_string().bold().green());
 
-        debug!("app {} {:?}", "runtime params".bold().green(),params);
-        Ok(App { params: params, user:  user})
+        Self::logging(params.debug).await;
+
+        let user = whoami::username();
+        let hostname = whoami::hostname();
+
+        info!(
+            "{} on {} run {} mode for {}",
+            user.bold().green(),
+            hostname.bold().green(),
+            params.app_mode.to_string().bold().green(),
+            params.mode.to_string().bold().green()
+        );
+
+        debug!("app {} {:?}", "runtime params".bold().green(), params);
+        Ok(App {
+            params: params,
+            user: user,
+            hostname: hostname,
+        })
     }
 
     /// Privite function Returns job config
@@ -86,10 +102,7 @@ impl App {
             "processing '{}' files start",
             self.params.file_type.to_string().bold().green()
         );
-        info!(
-            "file directory {} ",
-            self.params.file_path.bold().green()
-        );
+        info!("file directory {} ", self.params.file_path.bold().green());
         info!(
             "number of workers {}",
             self.params.worker.to_string().bold().green()
@@ -130,7 +143,14 @@ impl App {
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
                             let now = Instant::now();
-                            csv_processor.run_cipher(key, &self.params.mode, &self.params.standard, &job_conf).await?;
+                            csv_processor
+                                .run_cipher(
+                                    key,
+                                    &self.params.mode,
+                                    &self.params.standard,
+                                    &job_conf,
+                                )
+                                .await?;
                             info!(
                                 "{} completed elapsed time {:?}",
                                 "cipher".bold().green(),
@@ -150,20 +170,22 @@ impl App {
                 }
 
                 let now = Instant::now();
-                metrics = csv_processor.write(&self.params.output_path, &self.params.file_path).await?;
+                metrics = csv_processor
+                    .write(&self.params.output_path, &self.params.file_path)
+                    .await?;
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),
                     now.elapsed()
                 );
-                
+
                 match &self.params.key {
                     Some(_) => {
                         self.params.key = Some("*****".to_string());
-                    },
+                    }
                     None => {
                         self.params.key = None;
-                    },
+                    }
                 }
             }
             FileType::JSON => {

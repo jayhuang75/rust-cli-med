@@ -16,6 +16,8 @@ pub struct Database {
 
 #[derive(Debug, Default, Clone)]
 pub struct AuditSummary {
+    pub user: String,
+    pub hostname: String,
     pub total_files: usize,
     pub total_records: usize,
     pub failed_records: usize,
@@ -72,10 +74,10 @@ impl Database {
 
         let id = sqlx::query!(
             r#"
-                INSERT INTO audit ( total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )
-                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7)
+                INSERT INTO audit ( user, hostname, total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )
+                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
         "#,
-        total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed
+        summary.user, summary.hostname, total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed
         )
         .execute(&self.pool)
         .await?

@@ -1,13 +1,13 @@
 {
   "db": "SQLite",
-  "b5fcfa1640ad7f26e8e8242646f8a47089393d5b4f798b807184b66e77ba42ca": {
+  "28288d2f98758b31851fc92c306eac906e7ae7cf81cced4d044650be8e752cc5": {
     "describe": {
       "columns": [],
       "nullable": [],
       "parameters": {
-        "Right": 7
+        "Right": 9
       }
     },
-    "query": "\n                INSERT INTO audit ( total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )\n                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7)\n        "
+    "query": "\n                INSERT INTO audit ( user, hostname, total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )\n                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)\n        "
   }
 }

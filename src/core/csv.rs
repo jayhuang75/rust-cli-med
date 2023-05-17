@@ -9,7 +9,7 @@ use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use tracing::{debug};
+use tracing::{debug, info};
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Default)]
@@ -128,7 +128,7 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn run_cipher(&mut self, key: &str, mode: &Mode, standard: &Standard, job_conf: &JobConfig) -> Result<(), MaskerError> {
+    pub async fn run_cipher(&mut self, key: &str, mode: &Mode, standard: &Standard, job_conf: &JobConfig) -> Result<(), MaskerError> {        
         let cypher = Cypher::new(key);
         let bar: indicatif::ProgressBar =
             get_progress_bar(self.metrics.total_records as u64, "cryptography files");
