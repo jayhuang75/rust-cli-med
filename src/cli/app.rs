@@ -123,21 +123,20 @@ impl Cli {
             params.worker = worker.to_owned();
         }
 
-        match matches
-            .get_one::<Standard>("standard")
-            .expect("'STANDARD' is required when Encryption and Decryption")
-        {
-            Standard::AES128 => {
-                params.standard = Standard::AES128;
-            }
-            Standard::AES192 => {
-                params.standard = Standard::AES192;
-            }
-            Standard::AES256 => {
-                params.standard = Standard::AES256;
-            }
-            Standard::DES64 => {
-                params.standard = Standard::DES64;
+        if let Some(standard) = matches.get_one::<Standard>("standard") {
+            match standard {
+                Standard::AES128 => {
+                    params.standard = Standard::AES128;
+                }
+                Standard::AES192 => {
+                    params.standard = Standard::AES192;
+                }
+                Standard::AES256 => {
+                    params.standard = Standard::AES256;
+                }
+                Standard::DES64 => {
+                    params.standard = Standard::DES64;
+                }
             }
         }
 

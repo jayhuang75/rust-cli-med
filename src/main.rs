@@ -49,7 +49,7 @@ async fn main() -> Result<(), MaskerError> {
     let audit_id = audit_db.insert(&audit_summary).await?;
 
     info!(
-        "total processed {} files, {} records, and with {} records failed, elapsed time {:?}, audit record_id {}",
+        "total processed {} files, {} records, with {} records failed, elapsed time {:?}, audit record_id {}",
         audit_summary.total_files.to_string().bold().green(),
         audit_summary.total_records.to_string().bold().green(),
         audit_summary.failed_records.to_string().bold().green(),

@@ -13,6 +13,7 @@ use crate::utils::enums::{FileType, Mode, AppMode};
 
 pub struct App {
     pub params: Params,
+    pub user: String,
 }
 
 impl App {
@@ -34,10 +35,11 @@ impl App {
             AppMode::SDK => todo!(),
         };
         Self::logging(params.debug).await;
-        info!("app run on {} mode", params.app_mode.to_string().bold().green());
+        let user = whoami::username();
+        info!("{} run on {} mode for {}", user.bold().green(), params.app_mode.to_string().bold().green(), params.mode.to_string().bold().green());
 
         debug!("app {} {:?}", "runtime params".bold().green(),params);
-        Ok(App { params: params })
+        Ok(App { params: params, user:  user})
     }
 
     /// Privite function Returns job config
@@ -85,7 +87,7 @@ impl App {
             self.params.file_type.to_string().bold().green()
         );
         info!(
-            "file root directory {} ",
+            "file directory {} ",
             self.params.file_path.bold().green()
         );
         info!(

@@ -30,3 +30,4 @@ threadpool = "1.8.1"
 magic-crypt = "3.1.12"
 colored = "2.0.0"
 indicatif = {version = "*", features = ["rayon"]}
+whoami = "1.4.0"

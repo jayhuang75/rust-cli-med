@@ -1,4 +1,4 @@
-use magic_crypt::{new_magic_crypt, MagicCrypt64, MagicCrypt128, MagicCrypt192, MagicCrypt256, MagicCryptTrait, MagicCryptError, MagicCrypt};
+use magic_crypt::{new_magic_crypt, MagicCrypt64, MagicCrypt128, MagicCrypt192, MagicCrypt256, MagicCryptTrait, MagicCryptError};
 
 use super::enums::Standard;
 

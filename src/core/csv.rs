@@ -159,7 +159,7 @@ impl CsvFileProcessor {
                         records.iter().enumerate().for_each(|(i, item)| {
                             match indexs.contains(&i) {
                                 true => {
-                                    let mut masked: String;;
+                                    let masked: String;
                                     match mode {
                                         Mode::MASK => {unimplemented!()},
                                         Mode::ENCRYPT => masked = cypher.encrypt(item, standard).unwrap(),
