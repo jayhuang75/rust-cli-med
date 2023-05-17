@@ -26,15 +26,6 @@ impl App {
     /// ```
     ///
     pub async fn new(params: Params) -> Result<Self, MaskerError> {
-        // let params: Params;
-
-        // match app_mode {
-        //     AppMode::CLI => {
-        //         let new_cli = Cli::new().await?;
-        //         params = new_cli.params;
-        //     }
-        //     AppMode::SDK => todo!(),
-        // };
 
         Self::logging(params.debug).await;
 

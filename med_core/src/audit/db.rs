@@ -1,10 +1,10 @@
-use std::{str::FromStr, time::Duration};
+use std::{str::FromStr, time::Duration, path::Path};
 
 use colored::Colorize;
 use sqlx::{
     migrate::MigrateDatabase,
     sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions, SqliteSynchronous},
-    Sqlite,
+    Pool, Sqlite,
 };
 use tracing::info;
 
@@ -27,17 +27,20 @@ pub struct AuditSummary {
     pub successed: bool,
 }
 
+const DATABASE_URL: &str = "../audit/data.db";
+const DATABASE_MIGRATE_URL: &str = "../audit/migrations";
+
 impl Database {
-    pub async fn new(db_url: &str) -> Result<Database, MaskerError> {
-        if !Sqlite::database_exists(db_url).await.unwrap_or(false) {
-            Sqlite::create_database(db_url).await?;
-            info!("audit database {} created", db_url.bold().green());
+    pub async fn new() -> Result<Database, MaskerError> {
+        if !Sqlite::database_exists(DATABASE_URL).await.unwrap_or(false) {
+            Sqlite::create_database(DATABASE_URL).await?;
+            info!("audit database {} created", DATABASE_URL.bold().green());
         } else {
-            info!("audit database {} exist", db_url.bold().green());
+            info!("audit database {} exist", DATABASE_URL.bold().green());
         }
         let pool_timeout = Duration::from_secs(30);
 
-        let connection_options = SqliteConnectOptions::from_str(db_url)?
+        let connection_options = SqliteConnectOptions::from_str(DATABASE_URL)?
             .create_if_missing(true)
             .journal_mode(SqliteJournalMode::Wal)
             .synchronous(SqliteSynchronous::Normal)
@@ -48,20 +51,26 @@ impl Database {
             .connect_with(connection_options)
             .await?;
 
+        Self::migrate(&pool).await?;
+
         Ok(Database { pool })
     }
 
     #[allow(dead_code)]
-    pub async fn migrate(&mut self, migrations_path: &str) -> Result<(), MaskerError> {
-        // "./data/migrations"
-        let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        let migrations = std::path::Path::new(&crate_dir).join(migrations_path);
+    async fn migrate(pool: &Pool<Sqlite>) -> Result<(), MaskerError> {
+        // let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        // info!("crate dir {}", crate_dir);
+
+        let migrations = Path::new(DATABASE_MIGRATE_URL);
+        info!("db migration path {}", migrations.display().to_string().bold().green());
 
         sqlx::migrate::Migrator::new(migrations)
             .await
             .unwrap()
-            .run(&self.pool)
+            .run(pool)
             .await?;
+
+        info!("audit database {} {}", DATABASE_URL, "migrated".bold().green());
 
         Ok(())
     }

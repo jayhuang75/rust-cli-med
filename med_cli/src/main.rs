@@ -10,8 +10,6 @@ use med_core::app::core::App;
 
 use cli::app::Cli;
 
-const DATABASE_URL: &str = "../audit/data.db";
-// const DATABASE_MIGRATIONS: &str = "../audit/migrations";
 
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
@@ -26,8 +24,8 @@ async fn main() -> Result<(), MaskerError> {
 
     audit_summary.runtime_conf = serde_json::to_string(&new_app.params)?;
 
-    let mut audit_db = audit::db::Database::new(DATABASE_URL).await?;
-    // audit_db.migrate(DATABASE_MIGRATIONS).await?;
+    let mut audit_db = audit::db::Database::new().await?;
+    // audit_db.migrate().await?;
 
     match new_app.process().await {
         Ok(metrics) => {
