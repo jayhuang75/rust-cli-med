@@ -1,15 +1,15 @@
-# rust-cli-med
+# M.E.D. (Mask, Encrypt, Decrypt)
 
-## Background & Motivation about the M.E.D
+## Background & Motivation
 
 Sometimes in the Enterprise Level, we need a simple enough CLI tool with auditable capabilities for Data Masking/Encyption/Decryption.
 
 ## Key Features
 
 1. Rust powered performance.
-2. Provide Masking, Tokenization, and Encyption/Decryption capabilities.
+2. Provide Masking, and Encyption/Decryption capabilities.
 3. Auditable with build-in SQLite powered Audit table.
-4. SDK for RESTful API integration.
+4. SDK for integration.
 
 ## How to
 
