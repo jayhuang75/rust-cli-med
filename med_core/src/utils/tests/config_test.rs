@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::utils::config::JobConfig;
+use crate::utils::{config::JobConfig, error::MaskerErrorType};
 
 #[tokio::test]
 async fn test_new_config_failed_load() {
@@ -11,7 +11,7 @@ async fn test_new_config_failed_load() {
             unimplemented!()
         }
         Err(err) => {
-            assert_eq!(err.message(), "No such file or directory (os error 2)");
+            assert_eq!(err.error_type, MaskerErrorType::IoError);
         }
     }
 }
