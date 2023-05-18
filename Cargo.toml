@@ -2,7 +2,6 @@
 members = [
     "med_cli",
     "med_core",
-    "med_sdk",
 ]
 
 [workspace.dependencies]  
