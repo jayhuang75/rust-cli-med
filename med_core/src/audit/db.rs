@@ -27,9 +27,6 @@ pub struct AuditSummary {
     pub successed: bool,
 }
 
-// const DATABASE_URL: &str = "../audit/data.db";
-// const DATABASE_MIGRATE_URL: &str = "../audit/migrations";
-
 impl Database {
     pub async fn new() -> Result<Database, MaskerError> {
         let database_url = Self::create_audit_db().await?;
@@ -69,7 +66,7 @@ impl Database {
     }
 
     async fn create_audit_db() -> Result<PathBuf, MaskerError> {
-        let path = dirs::config_dir().unwrap().join("com.dash_oui.med");
+        let path = dirs::config_dir().unwrap().join("med.db");
         Ok(path)
     }
 

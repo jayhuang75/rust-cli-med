@@ -72,6 +72,16 @@ TODO
 
 ### User guide
 
+#### Audit database (Sqlite)
+
+##### location
+
+| Platform  |  Value |    Example      |
+| ------------- | ------------- | ------------- |
+| Linux  | $HOME/.config/med  | /home/bob/.config/med |
+| MacOS  | $HOME/Library/Application Support/med  | /Users/Bob/Library/Application Support/med |
+| Windows  | {FOLDERID_RoamingAppData}/med  | C:\Users\Bob\AppData\Roaming\med |
+
 ## Documentation
 
 TODO
