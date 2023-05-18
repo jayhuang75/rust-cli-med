@@ -2,6 +2,15 @@
 name = "med_cli"
 version = "0.1.0"
 edition = "2021"
+authors = ["Wei Huang <jayhuang75@hotmail.com>"]
+license = "Apache-2.0"
+description = "A tool to Masking, Encryption, and Decryption."
+readme = "README.md"
+homepage = "https://github.com/jayhuang75/rust-cli-med"
+repository = "https://github.com/jayhuang75/rust-cli-med"
+keywords = ["cli", "encrypt", "decrypt", "masking"]
+categories = ["command-line-utilities"]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
