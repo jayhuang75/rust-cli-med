@@ -27,16 +27,16 @@ impl Cypher {
         let encrypted_str: String;
         match standard {
             Standard::DES64 => {
-                encrypted_str = self.key64.encrypt_str_to_base64(data.to_string());
+                encrypted_str = self.key64.encrypt_str_to_base64(data);
             }
             Standard::AES128 => {
-                encrypted_str = self.key128.encrypt_str_to_base64(data.to_string());
+                encrypted_str = self.key128.encrypt_str_to_base64(data);
             }
             Standard::AES192 => {
-                encrypted_str = self.key192.encrypt_str_to_base64(data.to_string());
+                encrypted_str = self.key192.encrypt_str_to_base64(data);
             }
             Standard::AES256 => {
-                encrypted_str = self.key256.encrypt_str_to_base64(data.to_string());
+                encrypted_str = self.key256.encrypt_str_to_base64(data);
             }
         }
         Ok(encrypted_str)
@@ -47,16 +47,16 @@ impl Cypher {
         let decrypted_str: String;
         match standard {
             Standard::DES64 => {
-                decrypted_str = self.key64.decrypt_base64_to_string(data.to_string())?;
+                decrypted_str = self.key64.decrypt_base64_to_string(data)?;
             }
             Standard::AES128 => {
-                decrypted_str = self.key128.decrypt_base64_to_string(data.to_string())?;
+                decrypted_str = self.key128.decrypt_base64_to_string(data)?;
             }
             Standard::AES192 => {
-                decrypted_str = self.key192.decrypt_base64_to_string(data.to_string())?;
+                decrypted_str = self.key192.decrypt_base64_to_string(data)?;
             }
             Standard::AES256 => {
-                decrypted_str = self.key256.decrypt_base64_to_string(data.to_string())?;
+                decrypted_str = self.key256.decrypt_base64_to_string(data)?;
             }
         }
         Ok(decrypted_str)

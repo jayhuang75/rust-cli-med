@@ -49,7 +49,7 @@ impl CsvFileProcessor {
 
         drop(tx);
 
-        let bar = get_progress_bar(files_number as u64, "load files to processor");
+        let bar = get_progress_bar(files_number, "load files to processor");
         rx.iter().for_each(|item| {
             bar.inc(1);
             self.metrics.total_files += 1;
@@ -206,14 +206,14 @@ impl CsvFileProcessor {
             .filter_map(|e| e.ok())
             .filter(|e| e.path().is_dir())
             .for_each(|e| {
-                let output_path = format!("{}/{}", output_dir, e.path().display().to_string());
-                let _ = fs::create_dir_all(output_path).unwrap();
+                let output_path = format!("{}/{}", output_dir, e.path().display());
+                fs::create_dir_all(output_path).unwrap();
             });
         Ok(())
     }
 
     pub async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
-        let _ = self.create_output_dir(output_dir, file_dir)?;
+        self.create_output_dir(output_dir, file_dir)?;
         let bar: indicatif::ProgressBar =
             get_progress_bar(self.metrics.total_records as u64, "write files");
         self.result.par_iter().for_each(|item| {

@@ -24,7 +24,7 @@ pub struct MaskerError {
 impl MaskerError {
     #[allow(dead_code)]
     pub fn message(&self) -> String {
-        match &*self {
+        match self {
             MaskerError {
                 message: Some(message),
                 ..

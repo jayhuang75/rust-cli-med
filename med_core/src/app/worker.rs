@@ -30,7 +30,7 @@ impl Worker {
         let mut failed_records: usize = 0;
         let mut record_failed_reason: Vec<MaskerError> = Vec::new();
 
-        reader.records().into_iter().for_each(|record| {
+        reader.records().for_each(|record| {
             match record {
                 Ok(r) => {
                     total_records += 1;

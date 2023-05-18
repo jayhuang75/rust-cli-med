@@ -96,7 +96,7 @@ impl App {
                 let mut csv_processor = CsvFileProcessor::default();
 
                 let now = Instant::now();
-                csv_processor.load(&self).await?;
+                csv_processor.load(self).await?;
                 info!(
                     "load files to processor {} elapsed time {:?}",
                     "completed".bold().green(),
@@ -132,10 +132,8 @@ impl App {
                         }
                         None => {
                             return Err(MaskerError {
-                                message: Some(format!(
-                                    "Missing key for Encyption and Decryption input!"
-                                )),
-                                cause: Some(format!("missing -k or --key")),
+                                message: Some("Missing key for Encyption and Decryption input!".to_string()),
+                                cause: Some("missing -k or --key".to_string()),
                                 error_type: MaskerErrorType::ConfigError,
                             })
                         }
