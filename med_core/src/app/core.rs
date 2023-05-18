@@ -17,14 +17,6 @@ pub struct App {
 }
 
 impl App {
-    /// Returns an App struct
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let new_app = App::new(AppMode::CLI).await?;
-    /// ```
-    ///
     pub async fn new(params: Params) -> Result<Self, MaskerError> {
 
         Self::logging(params.debug).await;
@@ -78,15 +70,7 @@ impl App {
             }
         }
     }
-    /// Returns process result
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let new_app = App::new().await;
-    /// let result = new_app.process().await?;
-    /// ```
-    ///
+    
     pub async fn process(&mut self) -> Result<Metrics, MaskerError> {
         info!(
             "processing '{}' files start",
