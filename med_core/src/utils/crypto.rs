@@ -1,4 +1,7 @@
-use magic_crypt::{new_magic_crypt, MagicCrypt64, MagicCrypt128, MagicCrypt192, MagicCrypt256, MagicCryptTrait, MagicCryptError};
+use magic_crypt::{
+    new_magic_crypt, MagicCrypt128, MagicCrypt192, MagicCrypt256, MagicCrypt64, MagicCryptError,
+    MagicCryptTrait,
+};
 
 use super::enums::Standard;
 
@@ -25,16 +28,16 @@ impl Cypher {
         match standard {
             Standard::DES64 => {
                 encrypted_str = self.key64.encrypt_str_to_base64(data.to_string());
-            },
+            }
             Standard::AES128 => {
                 encrypted_str = self.key128.encrypt_str_to_base64(data.to_string());
-            },
+            }
             Standard::AES192 => {
                 encrypted_str = self.key192.encrypt_str_to_base64(data.to_string());
-            },
+            }
             Standard::AES256 => {
                 encrypted_str = self.key256.encrypt_str_to_base64(data.to_string());
-            },
+            }
         }
         Ok(encrypted_str)
     }
@@ -45,20 +48,19 @@ impl Cypher {
         match standard {
             Standard::DES64 => {
                 decrypted_str = self.key64.decrypt_base64_to_string(data.to_string())?;
-            },
+            }
             Standard::AES128 => {
                 decrypted_str = self.key128.decrypt_base64_to_string(data.to_string())?;
-            },
+            }
             Standard::AES192 => {
                 decrypted_str = self.key192.decrypt_base64_to_string(data.to_string())?;
-            },
+            }
             Standard::AES256 => {
                 decrypted_str = self.key256.decrypt_base64_to_string(data.to_string())?;
-            },
+            }
         }
         Ok(decrypted_str)
     }
-    
 }
 
 #[cfg(test)]

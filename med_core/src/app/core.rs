@@ -18,7 +18,6 @@ pub struct App {
 
 impl App {
     pub async fn new(params: Params) -> Result<Self, MaskerError> {
-
         Self::logging(params.debug).await;
 
         let user = whoami::username();
@@ -70,7 +69,7 @@ impl App {
             }
         }
     }
-    
+
     pub async fn process(&mut self) -> Result<Metrics, MaskerError> {
         info!(
             "processing '{}' files start",

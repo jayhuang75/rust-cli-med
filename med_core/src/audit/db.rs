@@ -1,4 +1,4 @@
-use std::{str::FromStr, time::Duration, path::Path};
+use std::{path::Path, str::FromStr, time::Duration};
 
 use colored::Colorize;
 use sqlx::{
@@ -62,7 +62,10 @@ impl Database {
         // info!("crate dir {}", crate_dir);
 
         let migrations = Path::new(DATABASE_MIGRATE_URL);
-        info!("db migration path {}", migrations.display().to_string().bold().green());
+        info!(
+            "db migration path {}",
+            migrations.display().to_string().bold().green()
+        );
 
         sqlx::migrate::Migrator::new(migrations)
             .await
@@ -70,7 +73,11 @@ impl Database {
             .run(pool)
             .await?;
 
-        info!("audit database {} {}", DATABASE_URL, "migrated".bold().green());
+        info!(
+            "audit database {} {}",
+            DATABASE_URL,
+            "migrated".bold().green()
+        );
 
         Ok(())
     }

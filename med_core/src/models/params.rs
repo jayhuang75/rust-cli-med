@@ -2,7 +2,7 @@ use std::fmt;
 
 use serde::Serialize;
 
-use crate::utils::{enums::{AppMode, FileType, Mode, Standard}};
+use crate::utils::enums::{AppMode, FileType, Mode, Standard};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Params {

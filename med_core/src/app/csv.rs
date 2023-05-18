@@ -1,6 +1,6 @@
 use crate::app::core::App;
-use crate::models::metrics::Metrics;
 use crate::app::worker::Worker;
+use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
 use crate::utils::enums::{Mode, Standard};
@@ -9,7 +9,7 @@ use crate::utils::progress_bar::get_progress_bar;
 use csv::StringRecord;
 use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use tracing::{debug};
+use tracing::debug;
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Default)]
@@ -55,7 +55,9 @@ impl CsvFileProcessor {
             self.metrics.total_files += 1;
             self.metrics.total_records += item.total_records;
             self.metrics.failed_records += item.failed_records;
-            self.metrics.record_failed_reason.extend(item.record_failed_reason.clone());
+            self.metrics
+                .record_failed_reason
+                .extend(item.record_failed_reason.clone());
             self.result.push(item);
         });
         bar.finish_and_clear();
@@ -128,7 +130,13 @@ impl CsvFileProcessor {
         Ok(())
     }
 
-    pub async fn run_cipher(&mut self, key: &str, mode: &Mode, standard: &Standard, job_conf: &JobConfig) -> Result<(), MaskerError> {        
+    pub async fn run_cipher(
+        &mut self,
+        key: &str,
+        mode: &Mode,
+        standard: &Standard,
+        job_conf: &JobConfig,
+    ) -> Result<(), MaskerError> {
         let cypher = Cypher::new(key);
         let bar: indicatif::ProgressBar =
             get_progress_bar(self.metrics.total_records as u64, "cryptography files");
@@ -161,9 +169,15 @@ impl CsvFileProcessor {
                                 true => {
                                     let masked: String;
                                     match mode {
-                                        Mode::MASK => {unimplemented!()},
-                                        Mode::ENCRYPT => masked = cypher.encrypt(item, standard).unwrap(),
-                                        Mode::DECRYPT => masked = cypher.decrypt(item, standard).unwrap(),
+                                        Mode::MASK => {
+                                            unimplemented!()
+                                        }
+                                        Mode::ENCRYPT => {
+                                            masked = cypher.encrypt(item, standard).unwrap()
+                                        }
+                                        Mode::DECRYPT => {
+                                            masked = cypher.decrypt(item, standard).unwrap()
+                                        }
                                     }
                                     masked_record.push_field(&masked);
                                 }

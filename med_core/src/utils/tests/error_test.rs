@@ -1,4 +1,4 @@
-use crate::utils::{error::{MaskerError, MaskerErrorType}};
+use crate::utils::error::{MaskerError, MaskerErrorType};
 
 #[tokio::test]
 async fn test_message() {

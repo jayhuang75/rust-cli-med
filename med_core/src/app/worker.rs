@@ -1,7 +1,7 @@
 use colored::Colorize;
 use csv::{StringRecord, Writer};
 use threadpool::ThreadPool;
-use tracing::{info};
+use tracing::info;
 
 use crate::utils::error::{MaskerError, MaskerErrorType};
 
@@ -16,7 +16,9 @@ pub struct Worker {
 impl Worker {
     pub async fn new(cpu_num: u16) -> Result<Self, MaskerError> {
         let pool = ThreadPool::new(cpu_num as usize);
-        rayon::ThreadPoolBuilder::new().num_threads(cpu_num as usize).build_global()?;
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(cpu_num as usize)
+            .build_global()?;
         Ok(Worker { cpu_num, pool })
     }
 
@@ -33,9 +35,9 @@ impl Worker {
                 Ok(r) => {
                     total_records += 1;
                     data.push(r);
-                },
+                }
                 Err(err) => {
-                    let record_error = MaskerError{
+                    let record_error = MaskerError {
                         message: Some(format!("please check {} csv format", path)),
                         cause: Some(err.to_string()),
                         error_type: MaskerErrorType::CsvError,
@@ -44,7 +46,7 @@ impl Worker {
                     record_failed_reason.push(record_error);
                     failed_records += 1;
                     info!("{}: {}", "warning".bold().yellow(), error_str);
-                },
+                }
             };
         });
         tx.send(CsvFile {
@@ -59,8 +61,11 @@ impl Worker {
         Ok(())
     }
 
-    pub fn write_csv(masked_data: &CsvFile, output_file: &str, bar: &indicatif::ProgressBar) -> Result<(), MaskerError> {
-
+    pub fn write_csv(
+        masked_data: &CsvFile,
+        output_file: &str,
+        bar: &indicatif::ProgressBar,
+    ) -> Result<(), MaskerError> {
         let mut wtr = Writer::from_path(output_file)?;
         // write the header
         wtr.write_record(&masked_data.headers)?;

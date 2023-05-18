@@ -1,6 +1,6 @@
 use std::fmt;
 
-use clap::{ValueEnum, builder::PossibleValue};
+use clap::{builder::PossibleValue, ValueEnum};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
@@ -46,8 +46,12 @@ impl ValueEnum for Mode {
     fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
         Some(match self {
             Mode::MASK => PossibleValue::new("mask").help("Mask the data by *"),
-            Mode::ENCRYPT => PossibleValue::new("encrypt").help("Encrypt the data with provided KEY"),
-            Mode::DECRYPT => PossibleValue::new("decrypt").help("Decrypt the data with provided KEY"),
+            Mode::ENCRYPT => {
+                PossibleValue::new("encrypt").help("Encrypt the data with provided KEY")
+            }
+            Mode::DECRYPT => {
+                PossibleValue::new("decrypt").help("Decrypt the data with provided KEY")
+            }
         })
     }
 }
@@ -87,7 +91,7 @@ impl std::fmt::Debug for Mode {
 #[allow(dead_code)]
 pub enum AppMode {
     CLI,
-    SDK
+    SDK,
 }
 
 impl Default for AppMode {
@@ -114,7 +118,6 @@ impl fmt::Display for AppMode {
     }
 }
 
-
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum Standard {
     DES64 = 64,
@@ -132,7 +135,12 @@ impl Default for Standard {
 // Can also be derived with feature flag `derive`
 impl ValueEnum for Standard {
     fn value_variants<'a>() -> &'a [Self] {
-        &[Standard::DES64, Standard::AES128, Standard::AES192, Standard::AES256]
+        &[
+            Standard::DES64,
+            Standard::AES128,
+            Standard::AES192,
+            Standard::AES256,
+        ]
     }
 
     fn to_possible_value<'a>(&self) -> Option<PossibleValue> {

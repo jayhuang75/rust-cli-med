@@ -4,16 +4,14 @@ use tokio::time::Instant;
 use tracing::info;
 mod cli;
 
-use med_core::utils::{error::MaskerError};
-use med_core::audit::db::AuditSummary;
 use med_core::app::core::App;
+use med_core::audit::db::AuditSummary;
+use med_core::utils::error::MaskerError;
 
 use cli::app::Cli;
 
-
 #[tokio::main]
 async fn main() -> Result<(), MaskerError> {
-
     let now = Instant::now();
     let new_cli = Cli::new().await?;
     let params = new_cli.params;
@@ -34,14 +32,14 @@ async fn main() -> Result<(), MaskerError> {
             audit_summary.failed_records = metrics.failed_records;
             audit_summary.record_failed_reason = metrics.record_failed_reason;
             audit_summary.successed = true;
-        },
+        }
         Err(err) => {
             audit_summary.process_failure_reason = Some(serde_json::to_string(&err.clone())?);
             info!("{} {:?}", "error".bold().red(), err.to_string());
         }
     }
 
-    if !new_app.params.key.is_none() { 
+    if !new_app.params.key.is_none() {
         new_app.params.key = Some("****".to_owned());
     }
     audit_summary.user = new_app.user;

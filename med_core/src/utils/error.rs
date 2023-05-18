@@ -1,6 +1,6 @@
-use std::{fmt};
 use serde::Serialize;
 use serde_json::Error;
+use std::fmt;
 use tokio::io;
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
@@ -20,7 +20,6 @@ pub struct MaskerError {
     pub cause: Option<String>,
     pub error_type: MaskerErrorType,
 }
-
 
 impl MaskerError {
     #[allow(dead_code)]
