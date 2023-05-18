@@ -33,9 +33,9 @@ impl App {
 
         debug!("app {} {:?}", "runtime params".bold().green(), params);
         Ok(App {
-            params: params,
-            user: user,
-            hostname: hostname,
+            params,
+            user,
+            hostname,
         })
     }
 

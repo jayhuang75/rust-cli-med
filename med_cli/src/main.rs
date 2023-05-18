@@ -18,12 +18,12 @@ async fn main() -> Result<(), MaskerError> {
 
     let mut new_app = App::new(params).await?;
 
-    let mut audit_summary = AuditSummary::default();
-
-    audit_summary.runtime_conf = serde_json::to_string(&new_app.params)?;
+    let mut audit_summary = AuditSummary { 
+        runtime_conf: serde_json::to_string(&new_app.params)?, 
+        ..Default::default()
+    };
 
     let mut audit_db = audit::db::Database::new().await?;
-    // audit_db.migrate().await?;
 
     match new_app.process().await {
         Ok(metrics) => {
@@ -34,12 +34,12 @@ async fn main() -> Result<(), MaskerError> {
             audit_summary.successed = true;
         }
         Err(err) => {
-            audit_summary.process_failure_reason = Some(serde_json::to_string(&err.clone())?);
+            audit_summary.process_failure_reason = Some(serde_json::to_string(&err)?);
             info!("{} {:?}", "error".bold().red(), err.to_string());
         }
     }
 
-    if !new_app.params.key.is_none() {
+    if new_app.params.key.is_some() {
         new_app.params.key = Some("****".to_owned());
     }
     audit_summary.user = new_app.user;

@@ -50,12 +50,12 @@ impl Worker {
             };
         });
         tx.send(CsvFile {
-            path: path,
-            total_records: total_records,
-            failed_records: failed_records,
-            record_failed_reason: record_failed_reason,
-            headers: headers,
-            data: data,
+            path,
+            total_records,
+            failed_records,
+            record_failed_reason,
+            headers,
+            data,
         })
         .unwrap();
         Ok(())

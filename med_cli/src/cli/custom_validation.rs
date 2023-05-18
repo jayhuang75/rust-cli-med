@@ -22,6 +22,6 @@ pub fn dir_exist(s: &str) -> Result<PathBuf, String> {
     let path = PathBuf::from(s);
     match path.is_dir() {
         true => Ok(path),
-        false => return Err(format!("{} not exist", s)),
+        false => Err(format!("{} not exist", s)),
     }
 }
