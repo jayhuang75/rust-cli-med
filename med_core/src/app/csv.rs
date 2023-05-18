@@ -86,8 +86,10 @@ impl CsvFileProcessor {
             .result
             .par_iter()
             .map(|item| {
-                let mut new_csv = CsvFile::default();
-                new_csv.headers = item.headers.clone();
+                let mut new_csv = CsvFile {
+                    headers: item.headers.clone(),
+                    ..Default::default()
+                };
                 let indexs = item
                     .headers
                     .iter()
@@ -145,8 +147,11 @@ impl CsvFileProcessor {
             .result
             .par_iter()
             .map(|item| {
-                let mut new_csv = CsvFile::default();
-                new_csv.headers = item.headers.clone();
+                let mut new_csv = CsvFile {
+                    headers: item.headers.clone(),
+                    ..Default::default()
+                };
+
                 let indexs = item
                     .headers
                     .iter()

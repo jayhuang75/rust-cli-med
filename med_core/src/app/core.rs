@@ -132,7 +132,9 @@ impl App {
                         }
                         None => {
                             return Err(MaskerError {
-                                message: Some("Missing key for Encyption and Decryption input!".to_string()),
+                                message: Some(
+                                    "Missing key for Encyption and Decryption input!".to_string(),
+                                ),
                                 cause: Some("missing -k or --key".to_string()),
                                 error_type: MaskerErrorType::ConfigError,
                             })

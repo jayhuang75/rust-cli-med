@@ -18,8 +18,8 @@ async fn main() -> Result<(), MaskerError> {
 
     let mut new_app = App::new(params).await?;
 
-    let mut audit_summary = AuditSummary { 
-        runtime_conf: serde_json::to_string(&new_app.params)?, 
+    let mut audit_summary = AuditSummary {
+        runtime_conf: serde_json::to_string(&new_app.params)?,
         ..Default::default()
     };
 

@@ -110,7 +110,7 @@ impl Cli {
         }
 
         if let Some(f_type) = matches.get_one::<String>("type") {
-            if f_type.to_owned() != FileType::CSV.to_string() {
+            if *f_type != FileType::CSV.to_string() {
                 params.file_type = FileType::JSON;
             }
         }

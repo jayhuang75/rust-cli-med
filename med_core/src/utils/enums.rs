@@ -3,15 +3,12 @@ use std::fmt;
 use clap::{builder::PossibleValue, ValueEnum};
 use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Default)]
 pub enum FileType {
     #[default]
     CSV,
     JSON,
 }
-
-
 
 impl fmt::Display for FileType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -22,16 +19,13 @@ impl fmt::Display for FileType {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
-#[derive(Default)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Default)]
 pub enum Mode {
     #[default]
     MASK,
     ENCRYPT,
     DECRYPT,
 }
-
-
 
 // Can also be derived with feature flag `derive`
 impl ValueEnum for Mode {
@@ -92,8 +86,6 @@ pub enum AppMode {
     SDK,
 }
 
-
-
 impl std::fmt::Debug for AppMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -112,8 +104,7 @@ impl fmt::Display for AppMode {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
-#[derive(Default)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Default)]
 pub enum Standard {
     #[default]
     DES64 = 64,
@@ -121,8 +112,6 @@ pub enum Standard {
     AES192 = 192,
     AES256 = 256,
 }
-
-
 
 // Can also be derived with feature flag `derive`
 impl ValueEnum for Standard {
