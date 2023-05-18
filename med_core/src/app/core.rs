@@ -32,6 +32,7 @@ impl App {
         );
 
         debug!("app {} {:?}", "runtime params".bold().green(), params);
+
         Ok(App {
             params,
             user,

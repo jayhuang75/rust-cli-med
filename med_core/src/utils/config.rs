@@ -1,6 +1,5 @@
-use std::path::Path;
-
 use serde::Deserialize;
+use std::path::Path;
 
 use crate::utils::error::MaskerError;
 
