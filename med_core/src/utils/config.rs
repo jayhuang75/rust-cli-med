@@ -8,7 +8,6 @@ use crate::utils::error::MaskerError;
 pub struct JobConfig {
     pub mask_symbols: String,
     pub fields: Vec<String>,
-    pub aes: i16,
 }
 
 impl JobConfig {
