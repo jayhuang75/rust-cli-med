@@ -11,14 +11,13 @@ on:
   pull_request:
     branches: [development]
 
-defaults:
-  run:
-    working-directory: med_cli
-
 jobs:
   release:
     name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: med_cli
     strategy:
       fail-fast: false
       matrix:
