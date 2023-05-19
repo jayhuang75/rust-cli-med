@@ -25,8 +25,8 @@ jobs:
         include:
           - target: x86_64-pc-windows-gnu
             archive: tar.gz
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz tar.xz
+          # - target: x86_64-unknown-linux-musl
+          #   archive: tar.gz tar.xz
           - target: x86_64-apple-darwin
             archive: tar.gz
     steps:
@@ -38,7 +38,7 @@ jobs:
         with:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
-          TOOLCHAIN_VERSION: 1.64.0
+          TOOLCHAIN_VERSION: 1.69.0
   windows-msvc-release:
     name: release windows msvc
     runs-on: windows-latest
