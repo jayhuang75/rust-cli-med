@@ -3,9 +3,9 @@ name: ci
 on:
   push:
     branches:
-     - '*'
+      - "*"
   pull_request:
-    branches: [ development ]
+    branches: [development]
 
 env:
   CARGO_TERM_COLOR: always
@@ -36,7 +36,7 @@ jobs:
         with:
           command: check
   test:
-    runs-on: '${{ matrix.os }}'
+    runs-on: "${{ matrix.os }}"
     strategy:
       matrix:
         include:
@@ -68,7 +68,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: run
-          args: '-- -h'
+          args: "-- -h"
   lints:
     runs-on: ubuntu-latest
     steps:
@@ -90,12 +90,43 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: 'rustfmt, clippy'
+          components: "rustfmt, clippy"
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: '--all -- --check'
+          args: "--all -- --check"
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: '-- -D warnings'
+          args: "-- -D warnings"
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          lfs: true
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - id: get_previous_version
+        run: echo ::set-output name=PREVIOUS_VERSION::$(git describe --tags "$(git rev-list --tags --max-count=1)")
+        shell: bash
+      - id: semvers
+        uses: WyriHaximus/github-action-next-semvers@master
+        with:
+          version: "${{ steps.get_previous_version.outputs.PREVIOUS_VERSION }}"
+      - run: mkdir -p ./version
+      - if: '!contains(github.event.head_commit.message, "BC BREAK") && !contains(github.event.head_commit.message, "Signed-off-by: dependabot-preview[bot] <support@dependabot.com>")'
+        run: echo "$VERSION" >./version/version
+        env:
+          VERSION: ${{ steps.semvers.outputs.v_minor }}
+      - if: 'contains(github.event.head_commit.message, "Signed-off-by: dependabot-preview[bot] <support@dependabot.com>")'
+        run: echo "$VERSION" >./version/version
+        env:
+          VERSION: ${{ steps.semvers.outputs.v_patch }}
+      - run: echo "$VERSION" > ./version/version
+        env:
+          VERSION: ${{ steps.semvers.outputs.v_major }}
+          if: "contains(github.event.head_commit.message, 'BC BREAK')"
+      - uses: actions/upload-artifact@master
+        with:
+          name: version
+          path: ./version/version
