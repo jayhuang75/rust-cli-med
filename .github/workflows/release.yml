@@ -37,11 +37,11 @@ jobs:
         run: |
           cargo build --release
       - name: tar
-        run: tar --directory=target/release -cf archive.tar.gz nitrogen.exe
+        run: tar --directory=target/release -cf archive.tar.gz med.exe
       - name: upload
         run: |
-          $id = gh api -H "Accept: application/vnd.github+json" /repos/capeprivacy/nitrogen/releases/tags/${{ github.ref_name }} --jq .id
-          curl --fail-with-body -sS  -X POST --data-binary "@archive.tar.gz" -H 'Content-Type: application/octet-stream' -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://uploads.github.com/repos/capeprivacy/nitrogen/releases/$id/assets?name=nitrogen_${{ github.ref_name }}_x86_64-pc-windows-msvc.tar.gz"
+          $id = gh api -H "Accept: application/vnd.github+json" /repos/jayhuang75/rust-cli-med/releases/tags/${{ github.ref_name }} --jq .id
+          curl --fail-with-body -sS  -X POST --data-binary "@archive.tar.gz" -H 'Content-Type: application/octet-stream' -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' "https://uploads.github.com/repos/jayhuang75/rust-cli-med/releases/$id/assets?name=med_${{ github.ref_name }}_x86_64-pc-windows-msvc.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   macos-arm-release:
@@ -57,10 +57,10 @@ jobs:
           rustup target add aarch64-apple-darwin
           cargo build --release --target aarch64-apple-darwin
       - name: tar
-        run: tar --directory=target/aarch64-apple-darwin/release -cf archive.tar.gz nitrogen
+        run: tar --directory=target/aarch64-apple-darwin/release -cf archive.tar.gz med
       - name: upload
         run: |
-          id=$(gh api -H "Accept: application/vnd.github+json" /repos/capeprivacy/nitrogen/releases/tags/${{ github.ref_name }} --jq .id)
-          curl --fail-with-body -sS  -X POST --data-binary @"archive.tar.gz" -H 'Content-Type: application/octet-stream' -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://uploads.github.com/repos/capeprivacy/nitrogen/releases/$id/assets?name=nitrogen_${{ github.ref_name }}_aarch64-apple-darwin.tar.gz"
+          id=$(gh api -H "Accept: application/vnd.github+json" /repos/jayhuang75/rust-cli-med/releases/tags/${{ github.ref_name }} --jq .id)
+          curl --fail-with-body -sS  -X POST --data-binary @"archive.tar.gz" -H 'Content-Type: application/octet-stream' -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://uploads.github.com/repos/jayhuang75/rust-cli-med/releases/$id/assets?name=med${{ github.ref_name }}_aarch64-apple-darwin.tar.gz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
