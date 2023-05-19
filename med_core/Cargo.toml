@@ -17,7 +17,7 @@ serde_json = { workspace = true}
 
 rayon = "1.7.0"
 sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "offline"] }
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0.163", features = ["derive"] }
 serde_yaml = "0.9.21"
 
 csv = "1.2.1"
