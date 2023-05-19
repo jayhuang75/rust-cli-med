@@ -1,12 +1,15 @@
 name: ci
+
 on:
   push:
     branches:
       - "*"
   pull_request:
     branches: [development]
+
 env:
   CARGO_TERM_COLOR: always
+
 defaults:
   run:
     working-directory: med_cli
@@ -100,21 +103,3 @@ jobs:
         with:
           command: clippy
           args: "-- -D warnings"
-  release:
-    name: release ${{ matrix.target }}
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [x86_64-pc-windows-gnu, x86_64-unknown-linux-musl]
-      steps:
-        - uses: actions/checkout@master
-        - name: Compile and release
-          uses: rust-build/rust-build.action@v1.4.3
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              RUSTTARGET: ${{ matrix.target }}
-              EXTRA_FILES: "README.md LICENSE"
