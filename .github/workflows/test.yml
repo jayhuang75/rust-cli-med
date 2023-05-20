@@ -71,6 +71,10 @@ jobs:
         rustup install ${{ matrix.rust }}
         rustup target add ${{ matrix.target }}
         rustup show
+      
+    - name: Install gcc
+      run : |
+        apt-get install musl-tools
 
     - name: Build
       run: cargo build --release --target ${{ matrix.target }}
