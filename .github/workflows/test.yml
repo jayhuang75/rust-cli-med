@@ -36,22 +36,16 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             cross: true
-            features:
-              - vendored-openssl
 
           - name: linux-armv7-gnu
             os: ubuntu-latest
             target: armv7-unknown-linux-gnueabihf
             cross: true
-            features:
-              - vendored-openssl
 
           - name: linux-arm64-gnu
             os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             cross: true
-            features:
-              - vendored-openssl
 
           - name: mac-x86-64
             os: macos-latest
@@ -86,7 +80,7 @@ jobs:
         with:
           use-cross: ${{ matrix.cross }}
           command: build
-          args: --release --features "${{ join(matrix.features, ',') }}" --target ${{ matrix.target }}
+          args: --release --target ${{ matrix.target }}
       - name: Package
         shell: bash
         run: |
