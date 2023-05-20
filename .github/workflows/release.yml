@@ -7,55 +7,64 @@ name: Release
 on:
   push:
     branches:
-      # - "*"
-      - "development"
+      - "*"
+      # - "development"
   pull_request:
     branches: [development]
 
 jobs:
-  # release:
-  #   name: release ${{ matrix.target }}
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         # - target: x86_64-pc-windows-gnu
-  #         #   archive: tar.gz
-  #         # - target: x86_64-unknown-linux-musl
-  #         #   archive: tar.gz tar.xz
-  #         - target: x86_64-apple-darwin
-  #           archive: tar.gz
-  #   steps:
-  #     - uses: actions/checkout@master
-  #     - name: Compile and release
-  #       uses: rust-build/rust-build.action@v1.3.2
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         RUSTTARGET: ${{ matrix.target }}
-  #         ARCHIVE_TYPES: ${{ matrix.archive }}
-  #         TOOLCHAIN_VERSION: 1.69.0
-  windows-msvc-release:
-    name: release windows msvc
-    runs-on: windows-latest
+  release:
+    name: release ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: x86_64-pc-windows-gnu
+            archive: tar.gz
+          - target: x86_64-unknown-linux-musl
+            archive: tar.gz tar.xz
+          - target: x86_64-apple-darwin
+            archive: tar.gz
     steps:
-      - name: Check Out Code
-        uses: actions/checkout@master
-      - name: Build
-        run: |
-          cargo build --release
-      - name: tar
-        run: tar --directory=target/release -cf archive.tar.gz med.exe
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+      - uses: actions/checkout@master
+      - name: Compile and release
+        uses: rust-build/rust-build.action@v1.3.2
+        id: compile
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: archive.tar.gz
-          asset_name: med-windows-msvc
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: "This is my release text"
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
+          TOOLCHAIN_VERSION: 1.69.0
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Binary
+          path: |
+            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+
+  # windows-msvc-release:
+  #   name: release windows msvc
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Check Out Code
+  #       uses: actions/checkout@master
+  #     - name: Build
+  #       run: |
+  #         cargo build --release
+  #     - name: tar
+  #       run: tar --directory=target/release -cf archive.tar.gz med.exe
+  #     - name: Upload binaries to release
+  #       uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         file: archive.tar.gz
+  #         asset_name: med-windows-msvc
+  #         tag: ${{ github.ref }}
+  #         overwrite: true
+  #         body: "This is my release text"
   # macos-arm-release:
   #   name: release mac os arm release
   #   runs-on: macos-12

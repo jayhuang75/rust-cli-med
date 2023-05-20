@@ -29,3 +29,6 @@ indicatif = {version = "*", features = ["rayon"]}
 whoami = "1.4.0"
 
 dirs = "5.0.1"
+
+[build-dependencies]
+openssl = { workspace = true }

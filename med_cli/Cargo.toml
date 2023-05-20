@@ -27,7 +27,4 @@ num_cpus = { workspace = true }
 serde_json = { workspace = true}
 med_core = { path = "../med_core" }
 
-[build-dependencies]
-openssl = { workspace = true }
-
 
