@@ -44,7 +44,6 @@ jobs:
             target: armv7-unknown-linux-gnueabihf
             cross: true
             features:
-              
               - vendored-openssl
 
           - name: linux-arm64-gnu
@@ -87,7 +86,7 @@ jobs:
         with:
           use-cross: ${{ matrix.cross }}
           command: build
-          args: --release --locked --features "${{ join(matrix.features, ',') }}" --target ${{ matrix.target }}
+          args: --release "${{ join(matrix.features, ',') }}" --target ${{ matrix.target }}
       - name: Package
         shell: bash
         run: |
