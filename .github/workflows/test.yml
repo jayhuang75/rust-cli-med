@@ -31,15 +31,12 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             cross: false
-            features:
-              - fix
 
           - name: linux-x86-64-musl
             os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             cross: true
             features:
-              - fix
               - vendored-openssl
 
           - name: linux-armv7-gnu
@@ -47,7 +44,7 @@ jobs:
             target: armv7-unknown-linux-gnueabihf
             cross: true
             features:
-              - fix
+              
               - vendored-openssl
 
           - name: linux-arm64-gnu
@@ -55,22 +52,17 @@ jobs:
             target: aarch64-unknown-linux-gnu
             cross: true
             features:
-              - fix
               - vendored-openssl
 
           - name: mac-x86-64
             os: macos-latest
             target: x86_64-apple-darwin
-            cross: false
-            features:
-              - fix
+            cross: false              
 
           - name: windows-x86-64
             os: windows-latest
             target: x86_64-pc-windows-msvc
-            cross: false
-            features:
-              - fix
+            cross: false              
 
     name: Binaries for ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
