@@ -26,6 +26,9 @@ jobs:
             archive: tar.gz tar.xz
           - target: x86_64-apple-darwin
             archive: tar.gz
+    defaults:
+      run:
+        working-directory: ./med_cli
     steps:
       - uses: actions/checkout@master
       - name: Compile and release
