@@ -11,97 +11,120 @@ on:
   pull_request:
     branches: [development]
 
+env:
+  RUSTFLAGS: -D warnings
+  RUSTDOCFLAGS: -D warnings
+
 jobs:
-  build-release:
-    runs-on: ${{ matrix.os }}
+  build:
     strategy:
-      fail-fast: false
       matrix:
+        name:
+          - linux-x86-64-gnu
+          - linux-x86-64-musl
+          - linux-armv7-gnu
+          - linux-arm64-gnu
+          - mac-x86-64
+          - windows-x86-64
         include:
-          # Linux
-          - os: ubuntu-latest
+          - name: linux-x86-64-gnu
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            cross: false
+            features:
+              - fix
+
+          - name: linux-x86-64-musl
+            os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            archive: tar.gz
-            archive-cmd: tar czf
-            sha-cmd: sha256sum
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            archive: tar.gz
-            archive-cmd: tar czf
-            sha-cmd: sha256sum
-          - os: ubuntu-latest
-            target: arm-unknown-linux-musleabihf
-            archive: tar.gz
-            archive-cmd: tar czf
-            sha-cmd: sha256sum
+            cross: true
+            features:
+              - fix
+              - vendored-openssl
 
-          # Darwin
-          - os: macos-latest
+          - name: linux-armv7-gnu
+            os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            cross: true
+            features:
+              - fix
+              - vendored-openssl
+
+          - name: linux-arm64-gnu
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            cross: true
+            features:
+              - fix
+              - vendored-openssl
+
+          - name: mac-x86-64
+            os: macos-latest
             target: x86_64-apple-darwin
-            archive: zip
-            archive-cmd: zip -r
-            sha-cmd: shasum -a 256
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            archive: zip
-            archive-cmd: zip -r
-            sha-cmd: shasum -a 256
+            cross: false
+            features:
+              - fix
 
-          # Windows
-          - os: windows-latest
+          - name: windows-x86-64
+            os: windows-latest
             target: x86_64-pc-windows-msvc
-            archive: zip
-            archive-cmd: 7z a
-            sha-cmd: sha256sum
+            cross: false
+            features:
+              - fix
+
+    name: Binaries for ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Setup Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3.0.11
         with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
+      - uses: actions/cache@v3.0.11
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('Cargo.lock') }}
+      - uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af
+        with:
+          toolchain: stable
           profile: minimal
           override: true
-          target: ${{ matrix.target }}
-          toolchain: stable
-
-      - name: Build
-        uses: actions-rs/cargo@v1
+      - uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505
+        name: Build
         with:
-          use-cross: true
+          use-cross: ${{ matrix.cross }}
           command: build
-          args: --release --target ${{ matrix.target }}
-
-      - name: Package Artifacts
+          args: --release --locked --features "${{ join(matrix.features, ',') }}" --target ${{ matrix.target }}
+      - name: Package
         shell: bash
         run: |
-          src=$(pwd)
-          stage=$(mktemp -d)
-          ver=${GITHUB_REF#refs/tags/}
-          asset_name="$ver-${{ matrix.target }}.${{ matrix.archive }}"
-          ASSET_PATH="$src/$asset_name"
-          CHECKSUM_PATH="$ASSET_PATH.sha256"
-          cp target/${{ matrix.target }}/release/med $stage/
-          cd $stage
-          ${{ matrix.archive-cmd }} $ASSET_PATH *
-          cd $src
-          ${{ matrix.sha-cmd }} $asset_name > $CHECKSUM_PATH
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            echo "ASSET_PATH=$(cygpath -m $ASSET_PATH)" >> $GITHUB_ENV
-            echo "CHECKSUM_PATH=$(cygpath -m $CHECKSUM_PATH)" >> $GITHUB_ENV
-          else
-            echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
-            echo "CHECKSUM_PATH=$CHECKSUM_PATH" >> $GITHUB_ENV
-          fi
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+          ext=""
+          [[ "${{ matrix.name }}" == windows-* ]] && ext=".exe"
+          bin="../target/${{ matrix.target }}/release/med${ext}"
+          version=$(echo "${{ github.ref }}" | cut -d/ -f4)
+          dst="med-${{ matrix.target }}-${version}"
+          mkdir "$dst"
+          mv "$bin" "$dst/"
+          mv README.md CHANGELOG.md"$dst/"
+      - name: Archive (tar)
+        if: '! startsWith(matrix.name, ''windows-'')'
+        shell: bash
+        run: |
+          version=$(echo "${{ github.ref }}" | cut -d/ -f4)
+          dst="med-${{ matrix.target }}-${version}"
+          tar cavf "../$dst.tgz" "$dst"
+      - name: Archive (zip)
+        if: startsWith(matrix.name, 'windows-')
+        shell: bash
+        run: |
+          version=$(echo "${{ github.ref }}" | cut -d/ -f4)
+          dst="med-${{ matrix.target }}-${version}"
+          7z a "../$dst.zip" "$dst"
+      - uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
         with:
-          fail_on_unmatched_files: true
           files: |
-            ${{ env.ASSET_PATH }}
-            ${{ env.CHECKSUM_PATH }}
+            med-*.tgz
+            med-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
