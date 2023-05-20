@@ -86,7 +86,7 @@ jobs:
         with:
           use-cross: ${{ matrix.cross }}
           command: build
-          args: --release "${{ join(matrix.features, ',') }}" --target ${{ matrix.target }}
+          args: --release --feature "${{ join(matrix.features, ',') }}"--target ${{ matrix.target }}
       - name: Package
         shell: bash
         run: |
