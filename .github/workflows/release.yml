@@ -84,7 +84,7 @@ jobs:
         run: |
           cargo build --release
       - name: tar
-        run: tar --directory=target/x86_64-apple-darwin/release -cf macos_x86_archive.tar.gz med
+        run: tar --directory=target/release -cf macos_x86_archive.tar.gz med
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -92,25 +92,25 @@ jobs:
           files: 'macos_x86_archive.tar.gz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  macos-arm-release:
-    name: release macos arm release
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: check toolchain
-        run: rustup default
-      - name: Build
-        run: |
-          rustup toolchain install stable-aarch64-apple-darwin
-          rustup target add aarch64-apple-darwin
-          cargo build --release --target aarch64-apple-darwin
-      - name: tar
-        run: tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med
-      - name: Upload binaries arm to release  
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: 'macos_arm_archive.tar.gz'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # macos-arm-release:
+  #   name: release macos arm release
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: check toolchain
+  #       run: rustup default
+  #     - name: Build
+  #       run: |
+  #         rustup toolchain install stable-aarch64-apple-darwin
+  #         rustup target add aarch64-apple-darwin
+  #         cargo build --release --target aarch64-apple-darwin
+  #     - name: tar
+  #       run: tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med
+  #     - name: Upload binaries arm to release  
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         tag_name: ${{ github.ref_name }}
+  #         files: 'macos_arm_archive.tar.gz'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
