@@ -1,17 +1,10 @@
 name: Release
 
-# on:
-#   release:
-#     types: [created]
-#   # pull_request:
-#   #   branches: [development]
 on:
-  push:
-    branches:
-      - "*"
-      # - "development"
-  pull_request:
-    branches: [development]
+  release:
+    types: [created]
+  # pull_request:
+  #   branches: [development]
 
 jobs:
   # release:
@@ -73,37 +66,46 @@ jobs:
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
-  macos-release:
-    name: Mac ${{ matrix.target }}
+  macos-X86-release:
+    name: release macos x86 release
     runs-on: macos-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [aarch64-apple-darwin,x86_64-apple-darwin]
     steps:
       - uses: actions/checkout@master
       - name: check toolchain
         run: rustup default
-      - name: Prepare the target
+      - name: Build
         run: |
-          rustup toolchain install stable-aarch64-apple-darwin
-          rustup target add aarch64-apple-darwin
           rustup toolchain install x86_64-apple-darwin
           rustup target add x86_64-apple-darwin
-          # cargo build --release --target aarch64-apple-darwin
-
-      - name: Build target
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target ${{ matrix.target }}
-  
+          cargo build --release --target x86_64-apple-darwin
       - name: tar
-        run: tar --directory=target/${{matrix.target}}/release -cf ${{matrix.target}}_archive.tar.gz med
-      - name: Upload binaries to release  
+        run: tar --directory=target/x86_64-apple-darwin/release -cf macos_x86_archive.tar.gz med
+      - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          files: '${{matrix.target}}_archive.tar.gz'
+          files: 'macos_x86_archive.tar.gz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  macos-arm-release:
+    name: release macos arm release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: check toolchain
+        run: rustup default
+      - name: Build
+        run: |
+          rustup toolchain install stable-aarch64-apple-darwin
+          rustup target add aarch64-apple-darwin
+          cargo build --release --target aarch64-apple-darwin
+      - name: tar
+        run: tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med
+      - name: Upload binaries arm to release  
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: 'macos_arm_archive.tar.gz'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
