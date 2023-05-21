@@ -12,7 +12,7 @@ pub fn get_progress_bar(length: u64, msg: &str) -> ProgressBar {
     let progressbar_style = ProgressStyle::default_spinner()
         .tick_chars(TICK_SETTINGS.0)
         .progress_chars("=> ")
-        .template(" {spinner} {msg} {percent}% [{bar:40}] {pos}/{len} ETA {elapsed}")
+        .template(" {spinner} {msg} {percent}% [{bar:30}] {pos}/{len} ETA {elapsed}")
         .expect("no template error");
 
     let progress_bar = ProgressBar::new(length);
