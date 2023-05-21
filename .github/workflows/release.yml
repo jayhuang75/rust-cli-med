@@ -1,10 +1,17 @@
 name: Release
 
+# on:
+#   release:
+#     types: [created]
+#   # pull_request:
+#   #   branches: [development]
+
 on:
-  release:
-    types: [created]
-  # pull_request:
-  #   branches: [development]
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches: [development]
 
 jobs:
   # release:
