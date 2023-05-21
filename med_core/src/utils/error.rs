@@ -3,7 +3,7 @@ use serde_json::Error;
 use std::fmt;
 use tokio::io;
 
-#[derive(Debug, PartialEq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub enum MaskerErrorType {
     ConfigError,
     IoError,
@@ -14,7 +14,7 @@ pub enum MaskerErrorType {
     CsvError,
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct MaskerError {
     pub message: Option<String>,
     pub cause: Option<String>,

@@ -1,5 +1,6 @@
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
+use async_trait::async_trait;
 use colored::Colorize;
 use std::path::Path;
 use tokio::time::Instant;
@@ -8,12 +9,27 @@ use tracing_subscriber::fmt::format;
 
 use crate::app::csv::CsvFileProcessor;
 use crate::models::{metrics::Metrics, params::Params};
-use crate::utils::enums::{FileType, Mode};
+use crate::utils::enums::{FileType, Mode, Standard};
 
 pub struct App {
     pub params: Params,
     pub user: String,
     pub hostname: String,
+}
+
+#[async_trait]
+pub trait Processor {
+    async fn new() -> Self;
+    async fn load(&mut self, app: &App) -> Result<(), MaskerError>;
+    async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError>;
+    async fn run_cipher(
+        &mut self,
+        key: &str,
+        mode: &Mode,
+        standard: &Standard,
+        job_conf: &JobConfig,
+    ) -> Result<(), MaskerError>;
+    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError>;
 }
 
 impl App {
@@ -94,10 +110,10 @@ impl App {
 
         match &self.params.file_type {
             FileType::CSV => {
-                let mut csv_processor = CsvFileProcessor::default();
+                let mut processor: CsvFileProcessor = Processor::new().await;
 
                 let now = Instant::now();
-                csv_processor.load(self).await?;
+                processor.load(self).await?;
                 info!(
                     "load files to processor {} elapsed time {:?}",
                     "completed".bold().green(),
@@ -107,7 +123,7 @@ impl App {
                 match &self.params.mode {
                     Mode::MASK => {
                         let now = Instant::now();
-                        csv_processor.run_mask(&job_conf).await?;
+                        processor.run_mask(&job_conf).await?;
                         info!(
                             "{} data completed elapsed time {:?}",
                             Mode::MASK.to_string().bold().green(),
@@ -117,7 +133,7 @@ impl App {
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
                             let now = Instant::now();
-                            csv_processor
+                            processor
                                 .run_cipher(
                                     key,
                                     &self.params.mode,
@@ -144,7 +160,7 @@ impl App {
                 }
 
                 let now = Instant::now();
-                metrics = csv_processor
+                metrics = processor
                     .write(&self.params.output_path, &self.params.file_path)
                     .await?;
                 info!(

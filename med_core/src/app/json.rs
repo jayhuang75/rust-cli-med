@@ -1,33 +1,21 @@
 // use async_trait::async_trait;
 // use tracing::info;
 // use crate::utils::config::JobConfig;
-// use crate::utils::error::MaskerError;
+use crate::{models::metrics::Metrics, utils::error::MaskerError};
 // use crate::cmd::cli::Cli;
 // use crate::cmd::worker::Worker;
 
-// pub struct JsonFile {
-//     pub data: Option<Vec<serde_json::Value>>
-// }
+#[derive(Debug, Clone, Default)]
+pub struct JsonFile {
+    pub path: String,
+    pub total_keys: usize,
+    pub failed_keys: usize,
+    pub key_failed_reason: Vec<MaskerError>,
+    pub keys: Vec<String>,
+    pub data: Vec<serde_json::Value>,
+}
 
-// impl Default for JsonFile{
-//     fn default() -> Self {
-//         Self { data: None }
-//     }
-// }
-
-// // #[async_trait(?Send)]
-// // impl Producer for JsonFile {
-// //     async fn load(&self, params: &Cli) -> Result<(), MaskerError> {
-// //         info!("json loaded");
-// //         let new_worker = Worker::new(params.worker).await?;
-// //         Ok(())
-// //     }
-// //     async fn run(&self) -> Result<(), MaskerError> {
-// //         info!("json run");
-// //         Ok(())
-// //     }
-// //     async fn write(&self) -> Result<(), MaskerError> {
-// //         info!("json write");
-// //         Ok(())
-// //     }
-// // }
+pub struct JsonFileProcessor {
+    pub metrics: Metrics,
+    pub result: Vec<JsonFile>,
+}
