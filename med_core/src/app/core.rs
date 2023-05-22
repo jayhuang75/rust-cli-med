@@ -1,3 +1,4 @@
+use crate::app::json::JsonFileProcessor;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
 use async_trait::async_trait;
@@ -17,10 +18,10 @@ pub struct App {
     pub hostname: String,
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait Processor {
     async fn new() -> Self;
-    async fn load(&mut self, app: &App) -> Result<(), MaskerError>;
+    async fn load(&mut self, num_worker: &u16, file_path: &str) -> Result<(), MaskerError>;
     async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError>;
     async fn run_cipher(
         &mut self,
@@ -113,9 +114,10 @@ impl App {
                 let mut processor: CsvFileProcessor = Processor::new().await;
 
                 let now = Instant::now();
-                processor.load(self).await?;
+                processor.load(&self.params.worker, &self.params.file_path).await?;
                 info!(
-                    "load files to processor {} elapsed time {:?}",
+                    "load {:?} files to processor {} elapsed time {:?}",
+                    self.params.file_type,
                     "completed".bold().green(),
                     now.elapsed()
                 );
@@ -179,8 +181,18 @@ impl App {
                 }
             }
             FileType::JSON => {
-                todo!()
-            }
+                let mut processor: JsonFileProcessor = Processor::new().await;
+
+                let now = Instant::now();
+                processor.load(&self.params.worker, &self.params.file_path).await?;
+                info!(
+                    "load {:?} files to processor {} elapsed time {:?}",
+                    self.params.file_type,
+                    "completed".bold().green(),
+                    now.elapsed()
+                );
+                metrics = Metrics::default();        
+             }
         }
 
         Ok(metrics)

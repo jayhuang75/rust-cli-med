@@ -1,11 +1,13 @@
 use colored::Colorize;
 use csv::{StringRecord, Writer};
+use serde_json::Value;
 use threadpool::ThreadPool;
 use tracing::info;
 
 use crate::utils::error::{MaskerError, MaskerErrorType};
 
 use crate::app::csv::CsvFile;
+use crate::app::json::JsonFile;
 
 #[derive(Debug)]
 pub struct Worker {
@@ -76,5 +78,20 @@ impl Worker {
         });
         wtr.flush()?;
         Ok(())
+    }
+
+    pub fn read_json(tx: flume::Sender<JsonFile>, path: String) -> Result<(), MaskerError> {
+        let text = std::fs::read_to_string(&path).unwrap();        
+        let data = serde_json::from_str::<Value>(&text)?;
+        tx.send(JsonFile { path, data }).unwrap();
+        Ok(())
+    }
+
+    pub fn write_json(
+        masked_data: &JsonFile,
+        output_file: &str,
+        bar: &indicatif::ProgressBar,
+    ) -> Result<(), MaskerError> {
+        todo!()
     }
 }

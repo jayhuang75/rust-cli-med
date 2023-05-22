@@ -1,4 +1,3 @@
-use crate::app::core::App;
 use crate::app::worker::Worker;
 use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
@@ -31,23 +30,24 @@ pub struct CsvFileProcessor {
     pub result: Vec<CsvFile>,
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Processor for CsvFileProcessor {
     async fn new() -> Self {
         CsvFileProcessor::default()
     }
-    async fn load(&mut self, app: &App) -> Result<(), MaskerError> {
+    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MaskerError> {
         let (tx, rx) = flume::unbounded();
-        let new_worker = Worker::new(app.params.worker).await?;
+        let new_worker = Worker::new(num_workers.to_owned()).await?;
         let mut files_number: u64 = 0;
-        for entry in WalkDir::new(&app.params.file_path)
+
+        for entry in WalkDir::new(file_path)
             .follow_links(true)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| !e.path().is_dir())
         {
             let tx = tx.clone();
-            debug!("load files: {:?}", entry.path().display().to_string());
+            debug!("load csv files: {:?}", entry.path().display().to_string());
             files_number += 1;
             new_worker.pool.execute(move || {
                 Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
@@ -56,7 +56,7 @@ impl Processor for CsvFileProcessor {
 
         drop(tx);
 
-        let bar = get_progress_bar(files_number, "load files to processor");
+        let bar = get_progress_bar(files_number, "load csv files to processor");
         rx.iter().for_each(|item| {
             bar.inc(1);
             self.metrics.total_files += 1;
