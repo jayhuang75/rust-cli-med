@@ -1,19 +1,29 @@
 use async_trait::async_trait;
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, info};
 use walkdir::WalkDir;
 
 // use async_trait::async_trait;
 // use tracing::info;
 // use crate::utils::config::JobConfig;
-use crate::{models::{metrics::Metrics}, utils::{error::MaskerError, enums::{Mode, Standard}, config::JobConfig, progress_bar::get_progress_bar}};
+use crate::{
+    models::metrics::Metrics,
+    utils::{
+        config::JobConfig,
+        enums::{Mode, Standard},
+        error::MaskerError,
+        progress_bar::get_progress_bar,
+    },
+};
 
-use super::{core::{Processor}, worker::Worker};
+use super::{core::Processor, worker::Worker};
 // use crate::cmd::cli::Cli;
 // use crate::cmd::worker::Worker;
 
 #[derive(Debug, Clone, Default)]
 pub struct JsonFile {
     pub path: String,
+    pub total_records: usize,
     pub data: serde_json::Value,
 }
 
@@ -24,11 +34,11 @@ pub struct JsonFileProcessor {
 }
 
 #[async_trait(?Send)]
-impl Processor for JsonFileProcessor{
+impl Processor for JsonFileProcessor {
     async fn new() -> Self {
         JsonFileProcessor::default()
     }
-    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MaskerError>{
+    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MaskerError> {
         let (tx, rx) = flume::unbounded();
         let new_worker = Worker::new(num_workers.to_owned()).await?;
         let mut files_number: u64 = 0;
@@ -53,14 +63,26 @@ impl Processor for JsonFileProcessor{
         rx.iter().for_each(|item| {
             bar.inc(1);
             self.metrics.total_files += 1;
+            self.metrics.total_records += item.total_records;
             self.result.push(item);
         });
         bar.finish_and_clear();
         Ok(())
-
     }
     async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
-        todo!()
+        // let bar = get_progress_bar(self.metrics.total_records as u64, "masking json files");
+        self.result.par_iter().for_each(|item|{
+            if item.data.is_array() {
+                item.data.as_array().unwrap().par_iter().for_each(|item| {
+                    info!("data : {:?}", item);
+                });
+            }
+            if item.data.is_object() {
+                info!("data : {:?} is object", item.data);
+            }
+        });
+
+        Ok(())
     }
     async fn run_cipher(
         &mut self,

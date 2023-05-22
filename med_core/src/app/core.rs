@@ -191,7 +191,29 @@ impl App {
                     "completed".bold().green(),
                     now.elapsed()
                 );
-                metrics = Metrics::default();        
+                metrics = Metrics::default();
+
+                match &self.params.mode {
+                    Mode::MASK => {
+                        let now = Instant::now();
+                        processor.run_mask(&job_conf).await?;
+                        info!(
+                            "{} data completed elapsed time {:?}",
+                            Mode::MASK.to_string().bold().green(),
+                            now.elapsed()
+                        );
+                    }
+                    Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
+                        Some(key) => {
+                            
+                        }
+                        None => {
+                            
+                        }
+                    },
+                }
+
+                      
              }
         }
 

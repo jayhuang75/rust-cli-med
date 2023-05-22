@@ -73,7 +73,7 @@ impl Processor for CsvFileProcessor {
     }
 
     async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
-        let bar = get_progress_bar(self.metrics.total_records as u64, "masking files");
+        let bar = get_progress_bar(self.metrics.total_records as u64, "masking csv files");
 
         let new_result: Vec<CsvFile> = self
             .result
