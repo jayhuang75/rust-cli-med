@@ -73,7 +73,8 @@ impl Processor for JsonFileProcessor {
         // let bar = get_progress_bar(self.metrics.total_records as u64, "masking json files");
         let new_result: Vec<JsonFile> = self.result.par_iter().map(|item|{
             let mut new_json = JsonFile::default();
-            find_key(&mut item.data.clone(), job_conf);
+            let masked = find_key(&item.data, job_conf);
+            info!("masked : {:?}", masked);
             new_json.path = item.path.clone();
             new_json
         }).collect::<Vec<JsonFile>>();
