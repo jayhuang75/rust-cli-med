@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use tracing::{debug};
+use tracing::{debug, info};
 use walkdir::WalkDir;
 
 // use async_trait::async_trait;
@@ -73,7 +73,7 @@ impl Processor for JsonFileProcessor {
         // let bar = get_progress_bar(self.metrics.total_records as u64, "masking json files");
         let new_result: Vec<JsonFile> = self.result.par_iter().map(|item|{
             let mut new_json = JsonFile::default();
-            find_key(&item.data, job_conf);
+            find_key(&mut item.data.clone(), job_conf);
             new_json.path = item.path.clone();
             new_json
         }).collect::<Vec<JsonFile>>();
