@@ -2,3 +2,4 @@ mask_symbols: "#####" # mask symbols
 fields: # list of the cols/fields you want to mask 
   - name
   - email
+  - phone

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use tracing::{debug, info};
+use tracing::{debug};
 use walkdir::WalkDir;
 
 // use async_trait::async_trait;
@@ -12,7 +12,7 @@ use crate::{
         config::JobConfig,
         enums::{Mode, Standard},
         error::MaskerError,
-        progress_bar::get_progress_bar,
+        progress_bar::get_progress_bar, helpers::find_key,
     },
 };
 
@@ -71,16 +71,12 @@ impl Processor for JsonFileProcessor {
     }
     async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
         // let bar = get_progress_bar(self.metrics.total_records as u64, "masking json files");
-        self.result.par_iter().for_each(|item|{
-            if item.data.is_array() {
-                item.data.as_array().unwrap().par_iter().for_each(|item| {
-                    info!("data : {:?}", item);
-                });
-            }
-            if item.data.is_object() {
-                info!("data : {:?} is object", item.data);
-            }
-        });
+        let new_result: Vec<JsonFile> = self.result.par_iter().map(|item|{
+            let mut new_json = JsonFile::default();
+            find_key(&item.data, job_conf);
+            new_json.path = item.path.clone();
+            new_json
+        }).collect::<Vec<JsonFile>>();
 
         Ok(())
     }

@@ -1,8 +1,13 @@
 use std::fs;
 
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+use serde_json::Value;
+use tracing::info;
 use walkdir::WalkDir;
 
 use crate::utils::error::{MaskerError, MaskerErrorType};
+
+use crate::utils::config::JobConfig;
 
 pub fn check_if_field_exist_in_job_conf(indexs: Vec<usize>) {
     if indexs.is_empty() {
@@ -29,4 +34,32 @@ pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), M
             fs::create_dir_all(output_path).unwrap();
         });
     Ok(())
+}
+
+pub fn find_key(value: &Value, job_conf: &JobConfig) {
+    match value {
+        Value::Array(arr) => {
+            for a in arr {
+                if a.is_object() {
+                    find_key(a, job_conf);
+                }
+                job_conf.fields.par_iter().for_each(|field| {
+                    if let Some(mut key) = a.get(field) {
+                        info!("[array] level ----> {:?}", key);
+                        // if let Value::String(string) = &mut key {
+                        //     string.push_str(job_conf.mask_symbols.as_str());
+                        // }
+                    }
+                });
+            }
+        }
+        Value::Object(value) => {
+            value.values().into_iter().for_each(|item| {
+                if item.is_array() {
+                    find_key(item, job_conf);
+                }
+            });
+        }
+        _ => {}
+    }
 }
