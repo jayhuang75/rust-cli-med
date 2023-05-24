@@ -19,7 +19,7 @@ impl JobConfig {
                     cause: Some("load job configuration yaml file failed!".to_string()),
                     error_type: MaskerErrorType::ConfigError,
                 })
-            },
+            }
         };
         let config: JobConfig = serde_yaml::from_reader(f)?;
         Ok(config)

@@ -23,14 +23,6 @@ pub struct App {
 pub trait Processor {
     async fn new() -> Self;
     async fn load(&mut self, num_worker: &u16, file_path: &str) -> Result<(), MaskerError>;
-    async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError>;
-    async fn run_cipher(
-        &mut self,
-        key: &str,
-        mode: &Mode,
-        standard: &Standard,
-        job_conf: &JobConfig,
-    ) -> Result<(), MaskerError>;
     async fn run(
         &mut self,
         job_conf: &JobConfig,
@@ -132,10 +124,12 @@ impl App {
                     now.elapsed()
                 );
 
+                let now = Instant::now();
                 match &self.params.mode {
                     Mode::MASK => {
-                        let now = Instant::now();
-                        processor.run_mask(&job_conf).await?;
+                        processor
+                            .run(&job_conf, &self.params.mode, None, None)
+                            .await?;
                         info!(
                             "{} data completed elapsed time {:?}",
                             Mode::MASK.to_string().bold().green(),
@@ -144,13 +138,13 @@ impl App {
                     }
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
-                            let now = Instant::now();
+                            let cypher = Cypher::new(key);
                             processor
-                                .run_cipher(
-                                    key,
-                                    &self.params.mode,
-                                    &self.params.standard,
+                                .run(
                                     &job_conf,
+                                    &self.params.mode,
+                                    Some(&self.params.standard),
+                                    Some(&cypher),
                                 )
                                 .await?;
                             info!(
@@ -205,11 +199,13 @@ impl App {
                 );
                 metrics = Metrics::default();
 
+                let now = Instant::now();
                 match &self.params.mode {
                     Mode::MASK => {
-                        let now = Instant::now();
                         // processor.run_mask(&job_conf).await?;
-                        processor.run(&job_conf, &self.params.mode, None, None).await?;
+                        processor
+                            .run(&job_conf, &self.params.mode, None, None)
+                            .await?;
                         info!(
                             "{} data completed elapsed time {:?}",
                             Mode::MASK.to_string().bold().green(),
@@ -219,8 +215,19 @@ impl App {
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
                             let cypher = Cypher::new(key);
-                            info!("encrypt");
-                            processor.run(&job_conf, &self.params.mode, Some(&self.params.standard), Some(&cypher)).await?;
+                            processor
+                                .run(
+                                    &job_conf,
+                                    &self.params.mode,
+                                    Some(&self.params.standard),
+                                    Some(&cypher),
+                                )
+                                .await?;
+                            info!(
+                                "{} completed elapsed time {:?}",
+                                "cipher".bold().green(),
+                                now.elapsed()
+                            );
                         }
                         None => {
                             return Err(MaskerError {

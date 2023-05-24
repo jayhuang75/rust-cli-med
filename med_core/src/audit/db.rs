@@ -40,7 +40,6 @@ impl Database {
                 "audit database {} created",
                 database_url.display().to_string().bold().green()
             );
-            
         } else {
             info!(
                 "audit database {} exist",
@@ -60,7 +59,7 @@ impl Database {
             .max_connections(2)
             .connect_with(connection_options)
             .await?;
-        
+
         Self::create_table(&pool).await?;
 
         // Self::migrate(&pool).await?;

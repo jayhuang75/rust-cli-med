@@ -81,13 +81,18 @@ impl Worker {
     }
 
     pub fn read_json(tx: flume::Sender<JsonFile>, path: String) -> Result<(), MaskerError> {
-        let text = std::fs::read_to_string(&path)?;        
+        let text = std::fs::read_to_string(&path)?;
         let data = serde_json::from_str::<Value>(&text)?;
         let mut total_records: usize = 0;
         if data.is_array() {
             total_records = data.as_array().unwrap().len();
         }
-        tx.send(JsonFile { path, total_records, data }).unwrap();
+        tx.send(JsonFile {
+            path,
+            total_records,
+            data,
+        })
+        .unwrap();
         Ok(())
     }
 

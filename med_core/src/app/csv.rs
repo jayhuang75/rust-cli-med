@@ -72,7 +72,13 @@ impl Processor for CsvFileProcessor {
         Ok(())
     }
 
-    async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
+    async fn run(
+        &mut self,
+        job_conf: &JobConfig,
+        mode: &Mode,
+        standard: Option<&Standard>,
+        cypher: Option<&Cypher>,
+    ) -> Result<(), MaskerError> {
         let bar = get_progress_bar(self.metrics.total_records as u64, "masking csv files");
 
         let new_result: Vec<CsvFile> = self
@@ -103,13 +109,31 @@ impl Processor for CsvFileProcessor {
                         records.iter().enumerate().for_each(|(i, item)| {
                             match indexs.contains(&i) {
                                 true => {
-                                    let masked = job_conf.mask_symbols.clone();
+                                    let mut masked: String = String::new();
+                                    match mode {
+                                        Mode::MASK => {
+                                            masked = job_conf.mask_symbols.clone();
+                                        }
+                                        Mode::ENCRYPT => {
+                                            if let Some(cypher) = cypher {
+                                                if let Some(standard) = standard {
+                                                    masked = cypher.encrypt(item, standard).unwrap()
+                                                }
+                                            }
+                                        }
+                                        Mode::DECRYPT => {
+                                            if let Some(cypher) = cypher {
+                                                if let Some(standard) = standard {
+                                                    masked = cypher.decrypt(item, standard).unwrap()
+                                                }
+                                            }
+                                        }
+                                    }
                                     masked_record.push_field(&masked);
                                 }
                                 false => masked_record.push_field(item),
                             }
                         });
-
                         masked_record
                     })
                     .collect();
@@ -123,82 +147,6 @@ impl Processor for CsvFileProcessor {
         bar.finish_and_clear();
 
         Ok(())
-    }
-
-    async fn run_cipher(
-        &mut self,
-        key: &str,
-        mode: &Mode,
-        standard: &Standard,
-        job_conf: &JobConfig,
-    ) -> Result<(), MaskerError> {
-        let cypher = Cypher::new(key);
-        let bar: indicatif::ProgressBar =
-            get_progress_bar(self.metrics.total_records as u64, "cryptography files");
-
-        let new_result: Vec<CsvFile> = self
-            .result
-            .par_iter()
-            .map(|item| {
-                let mut new_csv = CsvFile {
-                    headers: item.headers.clone(),
-                    ..Default::default()
-                };
-
-                let indexs = item
-                    .headers
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
-                    .map(|(i, _)| i)
-                    .collect::<Vec<_>>();
-
-                check_if_field_exist_in_job_conf(indexs.clone());
-
-                let masked_data: Vec<StringRecord> = item
-                    .clone()
-                    .data
-                    .into_par_iter()
-                    .inspect(|_| bar.inc(1))
-                    .map(|records| {
-                        let mut masked_record: StringRecord = StringRecord::new();
-                        records.iter().enumerate().for_each(|(i, item)| {
-                            match indexs.contains(&i) {
-                                true => {
-                                    let masked: String;
-                                    match mode {
-                                        Mode::MASK => {
-                                            unimplemented!()
-                                        }
-                                        Mode::ENCRYPT => {
-                                            masked = cypher.encrypt(item, standard).unwrap()
-                                        }
-                                        Mode::DECRYPT => {
-                                            masked = cypher.decrypt(item, standard).unwrap()
-                                        }
-                                    }
-                                    masked_record.push_field(&masked);
-                                }
-                                false => masked_record.push_field(item),
-                            }
-                        });
-
-                        masked_record
-                    })
-                    .collect();
-                new_csv.path = item.path.clone();
-                new_csv.data = masked_data;
-                new_csv
-            })
-            .collect();
-        self.result = new_result;
-        bar.finish_and_clear();
-
-        Ok(())
-    }
-
-    async fn run(&mut self, job_conf: &JobConfig, mode: &Mode, standard: Option<&Standard>, cypher: Option<&Cypher>) -> Result<(), MaskerError> {
-        todo!()
     }
 
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {

@@ -36,63 +36,6 @@ pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), M
     Ok(())
 }
 
-pub fn json_find_and_mask(value: &mut Value, job_conf: &JobConfig) -> Value {
-    match value {
-        Value::Array(arr) => {
-            // debug!("[arr] {:?}", arr);
-            for item in arr {
-                if item.is_array() {
-                    json_find_and_mask(item, job_conf);
-                }
-
-                if item.is_object() {
-                    // info!("is obj {:?} ", val);
-                    item.as_object_mut()
-                        .unwrap()
-                        .into_iter()
-                        .for_each(|(key, val)| {
-                            //debug!("key: {:?}, val: {:?} ", key, val);
-                            //mask parent lvl
-                            if job_conf.fields.contains(key) {
-                                if let Value::String(mut masked_val) = val.to_owned() {
-                                    masked_val.clear();
-                                    masked_val.push_str(&job_conf.mask_symbols);
-                                    *val = Value::String(masked_val);
-                                }
-                            }
-
-                            if val.is_array() {
-                                json_find_and_mask(val, job_conf);
-                            }
-
-                            if val.is_object() {
-                                json_find_and_mask(val, job_conf);
-                            }
-                        });
-                }
-            }
-        }
-        Value::Object(obj) => {
-            for (key, val) in obj {
-                // debug!("key : {:?}, val: {:?}", key, val);
-                if val.is_array() {
-                    json_find_and_mask(val, job_conf);
-                } else {
-                    if job_conf.fields.contains(key) {
-                        if let Value::String(mut masked_val) = val.to_owned() {
-                            masked_val.clear();
-                            masked_val.push_str(&job_conf.mask_symbols);
-                            *val = Value::String(masked_val);
-                        }
-                    }
-                }
-            }
-        }
-        _ => {}
-    }
-    value.clone()
-}
-
 pub fn json_med_core(
     value: &mut Value,
     job_conf: &JobConfig,
@@ -118,10 +61,9 @@ pub fn json_med_core(
                             //mask parent lvl
                             if job_conf.fields.contains(key) {
                                 if let Value::String(mut masked_val) = val.to_owned() {
-                                    masked_val.clear();
-
                                     match mode {
                                         Mode::MASK => {
+                                            masked_val.clear();
                                             masked_val.push_str(&job_conf.mask_symbols);
                                         }
                                         Mode::ENCRYPT => {
@@ -130,6 +72,7 @@ pub fn json_med_core(
                                                     let masked = cypher
                                                         .encrypt(&masked_val, standard)
                                                         .unwrap();
+                                                    masked_val.clear();
                                                     masked_val.push_str(&masked);
                                                 }
                                             }
@@ -140,6 +83,7 @@ pub fn json_med_core(
                                                     let masked = cypher
                                                         .decrypt(&masked_val, standard)
                                                         .unwrap();
+                                                    masked_val.clear();
                                                     masked_val.push_str(&masked);
                                                 }
                                             }
@@ -165,36 +109,34 @@ pub fn json_med_core(
                 // debug!("key : {:?}, val: {:?}", key, val);
                 if val.is_array() {
                     json_med_core(val, job_conf, mode, standard, cypher);
-                } else {
-                    if job_conf.fields.contains(key) {
-                        if let Value::String(mut masked_val) = val.to_owned() {
-                            masked_val.clear();
-
-                            match mode {
-                                Mode::MASK => {
-                                    masked_val.push_str(&job_conf.mask_symbols);
-                                }
-                                Mode::ENCRYPT => {
-                                    if let Some(cypher) = cypher {
-                                        if let Some(standard) = standard {
-                                            let masked =
-                                                cypher.encrypt(&masked_val, standard).unwrap();
-                                            masked_val.push_str(&masked);
-                                        }
-                                    }
-                                }
-                                Mode::DECRYPT => {
-                                    if let Some(cypher) = cypher {
-                                        if let Some(standard) = standard {
-                                            let masked =
-                                                cypher.decrypt(&masked_val, standard).unwrap();
-                                            masked_val.push_str(&masked);
-                                        }
+                }
+                if job_conf.fields.contains(key) {
+                    if let Value::String(mut masked_val) = val.to_owned() {
+                        match mode {
+                            Mode::MASK => {
+                                masked_val.clear();
+                                masked_val.push_str(&job_conf.mask_symbols);
+                            }
+                            Mode::ENCRYPT => {
+                                if let Some(cypher) = cypher {
+                                    if let Some(standard) = standard {
+                                        let masked = cypher.encrypt(&masked_val, standard).unwrap();
+                                        masked_val.clear();
+                                        masked_val.push_str(&masked);
                                     }
                                 }
                             }
-                            *val = Value::String(masked_val);
+                            Mode::DECRYPT => {
+                                if let Some(cypher) = cypher {
+                                    if let Some(standard) = standard {
+                                        let masked = cypher.decrypt(&masked_val, standard).unwrap();
+                                        masked_val.clear();
+                                        masked_val.push_str(&masked);
+                                    }
+                                }
+                            }
                         }
+                        *val = Value::String(masked_val);
                     }
                 }
             }

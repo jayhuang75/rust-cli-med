@@ -10,10 +10,11 @@ use crate::{
     models::metrics::Metrics,
     utils::{
         config::JobConfig,
+        crypto::Cypher,
         enums::{Mode, Standard},
         error::MaskerError,
-        helpers::{json_med_core, json_find_and_mask},
-        progress_bar::get_progress_bar, crypto::Cypher,
+        helpers::json_med_core,
+        progress_bar::get_progress_bar,
     },
 };
 
@@ -70,36 +71,14 @@ impl Processor for JsonFileProcessor {
         bar.finish_and_clear();
         Ok(())
     }
-    async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {        
-        let bar = get_progress_bar(self.metrics.total_files as u64, "masking json files");
-        let new_result: Vec<JsonFile> = self
-            .result
-            .par_iter()
-            .inspect(|_| bar.inc(1))
-            .map(|item| {
-                let mut new_json = JsonFile::default();
-                let masked = json_find_and_mask(&mut item.data.clone(), job_conf);
-                new_json.path = item.path.clone();
-                new_json.data = masked;
-                new_json.total_records = self.metrics.total_records;
-                new_json
-            })
-            .collect::<Vec<JsonFile>>();
-        bar.finish_and_clear();
-        self.result = new_result;
-        Ok(())
-    }
-    async fn run_cipher(
-        &mut self,
-        key: &str,
-        mode: &Mode,
-        standard: &Standard,
-        job_conf: &JobConfig,
-    ) -> Result<(), MaskerError> {
-        todo!()  
-    }
 
-    async fn run(&mut self, job_conf: &JobConfig, mode: &Mode, standard: Option<&Standard>, cypher: Option<&Cypher>) -> Result<(), MaskerError>{
+    async fn run(
+        &mut self,
+        job_conf: &JobConfig,
+        mode: &Mode,
+        standard: Option<&Standard>,
+        cypher: Option<&Cypher>,
+    ) -> Result<(), MaskerError> {
         let bar = get_progress_bar(self.metrics.total_files as u64, "processing json files");
         let new_result: Vec<JsonFile> = self
             .result
@@ -107,7 +86,8 @@ impl Processor for JsonFileProcessor {
             .inspect(|_| bar.inc(1))
             .map(|item| {
                 let mut new_json = JsonFile::default();
-                let masked = json_med_core(&mut item.data.clone(), job_conf, mode, standard, cypher);
+                let masked =
+                    json_med_core(&mut item.data.clone(), job_conf, mode, standard, cypher);
                 new_json.path = item.path.clone();
                 new_json.data = masked;
                 new_json.total_records = self.metrics.total_records;
@@ -115,7 +95,8 @@ impl Processor for JsonFileProcessor {
             })
             .collect::<Vec<JsonFile>>();
         bar.finish_and_clear();
-        info!("test : {:?}", new_result);
+        info!("test: {:?}", new_result);
+
         self.result = new_result;
         Ok(())
     }
