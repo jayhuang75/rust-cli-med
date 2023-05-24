@@ -12,7 +12,8 @@ use crate::{
         config::JobConfig,
         enums::{Mode, Standard},
         error::MaskerError,
-        progress_bar::get_progress_bar, helpers::find_and_mask,
+        helpers::json_find_and_mask,
+        progress_bar::get_progress_bar,
     },
 };
 
@@ -69,16 +70,23 @@ impl Processor for JsonFileProcessor {
         bar.finish_and_clear();
         Ok(())
     }
-    async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {
-        // let bar = get_progress_bar(self.metrics.total_records as u64, "masking json files");
-        let new_result: Vec<JsonFile> = self.result.par_iter().map(|item|{
-            let mut new_json = JsonFile::default();
-            let masked = find_and_mask(&mut item.data.clone(), job_conf);
-            info!("masked : {:?}", masked);
-            new_json.path = item.path.clone();
-            new_json
-        }).collect::<Vec<JsonFile>>();
-
+    async fn run_mask(&mut self, job_conf: &JobConfig) -> Result<(), MaskerError> {        
+        let bar = get_progress_bar(self.metrics.total_files as u64, "masking json files");
+        let new_result: Vec<JsonFile> = self
+            .result
+            .par_iter()
+            .inspect(|_| bar.inc(1))
+            .map(|item| {
+                let mut new_json = JsonFile::default();
+                let masked = json_find_and_mask(&mut item.data.clone(), job_conf);
+                new_json.path = item.path.clone();
+                new_json.data = masked;
+                new_json.total_records = self.metrics.total_records;
+                new_json
+            })
+            .collect::<Vec<JsonFile>>();
+        bar.finish_and_clear();
+        self.result = new_result;
         Ok(())
     }
     async fn run_cipher(
@@ -88,6 +96,7 @@ impl Processor for JsonFileProcessor {
         standard: &Standard,
         job_conf: &JobConfig,
     ) -> Result<(), MaskerError> {
+        
         todo!()
     }
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
