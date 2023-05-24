@@ -12,7 +12,7 @@ use crate::{
         config::JobConfig,
         enums::{Mode, Standard},
         error::MaskerError,
-        progress_bar::get_progress_bar, helpers::find_key,
+        progress_bar::get_progress_bar, helpers::find_and_mask,
     },
 };
 
@@ -73,7 +73,7 @@ impl Processor for JsonFileProcessor {
         // let bar = get_progress_bar(self.metrics.total_records as u64, "masking json files");
         let new_result: Vec<JsonFile> = self.result.par_iter().map(|item|{
             let mut new_json = JsonFile::default();
-            let masked = find_key(&item.data, job_conf);
+            let masked = find_and_mask(&mut item.data.clone(), job_conf);
             info!("masked : {:?}", masked);
             new_json.path = item.path.clone();
             new_json

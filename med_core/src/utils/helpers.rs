@@ -1,13 +1,10 @@
 use std::fs;
 
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use serde_json::Value;
-use tracing::{debug, info};
-use walkdir::WalkDir;
-
-use crate::utils::error::{MaskerError, MaskerErrorType};
-
 use crate::utils::config::JobConfig;
+use crate::utils::error::{MaskerError, MaskerErrorType};
+use serde_json::Value;
+use tracing::info;
+use walkdir::WalkDir;
 
 pub fn check_if_field_exist_in_job_conf(indexs: Vec<usize>) {
     if indexs.is_empty() {
@@ -36,85 +33,59 @@ pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), M
     Ok(())
 }
 
-pub fn find_key(value: &Value, job_conf: &JobConfig) -> Value {
-    let mut array: Vec<Value> = vec![];
-    let mut map = serde_json::Map::new();
+pub fn find_and_mask(value: &mut Value, job_conf: &JobConfig) -> Value {
     match value {
-        Value::String(str_val) => {
-            info!("[str] {:?}", str_val);
-        }
         Value::Array(arr) => {
-            // info!("[arr] {:?}", arr);
-            for val in arr {
-                find_key(val, job_conf);
+            // debug!("[arr] {:?}", arr);
+            for item in arr {
+                if item.is_array() {
+                    find_and_mask(item, job_conf);
+                }
+
+                if item.is_object() {
+                    // info!("is obj {:?} ", val);
+                    item.as_object_mut()
+                        .unwrap()
+                        .into_iter()
+                        .for_each(|(key, val)| {
+                            //debug!("key: {:?}, val: {:?} ", key, val);
+                            //mask parent lvl
+                            if job_conf.fields.contains(key) {
+                                if let Value::String(mut masked_val) = val.to_owned() {
+                                    masked_val.clear();
+                                    masked_val.push_str(&job_conf.mask_symbols);
+                                    *val = Value::String(masked_val);
+                                }
+                            }
+
+                            if val.is_array() {
+                                find_and_mask(val, job_conf);
+                            }
+
+                            if val.is_object() {
+                                find_and_mask(val, job_conf);
+                            }
+                        });
+                }
             }
         }
         Value::Object(obj) => {
             for (key, val) in obj {
+                // debug!("key : {:?}, val: {:?}", key, val);
                 if val.is_array() {
-                    find_key(val, job_conf);
+                    find_and_mask(val, job_conf);
                 } else {
-                    // info!("[obj] key: {:?} : value: {:?}", key, val);
                     if job_conf.fields.contains(key) {
-                        if let Value::String(mut mask_val) = val.to_owned() {
-                            mask_val.clear();
-                            mask_val.push_str(&job_conf.mask_symbols);
-                            // map.insert(key.clone(), Value::String(val));
-                            info!("[obj] key: {:?} : value: {:?}", key, mask_val);
+                        if let Value::String(mut masked_val) = val.to_owned() {
+                            masked_val.clear();
+                            masked_val.push_str(&job_conf.mask_symbols);
+                            *val = Value::String(masked_val);
                         }
-                    } else {
-                        info!("[obj] key: {:?} : value: {:?}", key, val);
                     }
                 }
             }
         }
         _ => {}
     }
-    Value::Array(array)
+    value.clone()
 }
-
-// pub fn find_key(value: &Value, job_conf: &JobConfig) -> Value {
-//     let mut array: Vec<Value> = vec![];
-//     match value {
-//         Value::Array(arr) => {
-//             for a in arr {
-//                 // root level
-//                 // info!("[array] is array: {:?}", a.is_array());
-//                 // info!("[array] is object: {:?}", a.is_object());
-//                 let mut map = serde_json::Map::new();
-//                 if a.is_object() {
-//                     for (key, value) in a.as_object().unwrap() {
-//                         // info!("[array] {:?}:  {:?}", key, value);
-
-//                         if value.is_array() {
-//                             // info!("[array] before {:?} : {:?}", key, value);
-//                             let value_is_array = find_key(value, job_conf);
-//                             // info!("[array] after {:?} : {:?}", key, value_is_array);
-//                             map.insert(key.clone(), value_is_array);
-//                         } else {
-//                             map.insert(key.clone(), value.clone());
-//                             if job_conf.fields.contains(key) {
-//                                 if let Value::String(mut val) = value.to_owned() {
-//                                     val.clear();
-//                                     val.push_str(&job_conf.mask_symbols);
-//                                     map.insert(key.clone(), Value::String(val));
-//                                 }
-//                             } else {
-//                                 map.insert(key.clone(), value.clone());
-//                             }
-//                         }
-//                     }
-//                 }
-//                 array.push(Value::Object(map));
-//             }
-//         }
-//         Value::Object(value) => {
-//             for (key, value) in value {
-//                 info!("[obj] {:?}:  {:?}", key, value);
-//                 todo!("object based");
-//             }
-//         }
-//         _ => {}
-//     };
-//     Value::Array(array)
-// }
