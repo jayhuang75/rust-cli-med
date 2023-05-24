@@ -242,7 +242,6 @@ impl App {
                 }
             }
         }
-
         Ok(metrics)
     }
 }
