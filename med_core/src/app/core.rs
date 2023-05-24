@@ -1,4 +1,5 @@
 use crate::app::json::JsonFileProcessor;
+use crate::utils::crypto::Cypher;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
 use async_trait::async_trait;
@@ -29,6 +30,13 @@ pub trait Processor {
         mode: &Mode,
         standard: &Standard,
         job_conf: &JobConfig,
+    ) -> Result<(), MaskerError>;
+    async fn run(
+        &mut self,
+        job_conf: &JobConfig,
+        mode: &Mode,
+        standard: Option<&Standard>,
+        cypher: Option<&Cypher>,
     ) -> Result<(), MaskerError>;
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError>;
 }
@@ -114,7 +122,9 @@ impl App {
                 let mut processor: CsvFileProcessor = Processor::new().await;
 
                 let now = Instant::now();
-                processor.load(&self.params.worker, &self.params.file_path).await?;
+                processor
+                    .load(&self.params.worker, &self.params.file_path)
+                    .await?;
                 info!(
                     "load {:?} files to processor {} elapsed time {:?}",
                     self.params.file_type,
@@ -184,7 +194,9 @@ impl App {
                 let mut processor: JsonFileProcessor = Processor::new().await;
 
                 let now = Instant::now();
-                processor.load(&self.params.worker, &self.params.file_path).await?;
+                processor
+                    .load(&self.params.worker, &self.params.file_path)
+                    .await?;
                 info!(
                     "load {:?} files to processor {} elapsed time {:?}",
                     self.params.file_type,
@@ -196,7 +208,8 @@ impl App {
                 match &self.params.mode {
                     Mode::MASK => {
                         let now = Instant::now();
-                        processor.run_mask(&job_conf).await?;
+                        // processor.run_mask(&job_conf).await?;
+                        processor.run(&job_conf, &self.params.mode, None, None).await?;
                         info!(
                             "{} data completed elapsed time {:?}",
                             Mode::MASK.to_string().bold().green(),
@@ -205,16 +218,22 @@ impl App {
                     }
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
-                            
+                            let cypher = Cypher::new(key);
+                            info!("encrypt");
+                            processor.run(&job_conf, &self.params.mode, Some(&self.params.standard), Some(&cypher)).await?;
                         }
                         None => {
-                            
+                            return Err(MaskerError {
+                                message: Some(
+                                    "Missing key for Encyption and Decryption input!".to_string(),
+                                ),
+                                cause: Some("missing -k or --key".to_string()),
+                                error_type: MaskerErrorType::ConfigError,
+                            })
                         }
                     },
                 }
-
-                      
-             }
+            }
         }
 
         Ok(metrics)

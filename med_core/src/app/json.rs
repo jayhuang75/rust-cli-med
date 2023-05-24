@@ -12,8 +12,8 @@ use crate::{
         config::JobConfig,
         enums::{Mode, Standard},
         error::MaskerError,
-        helpers::json_find_and_mask,
-        progress_bar::get_progress_bar,
+        helpers::{json_med_core, json_find_and_mask},
+        progress_bar::get_progress_bar, crypto::Cypher,
     },
 };
 
@@ -96,9 +96,30 @@ impl Processor for JsonFileProcessor {
         standard: &Standard,
         job_conf: &JobConfig,
     ) -> Result<(), MaskerError> {
-        
-        todo!()
+        todo!()  
     }
+
+    async fn run(&mut self, job_conf: &JobConfig, mode: &Mode, standard: Option<&Standard>, cypher: Option<&Cypher>) -> Result<(), MaskerError>{
+        let bar = get_progress_bar(self.metrics.total_files as u64, "processing json files");
+        let new_result: Vec<JsonFile> = self
+            .result
+            .par_iter()
+            .inspect(|_| bar.inc(1))
+            .map(|item| {
+                let mut new_json = JsonFile::default();
+                let masked = json_med_core(&mut item.data.clone(), job_conf, mode, standard, cypher);
+                new_json.path = item.path.clone();
+                new_json.data = masked;
+                new_json.total_records = self.metrics.total_records;
+                new_json
+            })
+            .collect::<Vec<JsonFile>>();
+        bar.finish_and_clear();
+        info!("test : {:?}", new_result);
+        self.result = new_result;
+        Ok(())
+    }
+
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
         todo!()
     }

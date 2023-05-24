@@ -5,6 +5,10 @@ use crate::utils::error::{MaskerError, MaskerErrorType};
 use serde_json::Value;
 use walkdir::WalkDir;
 
+use crate::utils::enums::{Mode, Standard};
+
+use crate::utils::crypto::Cypher;
+
 pub fn check_if_field_exist_in_job_conf(indexs: Vec<usize>) {
     if indexs.is_empty() {
         eprintln!(
@@ -89,13 +93,19 @@ pub fn json_find_and_mask(value: &mut Value, job_conf: &JobConfig) -> Value {
     value.clone()
 }
 
-pub fn json_find_and_cipher(value: &mut Value, job_conf: &JobConfig) -> Value {
+pub fn json_med_core(
+    value: &mut Value,
+    job_conf: &JobConfig,
+    mode: &Mode,
+    standard: Option<&Standard>,
+    cypher: Option<&Cypher>,
+) -> Value {
     match value {
         Value::Array(arr) => {
             // debug!("[arr] {:?}", arr);
             for item in arr {
                 if item.is_array() {
-                    json_find_and_mask(item, job_conf);
+                    json_med_core(item, job_conf, mode, standard, cypher);
                 }
 
                 if item.is_object() {
@@ -109,17 +119,42 @@ pub fn json_find_and_cipher(value: &mut Value, job_conf: &JobConfig) -> Value {
                             if job_conf.fields.contains(key) {
                                 if let Value::String(mut masked_val) = val.to_owned() {
                                     masked_val.clear();
-                                    masked_val.push_str(&job_conf.mask_symbols);
+
+                                    match mode {
+                                        Mode::MASK => {
+                                            masked_val.push_str(&job_conf.mask_symbols);
+                                        }
+                                        Mode::ENCRYPT => {
+                                            if let Some(cypher) = cypher {
+                                                if let Some(standard) = standard {
+                                                    let masked = cypher
+                                                        .encrypt(&masked_val, standard)
+                                                        .unwrap();
+                                                    masked_val.push_str(&masked);
+                                                }
+                                            }
+                                        }
+                                        Mode::DECRYPT => {
+                                            if let Some(cypher) = cypher {
+                                                if let Some(standard) = standard {
+                                                    let masked = cypher
+                                                        .decrypt(&masked_val, standard)
+                                                        .unwrap();
+                                                    masked_val.push_str(&masked);
+                                                }
+                                            }
+                                        }
+                                    }
                                     *val = Value::String(masked_val);
                                 }
                             }
 
                             if val.is_array() {
-                                json_find_and_mask(val, job_conf);
+                                json_med_core(val, job_conf, mode, standard, cypher);
                             }
 
                             if val.is_object() {
-                                json_find_and_mask(val, job_conf);
+                                json_med_core(val, job_conf, mode, standard, cypher);
                             }
                         });
                 }
@@ -129,12 +164,35 @@ pub fn json_find_and_cipher(value: &mut Value, job_conf: &JobConfig) -> Value {
             for (key, val) in obj {
                 // debug!("key : {:?}, val: {:?}", key, val);
                 if val.is_array() {
-                    json_find_and_mask(val, job_conf);
+                    json_med_core(val, job_conf, mode, standard, cypher);
                 } else {
                     if job_conf.fields.contains(key) {
                         if let Value::String(mut masked_val) = val.to_owned() {
                             masked_val.clear();
-                            masked_val.push_str(&job_conf.mask_symbols);
+
+                            match mode {
+                                Mode::MASK => {
+                                    masked_val.push_str(&job_conf.mask_symbols);
+                                }
+                                Mode::ENCRYPT => {
+                                    if let Some(cypher) = cypher {
+                                        if let Some(standard) = standard {
+                                            let masked =
+                                                cypher.encrypt(&masked_val, standard).unwrap();
+                                            masked_val.push_str(&masked);
+                                        }
+                                    }
+                                }
+                                Mode::DECRYPT => {
+                                    if let Some(cypher) = cypher {
+                                        if let Some(standard) = standard {
+                                            let masked =
+                                                cypher.decrypt(&masked_val, standard).unwrap();
+                                            masked_val.push_str(&masked);
+                                        }
+                                    }
+                                }
+                            }
                             *val = Value::String(masked_val);
                         }
                     }

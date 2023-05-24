@@ -197,6 +197,10 @@ impl Processor for CsvFileProcessor {
         Ok(())
     }
 
+    async fn run(&mut self, job_conf: &JobConfig, mode: &Mode, standard: Option<&Standard>, cypher: Option<&Cypher>) -> Result<(), MaskerError> {
+        todo!()
+    }
+
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
         create_output_dir(output_dir, file_dir).await?;
         let bar: indicatif::ProgressBar =
