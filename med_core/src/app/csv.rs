@@ -5,7 +5,7 @@ use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
 use crate::utils::error::MaskerError;
-use crate::utils::helpers::{check_if_field_exist_in_job_conf, create_output_dir};
+use crate::utils::helpers::{csv_fields_exist, create_output_dir};
 use crate::utils::progress_bar::get_progress_bar;
 use async_trait::async_trait;
 use csv::StringRecord;
@@ -90,15 +90,8 @@ impl Processor for CsvFileProcessor {
                     headers: item.headers.clone(),
                     ..Default::default()
                 };
-                let indexs = item
-                    .headers
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
-                    .map(|(i, _)| i)
-                    .collect::<Vec<_>>();
 
-                check_if_field_exist_in_job_conf(indexs.clone());
+                let indexs = csv_fields_exist(item.headers.clone(), &job_conf.fields);
 
                 let masked_data: Vec<StringRecord> = item
                     .clone()

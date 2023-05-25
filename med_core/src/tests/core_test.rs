@@ -1,6 +1,6 @@
 use crate::app::core::App;
 use crate::models::enums::{AppMode, FileType, Mode, Standard};
-use crate::models::params::Params;
+use crate::models::params::{Params};
 use crate::utils::config::JobConfig;
 use crate::utils::error::MaskerError;
 use crate::utils::error::MaskerErrorType::ConfigError;
@@ -16,6 +16,7 @@ async fn test_params_init() {
     assert_eq!(new_params.mode, Mode::MASK);
     assert_eq!(new_params.standard, Standard::DES64);
     assert_eq!(new_params.key, Some("".to_owned()));
+    assert_eq!(new_params.to_string(), "app_mode: cli, file_path: , file_type: csv, conf_path: , output_path: , mode: mask, key: Some(\"\"), debug: false, worker: 2");
 }
 
 #[tokio::test]
