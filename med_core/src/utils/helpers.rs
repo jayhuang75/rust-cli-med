@@ -1,21 +1,21 @@
-use std::fs;
 use crate::utils::config::JobConfig;
-use crate::utils::error::{MaskerError};
+use crate::utils::error::MaskerError;
 use csv::StringRecord;
 use serde_json::Value;
+use std::fs;
 use walkdir::WalkDir;
 
 use crate::models::enums::{Mode, Standard};
 use crate::utils::crypto::Cypher;
 
-pub fn csv_fields_exist(headers: StringRecord, fields: &Vec<String>) -> Vec<usize> {
+pub fn csv_fields_exist(headers: StringRecord, fields: &[String]) -> Vec<usize> {
     let indexs = headers
         .iter()
         .enumerate()
         .filter(|(_, item)| fields.contains(&item.to_string()))
         .map(|(i, _)| i)
         .collect::<Vec<_>>();
-    
+
     if indexs.is_empty() {
         std::process::exit(1);
     }
@@ -44,8 +44,6 @@ pub fn json_med_core(
     standard: Option<&Standard>,
     cypher: Option<&Cypher>,
 ) -> Value {
-    use tracing::info;
-
     match value {
         Value::Array(arr) => {
             // debug!("[arr] {:?}", arr);
@@ -94,7 +92,7 @@ pub fn json_med_core(
                                     }
                                     *val = Value::String(masked_val);
                                 }
-                            } 
+                            }
 
                             if val.is_array() {
                                 json_med_core(val, job_conf, mode, standard, cypher);

@@ -1,5 +1,5 @@
-use csv::StringRecord;
 use crate::utils::helpers::csv_fields_exist;
+use csv::StringRecord;
 
 #[tokio::test]
 async fn test_csv_fields_exist() {

@@ -7,11 +7,11 @@ use colored::Colorize;
 use std::path::Path;
 use tokio::time::Instant;
 use tracing::{debug, info};
-use tracing_subscriber::fmt::format;
 
 use crate::app::csv::CsvFileProcessor;
 use crate::models::enums::{FileType, Mode, Standard};
 use crate::models::{metrics::Metrics, params::Params};
+use crate::utils::logger::logging;
 
 pub struct App {
     pub params: Params,
@@ -35,7 +35,7 @@ pub trait Processor {
 
 impl App {
     pub async fn new(params: Params) -> Result<Self, MaskerError> {
-        Self::logging(params.debug).await;
+        logging(params.debug).await;
 
         let user = whoami::username();
         let hostname = whoami::hostname();
@@ -62,30 +62,6 @@ impl App {
         let conf = JobConfig::new(Path::new(&self.params.conf_path)).await?;
         debug!("{} {:?}", "job config".bold().green(), conf);
         Ok(conf)
-    }
-
-    /// Privite function init the tracing
-    /// params: debug bool
-    async fn logging(debug: bool) {
-        let subscriber = tracing_subscriber::fmt() // disabling time is handy because CloudWatch will add the ingestion time.
-            .event_format(format().compact());
-
-        match debug {
-            true => {
-                subscriber
-                    .with_line_number(true)
-                    .with_target(true)
-                    .with_file(true)
-                    .with_max_level(tracing::Level::DEBUG)
-                    .init();
-            }
-            false => {
-                subscriber
-                    .with_target(false)
-                    .with_max_level(tracing::Level::INFO)
-                    .init();
-            }
-        }
     }
 
     pub async fn process(&mut self) -> Result<Metrics, MaskerError> {

@@ -5,7 +5,7 @@ use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
 use crate::utils::error::MaskerError;
-use crate::utils::helpers::{csv_fields_exist, create_output_dir};
+use crate::utils::helpers::{create_output_dir, csv_fields_exist};
 use crate::utils::progress_bar::get_progress_bar;
 use async_trait::async_trait;
 use csv::StringRecord;
