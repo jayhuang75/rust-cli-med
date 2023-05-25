@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::Write;
+
 use colored::Colorize;
 use csv::{StringRecord, Writer};
 use serde_json::Value;
@@ -96,11 +99,11 @@ impl Worker {
         Ok(())
     }
 
-    pub fn write_json(
-        masked_data: &JsonFile,
-        output_file: &str,
-        bar: &indicatif::ProgressBar,
-    ) -> Result<(), MaskerError> {
-        todo!()
+    pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MaskerError> {
+        let mut json_file = File::create(output_file)?;
+        let data = serde_json::to_string(masked_data)?;
+        json_file.write_all(data.as_bytes())?;
+        json_file.sync_data()?;
+        Ok(())
     }
 }

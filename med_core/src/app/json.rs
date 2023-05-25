@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use tracing::{debug, info};
+use tracing::debug;
 use walkdir::WalkDir;
 
 // use async_trait::async_trait;
@@ -13,7 +13,7 @@ use crate::{
         crypto::Cypher,
         enums::{Mode, Standard},
         error::MaskerError,
-        helpers::json_med_core,
+        helpers::{create_output_dir, json_med_core},
         progress_bar::get_progress_bar,
     },
 };
@@ -95,13 +95,23 @@ impl Processor for JsonFileProcessor {
             })
             .collect::<Vec<JsonFile>>();
         bar.finish_and_clear();
-        info!("test: {:?}", new_result);
-
         self.result = new_result;
         Ok(())
     }
 
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
-        todo!()
+        create_output_dir(output_dir, file_dir).await?;
+        let bar: indicatif::ProgressBar =
+            get_progress_bar(self.metrics.total_records as u64, "write files");
+        self.result
+            .par_iter()
+            .inspect(|_| bar.inc(1))
+            .for_each(|item| {
+                let output_files = format!("{}/{}", output_dir, item.path);
+                debug!("write to path: {:?}", output_files);
+                Worker::write_json(&item.data, &output_files).unwrap();
+            });
+        bar.finish_and_clear();
+        Ok(self.metrics.clone())
     }
 }

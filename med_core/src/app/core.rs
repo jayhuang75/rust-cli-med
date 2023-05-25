@@ -197,7 +197,6 @@ impl App {
                     "completed".bold().green(),
                     now.elapsed()
                 );
-                metrics = Metrics::default();
 
                 let now = Instant::now();
                 match &self.params.mode {
@@ -239,6 +238,25 @@ impl App {
                             })
                         }
                     },
+                }
+
+                let now = Instant::now();
+                metrics = processor
+                    .write(&self.params.output_path, &self.params.file_path)
+                    .await?;
+                info!(
+                    "write to folder {} completed elapsed time {:?}",
+                    self.params.output_path.bold().green(),
+                    now.elapsed()
+                );
+
+                match &self.params.key {
+                    Some(_) => {
+                        self.params.key = Some("*****".to_string());
+                    }
+                    None => {
+                        self.params.key = None;
+                    }
                 }
             }
         }
