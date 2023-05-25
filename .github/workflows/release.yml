@@ -78,7 +78,7 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp med_cli/conf_csv.yaml target/release/
+          cp demo/conf/conf_csv.yaml target/release/
           tar --directory=target/release -cf macos_x86_archive.tar.gz med conf_csv.yaml
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
@@ -102,7 +102,7 @@ jobs:
           cargo build --release --target aarch64-apple-darwin
       - name: tar
         run: |
-          cp med_cli/conf_csv.yaml target/aarch64-apple-darwin/release
+          cp demo/conf/conf_csv.yaml target/aarch64-apple-darwin/release
           tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med conf_csv.yaml
       - name: Upload binaries arm to release  
         uses: softprops/action-gh-release@v1
