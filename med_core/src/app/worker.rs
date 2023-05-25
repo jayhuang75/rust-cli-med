@@ -1,11 +1,16 @@
+use std::fs::File;
+use std::io::Write;
+
 use colored::Colorize;
 use csv::{StringRecord, Writer};
+use serde_json::Value;
 use threadpool::ThreadPool;
 use tracing::info;
 
 use crate::utils::error::{MaskerError, MaskerErrorType};
 
 use crate::app::csv::CsvFile;
+use crate::app::json::JsonFile;
 
 #[derive(Debug)]
 pub struct Worker {
@@ -75,6 +80,30 @@ impl Worker {
             wtr.write_record(item).unwrap();
         });
         wtr.flush()?;
+        Ok(())
+    }
+
+    pub fn read_json(tx: flume::Sender<JsonFile>, path: String) -> Result<(), MaskerError> {
+        let text = std::fs::read_to_string(&path)?;
+        let data = serde_json::from_str::<Value>(&text)?;
+        let mut total_records: usize = 0;
+        if data.is_array() {
+            total_records = data.as_array().unwrap().len();
+        }
+        tx.send(JsonFile {
+            path,
+            total_records,
+            data,
+        })
+        .unwrap();
+        Ok(())
+    }
+
+    pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MaskerError> {
+        let mut json_file = File::create(output_file)?;
+        let data = serde_json::to_string(masked_data)?;
+        json_file.write_all(data.as_bytes())?;
+        json_file.sync_data()?;
         Ok(())
     }
 }

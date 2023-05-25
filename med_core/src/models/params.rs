@@ -2,9 +2,9 @@ use std::fmt;
 
 use serde::Serialize;
 
-use crate::utils::enums::{AppMode, FileType, Mode, Standard};
+use crate::models::enums::{AppMode, FileType, Mode, Standard};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Params {
     pub app_mode: AppMode,
     pub file_path: String,

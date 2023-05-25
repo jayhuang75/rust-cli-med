@@ -60,8 +60,9 @@ impl Database {
             .connect_with(connection_options)
             .await?;
 
-        // Self::migrate(&pool).await?;
         Self::create_table(&pool).await?;
+
+        // Self::migrate(&pool).await?;
         Ok(Database { pool })
     }
 
@@ -71,7 +72,7 @@ impl Database {
     }
 
     async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MaskerError> {
-        let result = sqlx::query(
+        let _ = sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS audit (
                 id INTEGER PRIMARY KEY,
@@ -90,7 +91,7 @@ impl Database {
         )
         .execute(pool)
         .await?;
-        info!("audit database {:?} create successed", result);
+        // info!("audit database {:?} create successed", result);
         Ok(())
     }
 

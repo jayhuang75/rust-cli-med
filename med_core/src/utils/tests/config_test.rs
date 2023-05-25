@@ -11,15 +11,7 @@ async fn test_new_config_failed_load() {
             unimplemented!()
         }
         Err(err) => {
-            assert_eq!(err.error_type, MaskerErrorType::IoError);
+            assert_eq!(err.error_type, MaskerErrorType::ConfigError);
         }
     }
 }
-
-// #[tokio::test]
-// async fn test_tracing_setup() {
-//     let path = Path::new("conf.yml");
-//     let config = Config::new(path).await.unwrap();
-//     config.tracing().await;
-
-// }

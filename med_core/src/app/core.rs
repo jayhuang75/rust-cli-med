@@ -1,5 +1,8 @@
+use crate::app::json::JsonFileProcessor;
+use crate::utils::crypto::Cypher;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
+use async_trait::async_trait;
 use colored::Colorize;
 use std::path::Path;
 use tokio::time::Instant;
@@ -7,13 +10,27 @@ use tracing::{debug, info};
 use tracing_subscriber::fmt::format;
 
 use crate::app::csv::CsvFileProcessor;
+use crate::models::enums::{FileType, Mode, Standard};
 use crate::models::{metrics::Metrics, params::Params};
-use crate::utils::enums::{FileType, Mode};
 
 pub struct App {
     pub params: Params,
     pub user: String,
     pub hostname: String,
+}
+
+#[async_trait(?Send)]
+pub trait Processor {
+    async fn new() -> Self;
+    async fn load(&mut self, num_worker: &u16, file_path: &str) -> Result<(), MaskerError>;
+    async fn run(
+        &mut self,
+        job_conf: &JobConfig,
+        mode: &Mode,
+        standard: Option<&Standard>,
+        cypher: Option<&Cypher>,
+    ) -> Result<(), MaskerError>;
+    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError>;
 }
 
 impl App {
@@ -94,20 +111,25 @@ impl App {
 
         match &self.params.file_type {
             FileType::CSV => {
-                let mut csv_processor = CsvFileProcessor::default();
+                let mut processor: CsvFileProcessor = Processor::new().await;
 
                 let now = Instant::now();
-                csv_processor.load(self).await?;
+                processor
+                    .load(&self.params.worker, &self.params.file_path)
+                    .await?;
                 info!(
-                    "load files to processor {} elapsed time {:?}",
+                    "load {:?} files to processor {} elapsed time {:?}",
+                    self.params.file_type,
                     "completed".bold().green(),
                     now.elapsed()
                 );
 
+                let now = Instant::now();
                 match &self.params.mode {
                     Mode::MASK => {
-                        let now = Instant::now();
-                        csv_processor.run_mask(&job_conf).await?;
+                        processor
+                            .run(&job_conf, &self.params.mode, None, None)
+                            .await?;
                         info!(
                             "{} data completed elapsed time {:?}",
                             Mode::MASK.to_string().bold().green(),
@@ -116,13 +138,13 @@ impl App {
                     }
                     Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
                         Some(key) => {
-                            let now = Instant::now();
-                            csv_processor
-                                .run_cipher(
-                                    key,
-                                    &self.params.mode,
-                                    &self.params.standard,
+                            let cypher = Cypher::new(key);
+                            processor
+                                .run(
                                     &job_conf,
+                                    &self.params.mode,
+                                    Some(&self.params.standard),
+                                    Some(&cypher),
                                 )
                                 .await?;
                             info!(
@@ -144,7 +166,7 @@ impl App {
                 }
 
                 let now = Instant::now();
-                metrics = csv_processor
+                metrics = processor
                     .write(&self.params.output_path, &self.params.file_path)
                     .await?;
                 info!(
@@ -163,10 +185,85 @@ impl App {
                 }
             }
             FileType::JSON => {
-                todo!()
+                let mut processor: JsonFileProcessor = Processor::new().await;
+
+                let now = Instant::now();
+                processor
+                    .load(&self.params.worker, &self.params.file_path)
+                    .await?;
+                info!(
+                    "load {:?} files to processor {} elapsed time {:?}",
+                    self.params.file_type,
+                    "completed".bold().green(),
+                    now.elapsed()
+                );
+
+                let now = Instant::now();
+                match &self.params.mode {
+                    Mode::MASK => {
+                        // processor.run_mask(&job_conf).await?;
+                        processor
+                            .run(&job_conf, &self.params.mode, None, None)
+                            .await?;
+                        info!(
+                            "{} data completed elapsed time {:?}",
+                            Mode::MASK.to_string().bold().green(),
+                            now.elapsed()
+                        );
+                    }
+                    Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
+                        Some(key) => {
+                            let cypher = Cypher::new(key);
+                            processor
+                                .run(
+                                    &job_conf,
+                                    &self.params.mode,
+                                    Some(&self.params.standard),
+                                    Some(&cypher),
+                                )
+                                .await?;
+                            info!(
+                                "{} completed elapsed time {:?}",
+                                "cipher".bold().green(),
+                                now.elapsed()
+                            );
+                        }
+                        None => {
+                            return Err(MaskerError {
+                                message: Some(
+                                    "Missing key for Encyption and Decryption input!".to_string(),
+                                ),
+                                cause: Some("missing -k or --key".to_string()),
+                                error_type: MaskerErrorType::ConfigError,
+                            })
+                        }
+                    },
+                }
+
+                let now = Instant::now();
+                metrics = processor
+                    .write(&self.params.output_path, &self.params.file_path)
+                    .await?;
+                info!(
+                    "write to folder {} completed elapsed time {:?}",
+                    self.params.output_path.bold().green(),
+                    now.elapsed()
+                );
+
+                match &self.params.key {
+                    Some(_) => {
+                        self.params.key = Some("*****".to_string());
+                    }
+                    None => {
+                        self.params.key = None;
+                    }
+                }
             }
         }
-
         Ok(metrics)
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/core_test.rs"]
+mod core_test;

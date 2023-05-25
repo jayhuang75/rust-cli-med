@@ -19,7 +19,6 @@ async fn main() -> Result<(), MaskerError> {
     let mut new_app = App::new(params).await?;
 
     let mut audit_summary = AuditSummary {
-        runtime_conf: serde_json::to_string(&new_app.params)?,
         ..Default::default()
     };
 
@@ -44,6 +43,7 @@ async fn main() -> Result<(), MaskerError> {
     }
     audit_summary.user = new_app.user;
     audit_summary.hostname = new_app.hostname;
+    audit_summary.runtime_conf = serde_json::to_string(&new_app.params)?;
 
     let audit_id = audit_db.insert(&audit_summary).await?;
 
