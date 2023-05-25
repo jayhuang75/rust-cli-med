@@ -5,7 +5,10 @@ on:
     types: [created]
 
 jobs:
+  tests:
+    uses: ./.github/workflows/ci.yml 
   release:
+    needs: [tests]  # require tests to pass before deploy runs
     name: ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
