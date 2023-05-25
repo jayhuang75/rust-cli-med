@@ -145,3 +145,7 @@ pub fn json_med_core(
     }
     value.clone()
 }
+
+#[cfg(test)]
+#[path = "./tests/helpers_test.rs"]
+mod helpers_test;

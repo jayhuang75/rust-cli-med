@@ -11,6 +11,7 @@ use med_core::utils::error::MaskerError;
 use cli::app::Cli;
 
 #[tokio::main]
+#[cfg(not(tarpaulin_include))]
 async fn main() -> Result<(), MaskerError> {
     let now = Instant::now();
     let new_cli = Cli::new().await?;
