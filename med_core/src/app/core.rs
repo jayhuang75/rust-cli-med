@@ -10,8 +10,8 @@ use tracing::{debug, info};
 use tracing_subscriber::fmt::format;
 
 use crate::app::csv::CsvFileProcessor;
+use crate::models::enums::{FileType, Mode, Standard};
 use crate::models::{metrics::Metrics, params::Params};
-use crate::utils::enums::{FileType, Mode, Standard};
 
 pub struct App {
     pub params: Params,
@@ -263,3 +263,7 @@ impl App {
         Ok(metrics)
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/core_test.rs"]
+mod core_test;

@@ -5,7 +5,7 @@ use crate::utils::error::{MaskerError, MaskerErrorType};
 use serde_json::Value;
 use walkdir::WalkDir;
 
-use crate::utils::enums::{Mode, Standard};
+use crate::models::enums::{Mode, Standard};
 
 use crate::utils::crypto::Cypher;
 

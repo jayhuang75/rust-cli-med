@@ -3,7 +3,7 @@ use magic_crypt::{
     MagicCryptTrait,
 };
 
-use super::enums::Standard;
+use crate::models::enums::Standard;
 
 #[derive(Debug, Clone)]
 pub struct Cypher {

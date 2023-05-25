@@ -1,10 +1,8 @@
 use crate::cli::custom_validation::{dir_exist, worker_in_range};
 use clap::{arg, command, value_parser, ArgMatches};
+use med_core::models::enums::{FileType, Mode, Standard};
 use med_core::models::params::Params;
-use med_core::utils::{
-    enums::{FileType, Mode, Standard},
-    error::MaskerError,
-};
+use med_core::utils::error::MaskerError;
 use std::path::PathBuf;
 use tracing::log::info;
 

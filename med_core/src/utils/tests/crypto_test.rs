@@ -1,4 +1,5 @@
-use crate::utils::{crypto::Cypher, enums::Standard};
+use crate::models::enums::Standard;
+use crate::utils::crypto::Cypher;
 
 #[tokio::test]
 async fn test_crypto_data() {

@@ -1,8 +1,9 @@
 use crate::app::worker::Worker;
+use crate::models::enums::Mode;
+use crate::models::enums::Standard;
 use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
-use crate::utils::enums::{Mode, Standard};
 use crate::utils::error::MaskerError;
 use crate::utils::helpers::{check_if_field_exist_in_job_conf, create_output_dir};
 use crate::utils::progress_bar::get_progress_bar;

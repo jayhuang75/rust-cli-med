@@ -3,7 +3,7 @@ use std::fmt;
 use clap::{builder::PossibleValue, ValueEnum};
 use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Default, PartialEq)]
 pub enum FileType {
     #[default]
     CSV,
@@ -77,7 +77,7 @@ impl std::fmt::Debug for Mode {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, PartialEq)]
 #[allow(dead_code)]
 #[derive(Default)]
 pub enum AppMode {

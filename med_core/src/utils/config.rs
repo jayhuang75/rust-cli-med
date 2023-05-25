@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::utils::error::{MaskerError, MaskerErrorType};
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct JobConfig {
     pub mask_symbols: String,
     pub fields: Vec<String>,

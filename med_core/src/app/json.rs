@@ -7,11 +7,10 @@ use walkdir::WalkDir;
 // use tracing::info;
 // use crate::utils::config::JobConfig;
 use crate::{
-    models::metrics::Metrics,
+    models::{enums::Mode, enums::Standard, metrics::Metrics},
     utils::{
         config::JobConfig,
         crypto::Cypher,
-        enums::{Mode, Standard},
         error::MaskerError,
         helpers::{create_output_dir, json_med_core},
         progress_bar::get_progress_bar,
