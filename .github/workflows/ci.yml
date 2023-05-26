@@ -103,3 +103,24 @@ jobs:
         with:
           command: clippy
           args: "-- -D warnings"
+  
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Run cargo-tarpaulin
+        uses: actions-rs/tarpaulin@v0.1
+        with:
+          version: '0.25.2'
+          args: '-- --test-threads 2'
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
