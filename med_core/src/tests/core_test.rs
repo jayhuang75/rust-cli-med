@@ -2,8 +2,8 @@ use crate::app::core::App;
 use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
 use crate::utils::config::JobConfig;
-use crate::utils::error::{MaskerError, MaskerErrorType};
 use crate::utils::error::MaskerErrorType::ConfigError;
+use crate::utils::error::{MaskerError, MaskerErrorType};
 
 #[tokio::test]
 async fn test_csv_mask_app() {
@@ -68,7 +68,9 @@ async fn test_csv_cypher_without_key() {
     new_app.load_job_config().await.unwrap();
 
     match new_app.process().await {
-        Ok(_) => {unimplemented!()}
+        Ok(_) => {
+            unimplemented!()
+        }
         Err(e) => {
             assert_eq!(e.error_type, MaskerErrorType::ConfigError);
         }
@@ -145,7 +147,9 @@ async fn test_json_cypher_without_key() {
     new_app.load_job_config().await.unwrap();
 
     match new_app.process().await {
-        Ok(_) => {unimplemented!()}
+        Ok(_) => {
+            unimplemented!()
+        }
         Err(e) => {
             assert_eq!(e.error_type, MaskerErrorType::ConfigError);
         }
