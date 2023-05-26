@@ -6,20 +6,6 @@ use crate::utils::error::MaskerError;
 use crate::utils::error::MaskerErrorType::ConfigError;
 
 #[tokio::test]
-async fn test_params_init() {
-    let new_params = Params::default();
-    assert_eq!(new_params.app_mode, AppMode::CLI);
-    assert_eq!(new_params.debug, false);
-    assert_eq!(new_params.file_type, FileType::CSV);
-    assert_eq!(new_params.file_path, "");
-    assert_eq!(new_params.conf_path, "");
-    assert_eq!(new_params.mode, Mode::MASK);
-    assert_eq!(new_params.standard, Standard::DES64);
-    assert_eq!(new_params.key, Some("".to_owned()));
-    assert_eq!(new_params.to_string(), "app_mode: cli, file_path: , file_type: csv, conf_path: , output_path: , mode: mask, key: Some(\"\"), debug: false, worker: 2");
-}
-
-#[tokio::test]
 async fn test_csv_mask_app() {
     let mut new_params = Params::default();
     new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
@@ -55,16 +41,6 @@ async fn test_csv_mask_app() {
 
     let metrics = new_app.process().await.unwrap();
     assert_eq!(metrics.total_files, 0);
-}
-
-#[tokio::test]
-async fn test_logger() {
-    let mut new_params = Params::default();
-    new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
-    new_params.debug = true;
-
-    let new_app = App::new(new_params.clone()).await.unwrap();
-    assert_eq!(new_app.params.debug, true);
 }
 
 #[tokio::test]

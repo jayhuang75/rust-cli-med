@@ -28,3 +28,7 @@ pub async fn logging(debug: bool) {
         }
     });
 }
+
+#[cfg(test)]
+#[path = "./tests/logger_test.rs"]
+mod logger_test;

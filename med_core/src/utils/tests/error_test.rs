@@ -5,7 +5,7 @@ use indicatif::ProgressBar;
 use serde_json::Value;
 
 use crate::{
-    app::{csv::CsvFile, worker::Worker},
+    app::csv::CsvFile,
     utils::{
         config::JobConfig,
         crypto::Cypher,
@@ -13,6 +13,7 @@ use crate::{
         helpers::{write_csv, write_json},
     },
 };
+
 #[tokio::test]
 async fn test_message() {
     let msg = "Io Error message".to_string();
