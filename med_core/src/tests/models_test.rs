@@ -121,6 +121,7 @@ async fn test_enum() {
             assert_eq!(e, "invalid variant: test");
         }
     }
+
 }
 
 #[tokio::test]
