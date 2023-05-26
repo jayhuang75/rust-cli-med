@@ -27,6 +27,7 @@ pub struct AuditSummary {
     pub successed: bool,
 }
 
+#[cfg(not(tarpaulin_include))]
 impl Database {
     pub async fn new() -> Result<Database, MaskerError> {
         let database_url = Self::create_audit_db().await?;
@@ -94,32 +95,6 @@ impl Database {
         // info!("audit database {:?} create successed", result);
         Ok(())
     }
-
-    // #[allow(dead_code)]
-    // async fn migrate(pool: &Pool<Sqlite>) -> Result<(), MaskerError> {
-    //     // let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-    //     // info!("crate dir {}", crate_dir);
-
-    //     let migrations = Path::new(DATABASE_MIGRATE_URL);
-    //     info!(
-    //         "db migration path {}",
-    //         migrations.display().to_string().bold().green()
-    //     );
-
-    //     sqlx::migrate::Migrator::new(migrations)
-    //         .await
-    //         .unwrap()
-    //         .run(pool)
-    //         .await?;
-
-    //     info!(
-    //         "audit database {} {}",
-    //         DATABASE_URL,
-    //         "migrated".bold().green()
-    //     );
-
-    //     Ok(())
-    // }
 
     pub async fn insert(&mut self, summary: &AuditSummary) -> Result<i64, MaskerError> {
         let total_files = summary.total_files as i64;

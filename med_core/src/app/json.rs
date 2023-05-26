@@ -12,7 +12,7 @@ use crate::{
         config::JobConfig,
         crypto::Cypher,
         error::MaskerError,
-        helpers::{create_output_dir, json_med_core},
+        helpers::{create_output_dir, json_med_core, read_json, write_json},
         progress_bar::get_progress_bar,
     },
 };
@@ -54,7 +54,7 @@ impl Processor for JsonFileProcessor {
             debug!("load json files: {:?}", entry.path().display().to_string());
             files_number += 1;
             new_worker.pool.execute(move || {
-                Worker::read_json(tx, entry.path().display().to_string()).unwrap();
+                read_json(tx, entry.path().display().to_string()).unwrap();
             });
         }
 
@@ -108,7 +108,7 @@ impl Processor for JsonFileProcessor {
             .for_each(|item| {
                 let output_files = format!("{}/{}", output_dir, item.path);
                 debug!("write to path: {:?}", output_files);
-                Worker::write_json(&item.data, &output_files).unwrap();
+                write_json(&item.data, &output_files).unwrap();
             });
         bar.finish_and_clear();
         Ok(self.metrics.clone())

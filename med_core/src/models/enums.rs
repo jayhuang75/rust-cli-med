@@ -90,7 +90,7 @@ impl std::fmt::Debug for AppMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::CLI => write!(f, "cli"),
-            Self::SDK => write!(f, "sdj"),
+            Self::SDK => write!(f, "sdk"),
         }
     }
 }
