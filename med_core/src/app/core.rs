@@ -150,15 +150,6 @@ impl App {
                     self.params.output_path.bold().green(),
                     now.elapsed()
                 );
-
-                match &self.params.key {
-                    Some(_) => {
-                        self.params.key = Some("*****".to_string());
-                    }
-                    None => {
-                        self.params.key = None;
-                    }
-                }
             }
             FileType::JSON => {
                 let mut processor: JsonFileProcessor = Processor::new().await;
@@ -225,15 +216,6 @@ impl App {
                     self.params.output_path.bold().green(),
                     now.elapsed()
                 );
-
-                match &self.params.key {
-                    Some(_) => {
-                        self.params.key = Some("*****".to_string());
-                    }
-                    None => {
-                        self.params.key = None;
-                    }
-                }
             }
         }
         Ok(metrics)
