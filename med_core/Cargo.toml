@@ -15,7 +15,6 @@ colored = { workspace=true }
 num_cpus = { workspace = true }
 serde_json = { workspace = true}
 
-
 async-trait = "0.1.68"
 rayon = "1.7.0"
 sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "offline"] }
@@ -32,5 +31,5 @@ whoami = "1.4.0"
 
 dirs = "5.0.1"
 
-# [build-dependencies]
-# openssl = { workspace = true }
+[build-dependencies]
+openssl = { workspace = true }

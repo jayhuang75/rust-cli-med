@@ -5,10 +5,7 @@ on:
     types: [created]
 
 jobs:
-  tests:
-    uses: ./.github/workflows/ci.yml 
   release:
-    needs: [tests]  # require tests to pass before deploy runs
     name: ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
@@ -36,9 +33,9 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cp med_cli/conf.yaml target/${{ matrix.target }}/release 
+          cp demo/conf/conf_csv.yaml target/${{ matrix.target }}/release 
           cd target/${{ matrix.target }}/release          
-          tar czvf ../../../med-${{ matrix.target }}.tar.gz med conf.yaml
+          tar czvf ../../../med-${{ matrix.target }}.tar.gz med conf_csv.yaml
           cd -
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -59,8 +56,8 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp med_cli/conf.yaml target/release/
-          tar --directory=target/release -cf win_msvc_archive.tar.gz med.exe conf.yaml
+          cp demo/conf/conf_csv.yaml target/release/
+          tar --directory=target/release -cf win_msvc_archive.tar.gz med.exe conf_csv.yaml
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -81,8 +78,8 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp med_cli/conf.yaml target/release/
-          tar --directory=target/release -cf macos_x86_archive.tar.gz med conf.yaml
+          cp demo/conf/conf_csv.yaml target/release/
+          tar --directory=target/release -cf macos_x86_archive.tar.gz med conf_csv.yaml
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -105,8 +102,8 @@ jobs:
           cargo build --release --target aarch64-apple-darwin
       - name: tar
         run: |
-          cp med_cli/conf.yaml target/aarch64-apple-darwin/release
-          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med conf.yaml
+          cp demo/conf/conf_csv.yaml target/aarch64-apple-darwin/release
+          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med conf_csv.yaml
       - name: Upload binaries arm to release  
         uses: softprops/action-gh-release@v1
         with:

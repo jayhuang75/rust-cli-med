@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/jayhuang75/rust-cli-med/workflows/ci/badge.svg)](https://github.com/jayhuang75/rust-cli-med/actions) 
+
 # M.E.D. (Mask, Encrypt, Decrypt)
 
 ## Background & Motivation

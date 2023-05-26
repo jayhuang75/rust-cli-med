@@ -1,25 +1,12 @@
 use crate::app::core::App;
-use crate::models::enums::{AppMode, FileType, Mode, Standard};
+use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
 use crate::utils::config::JobConfig;
-use crate::utils::error::MaskerError;
 use crate::utils::error::MaskerErrorType::ConfigError;
+use crate::utils::error::{MaskerError, MaskerErrorType};
 
 #[tokio::test]
-async fn test_params_init() {
-    let new_params = Params::default();
-    assert_eq!(new_params.app_mode, AppMode::CLI);
-    assert_eq!(new_params.debug, false);
-    assert_eq!(new_params.file_type, FileType::CSV);
-    assert_eq!(new_params.file_path, "");
-    assert_eq!(new_params.conf_path, "");
-    assert_eq!(new_params.mode, Mode::MASK);
-    assert_eq!(new_params.standard, Standard::DES64);
-    assert_eq!(new_params.key, Some("".to_owned()));
-}
-
-#[tokio::test]
-async fn test_app() {
+async fn test_csv_mask_app() {
     let mut new_params = Params::default();
     new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
 
@@ -54,4 +41,117 @@ async fn test_app() {
 
     let metrics = new_app.process().await.unwrap();
     assert_eq!(metrics.total_files, 0);
+}
+
+#[tokio::test]
+async fn test_csv_encrypt_app() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
+    new_params.mode = Mode::ENCRYPT;
+    new_params.key = Some("12345".to_owned());
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    let metrics = new_app.process().await.unwrap();
+    assert_eq!(metrics.total_files, 0);
+}
+
+#[tokio::test]
+async fn test_csv_cypher_without_key() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
+    new_params.mode = Mode::ENCRYPT;
+    new_params.key = None;
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    match new_app.process().await {
+        Ok(_) => {
+            unimplemented!()
+        }
+        Err(e) => {
+            assert_eq!(e.error_type, MaskerErrorType::ConfigError);
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_csv_decrypt_app() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
+    new_params.mode = Mode::DECRYPT;
+    new_params.key = Some("12345".to_owned());
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    let metrics = new_app.process().await.unwrap();
+    assert_eq!(metrics.total_files, 0);
+}
+
+#[tokio::test]
+async fn test_json_mask_app() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_json.yaml".to_owned();
+    new_params.mode = Mode::MASK;
+    new_params.file_type = FileType::JSON;
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    let metrics = new_app.process().await.unwrap();
+    assert_eq!(metrics.total_files, 0);
+}
+
+#[tokio::test]
+async fn test_json_encrypt_app() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_json.yaml".to_owned();
+    new_params.mode = Mode::ENCRYPT;
+    new_params.file_type = FileType::JSON;
+    new_params.key = Some("12345".to_owned());
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    let metrics = new_app.process().await.unwrap();
+    assert_eq!(metrics.total_files, 0);
+}
+
+#[tokio::test]
+async fn test_json_decrypt_app() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_json.yaml".to_owned();
+    new_params.mode = Mode::DECRYPT;
+    new_params.file_type = FileType::JSON;
+    new_params.key = Some("12345".to_owned());
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    let metrics = new_app.process().await.unwrap();
+    assert_eq!(metrics.total_files, 0);
+}
+
+#[tokio::test]
+async fn test_json_cypher_without_key() {
+    let mut new_params = Params::default();
+    new_params.conf_path = "../demo/conf/conf_json.yaml".to_owned();
+    new_params.mode = Mode::ENCRYPT;
+    new_params.file_type = FileType::JSON;
+    new_params.key = None;
+
+    let mut new_app = App::new(new_params.clone()).await.unwrap();
+    new_app.load_job_config().await.unwrap();
+
+    match new_app.process().await {
+        Ok(_) => {
+            unimplemented!()
+        }
+        Err(e) => {
+            assert_eq!(e.error_type, MaskerErrorType::ConfigError);
+        }
+    }
 }

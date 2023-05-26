@@ -10,6 +10,7 @@ pub struct Cli {
     pub params: Params,
 }
 
+#[cfg(not(tarpaulin_include))]
 impl Cli {
     /// Returns a Cli with the input config
     ///

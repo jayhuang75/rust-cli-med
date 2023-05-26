@@ -25,3 +25,45 @@ pub fn dir_exist(s: &str) -> Result<PathBuf, String> {
         false => Err(format!("{} not exist", s)),
     }
 }
+
+//************************************************************************************************
+// Unit Test
+//////////////////////////////// */
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::{dir_exist, worker_in_range};
+
+    #[test]
+    fn test_worker_in_range() {
+        match worker_in_range(&num_cpus::get().to_string()) {
+            Ok(num) => {
+                assert_eq!(num, num_cpus::get() as u16);
+            }
+            Err(e) => {
+                assert_eq!(e,format!("worker is over your current max cores, consider lower the workerworker not in range 2-{:?} (max)", num_cpus::get()));
+            }
+        }
+    }
+
+    #[test]
+    fn test_dir_exist() {
+        match dir_exist("./") {
+            Ok(path) => {
+                assert_eq!(path, PathBuf::from("./"));
+            }
+            Err(e) => {
+                assert_eq!(e, "");
+            }
+        }
+        match dir_exist("./test") {
+            Ok(path) => {
+                assert_eq!(path, PathBuf::from("./"));
+            }
+            Err(e) => {
+                assert_eq!(e, "./test not exist");
+            }
+        }
+    }
+}

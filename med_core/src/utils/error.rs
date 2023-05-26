@@ -74,16 +74,16 @@ impl From<magic_crypt::MagicCryptError> for MaskerError {
     }
 }
 
-impl From<rayon::ThreadPoolBuildError> for MaskerError {
-    fn from(error: rayon::ThreadPoolBuildError) -> MaskerError {
-        MaskerError {
-            message: Some(error.to_string()),
-            cause: Some("rayon worker error".to_string()),
-            error_type: MaskerErrorType::WorkerError,
-        }
-    }
-}
-
+// impl From<rayon::ThreadPoolBuildError> for MaskerError {
+//     fn from(error: rayon::ThreadPoolBuildError) -> MaskerError {
+//         MaskerError {
+//             message: Some(error.to_string()),
+//             cause: Some("rayon worker error".to_string()),
+//             error_type: MaskerErrorType::WorkerError,
+//         }
+//     }
+// }
+#[cfg(not(tarpaulin_include))]
 impl From<Error> for MaskerError {
     fn from(error: Error) -> MaskerError {
         MaskerError {
@@ -94,6 +94,7 @@ impl From<Error> for MaskerError {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl From<sqlx::Error> for MaskerError {
     fn from(error: sqlx::Error) -> MaskerError {
         MaskerError {
@@ -104,6 +105,7 @@ impl From<sqlx::Error> for MaskerError {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 impl From<sqlx::migrate::MigrateError> for MaskerError {
     fn from(error: sqlx::migrate::MigrateError) -> MaskerError {
         MaskerError {

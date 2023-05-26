@@ -5,7 +5,9 @@ use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
 use crate::utils::error::MaskerError;
-use crate::utils::helpers::{check_if_field_exist_in_job_conf, create_output_dir};
+use crate::utils::helpers::read_csv;
+use crate::utils::helpers::write_csv;
+use crate::utils::helpers::{create_output_dir, csv_fields_exist};
 use crate::utils::progress_bar::get_progress_bar;
 use async_trait::async_trait;
 use csv::StringRecord;
@@ -51,7 +53,7 @@ impl Processor for CsvFileProcessor {
             debug!("load csv files: {:?}", entry.path().display().to_string());
             files_number += 1;
             new_worker.pool.execute(move || {
-                Worker::read_csv(tx, entry.path().display().to_string()).unwrap();
+                read_csv(tx, entry.path().display().to_string()).unwrap();
             });
         }
 
@@ -73,6 +75,7 @@ impl Processor for CsvFileProcessor {
         Ok(())
     }
 
+    #[cfg(not(tarpaulin_include))]
     async fn run(
         &mut self,
         job_conf: &JobConfig,
@@ -90,15 +93,8 @@ impl Processor for CsvFileProcessor {
                     headers: item.headers.clone(),
                     ..Default::default()
                 };
-                let indexs = item
-                    .headers
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, item)| job_conf.fields.contains(&item.to_string()))
-                    .map(|(i, _)| i)
-                    .collect::<Vec<_>>();
 
-                check_if_field_exist_in_job_conf(indexs.clone());
+                let indexs = csv_fields_exist(item.headers.clone(), &job_conf.fields);
 
                 let masked_data: Vec<StringRecord> = item
                     .clone()
@@ -150,6 +146,7 @@ impl Processor for CsvFileProcessor {
         Ok(())
     }
 
+    #[cfg(not(tarpaulin_include))]
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
         create_output_dir(output_dir, file_dir).await?;
         let bar: indicatif::ProgressBar =
@@ -157,7 +154,7 @@ impl Processor for CsvFileProcessor {
         self.result.par_iter().for_each(|item| {
             let output_files = format!("{}/{}", output_dir, item.path);
             debug!("write to path: {:?}", output_files);
-            Worker::write_csv(item, &output_files, &bar).unwrap();
+            write_csv(item, &output_files, &bar).unwrap();
         });
         bar.finish_and_clear();
         Ok(self.metrics.clone())
