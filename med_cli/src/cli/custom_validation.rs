@@ -42,7 +42,7 @@ mod tests {
                 assert_eq!(num, num_cpus::get() as u16);
             }
             Err(e) => {
-                assert_eq!(e,format!("worker is over your current max cores, consider lower the workerworker not in range 2-{:?}(max)", num_cpus::get()));
+                assert_eq!(e,format!("worker is over your current max cores, consider lower the workerworker not in range 2-{:?} (max)", num_cpus::get()));
             }
         }
     }
