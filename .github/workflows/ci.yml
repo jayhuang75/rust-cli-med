@@ -10,9 +10,9 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-defaults:
-  run:
-    working-directory: med_cli
+# defaults:
+#   run:
+#     working-directory: med_cli
 
 jobs:
   check:
@@ -124,3 +124,5 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
