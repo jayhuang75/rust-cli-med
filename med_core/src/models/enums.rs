@@ -35,7 +35,7 @@ impl ValueEnum for Mode {
 
     fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
         Some(match self {
-            Mode::MASK => PossibleValue::new("mask").help("Mask the data by *"),
+            Mode::MASK => PossibleValue::new("mask").help("Masking the data"),
             Mode::ENCRYPT => {
                 PossibleValue::new("encrypt").help("Encrypt the data with provided KEY")
             }
@@ -89,8 +89,8 @@ pub enum AppMode {
 impl std::fmt::Debug for AppMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::CLI => write!(f, "cli"),
-            Self::SDK => write!(f, "sdj"),
+            Self::CLI => write!(f, "CLI"),
+            Self::SDK => write!(f, "SDK"),
         }
     }
 }
@@ -98,8 +98,8 @@ impl std::fmt::Debug for AppMode {
 impl fmt::Display for AppMode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            AppMode::CLI => write!(f, "cli"),
-            AppMode::SDK => write!(f, "sdk"),
+            AppMode::CLI => write!(f, "CLI"),
+            AppMode::SDK => write!(f, "SDK"),
         }
     }
 }
@@ -165,3 +165,7 @@ impl std::fmt::Debug for Standard {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/models_test.rs"]
+mod models_test;

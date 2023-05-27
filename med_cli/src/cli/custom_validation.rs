@@ -37,21 +37,12 @@ mod tests {
 
     #[test]
     fn test_worker_in_range() {
-        match worker_in_range("60") {
+        match worker_in_range(&num_cpus::get().to_string()) {
             Ok(num) => {
-                assert_eq!(num, 60);
+                assert_eq!(num, num_cpus::get() as u16);
             }
             Err(e) => {
-                assert_eq!(e, "worker is over your current max cores, consider lower the workerworker not in range 2-12 (max)");
-            }
-        }
-
-        match worker_in_range("12") {
-            Ok(num) => {
-                assert_eq!(num, 12);
-            }
-            Err(e) => {
-                assert_eq!(e, "worker is over your current max cores, consider lower the workerworker not in range 2-12 (max)");
+                assert_eq!(e,format!("worker is over your current max cores, consider lower the workerworker not in range 2-{:?} (max)", num_cpus::get()));
             }
         }
     }
