@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Wei Huang <jayhuang75@hotmail.com>"]
 license = "Apache-2.0"
-description = "A tool to Masking, Encryption, and Decryption."
+description = "A Rust Powered CLI tool for CSV/JSON Masking, Encryption, and Decryption."
 readme = "README.md"
 homepage = "https://github.com/jayhuang75/rust-cli-med"
 repository = "https://github.com/jayhuang75/rust-cli-med"
@@ -25,6 +25,6 @@ tracing-subscriber = { workspace = true }
 colored = { workspace = true }
 num_cpus = { workspace = true }
 serde_json = { workspace = true}
-med_core = { path = "../med_core" }
+med_core = { version = "0.1.0", path = "../med_core"}
 
 
