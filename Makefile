@@ -7,17 +7,19 @@ update_debian:
 	sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y && sudo apt autoclean -y
 
 .PHONY:
-run:
-	RUST_LOG=info cargo run -q --release| bunyan
+json_encrypt:
+	cargo run --bin med encrypt -t json -f demo/data/json -c demo/conf/conf_json.yaml -w 12 -k 1q2w3er -s des64
 
 .PHONY:
-db_migration:
-	sqlx database create
-	sqlx migrate run
+json_mask:
+	cargo run --bin med mask -t json -f demo/data/json -c demo/conf/conf_json.yaml -w 12
 
 .PHONY:
-db_reset:
-	sqlx database drop
-	sqlx database create
-	sqlx migrate run
+csv_mask:
+	cargo run --bin med mask -f demo/data/csv -c demo/conf/conf_csv.yaml -w 12
+
+.PHONY:
+csv_encrypt:
+	cargo run --bin med encrypt -f demo/data/csv -c demo/conf/conf_csv.yaml -w 12 -k 1q2w3e4r -s des64
+
 
