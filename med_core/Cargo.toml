@@ -1,8 +1,15 @@
 [package]
 name = "med_core"
 version = "0.1.0"
-authors = ["wei <jayhuang75@gmail.com>"]
 edition = "2021"
+authors = ["Wei Huang <jayhuang75@hotmail.com>"]
+license = "Apache-2.0"
+description = "A Rust Powered Core Engine for M.E.D. Masking, Encryption, and Decryption CSV/JSON"
+readme = "README.md"
+homepage = "https://github.com/jayhuang75/rust-cli-med"
+repository = "https://github.com/jayhuang75/rust-cli-med"
+keywords = ["cli", "encrypt", "decrypt", "masking"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
