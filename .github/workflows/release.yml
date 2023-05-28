@@ -33,9 +33,9 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cp demo/conf/conf_csv.yaml target/${{ matrix.target }}/release 
+          cp -R demo target/${{ matrix.target }}/release 
           cd target/${{ matrix.target }}/release          
-          tar czvf ../../../med-${{ matrix.target }}.tar.gz med conf_csv.yaml
+          tar czvf ../../../med-${{ matrix.target }}.tar.gz med demo/
           cd -
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -56,8 +56,8 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp demo/conf/conf_csv.yaml target/release/
-          tar --directory=target/release -cf win_msvc_archive.tar.gz med.exe conf_csv.yaml
+          cp -R demo target/release/
+          tar --directory=target/release -cf win_msvc_archive.tar.gz med.exe demo/
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -78,8 +78,8 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp demo/conf/conf_csv.yaml target/release/
-          tar --directory=target/release -cf macos_x86_archive.tar.gz med conf_csv.yaml
+          cp -R demo target/release/
+          tar --directory=target/release -cf macos_x86_archive.tar.gz med demo/
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -102,8 +102,8 @@ jobs:
           cargo build --release --target aarch64-apple-darwin
       - name: tar
         run: |
-          cp demo/conf/conf_csv.yaml target/aarch64-apple-darwin/release
-          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med conf_csv.yaml
+          cp -R demo target/aarch64-apple-darwin/release
+          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med demo/
       - name: Upload binaries arm to release  
         uses: softprops/action-gh-release@v1
         with:
