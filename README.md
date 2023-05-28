@@ -24,5 +24,8 @@ There are 2 main crates in this package.
 - [ ] Application Architecture Design
 - [ ] Rust code level documentation
 
-## Contribution
+## Contributions
 
+I gladly accept contributions via GitHub pull requests. However please complete the [template](.github/workflows/PULL_REQUEST_TEMPLATE.md) before the PR.
+
+Thank you!
