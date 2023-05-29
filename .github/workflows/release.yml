@@ -17,12 +17,7 @@ jobs:
     name: Extract crate metadata
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build Changelog
-      id: github_release
-      uses: mikepenz/release-changelog-builder-action@v3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+    - uses: actions/checkout@v3 
     - name: Extract crate information
       id: crate_metadata
       run: |
@@ -35,11 +30,11 @@ jobs:
         version: ${{ steps.crate_metadata.outputs.version }}
         maintainer: ${{ steps.crate_metadata.outputs.maintainer }}
         homepage: ${{ steps.crate_metadata.outputs.homepage }}  
-    
+      
   create-release:
     name: create-release
     runs-on: ubuntu-latest
-    needs: [crate_metadata, github_release]
+    needs: crate_metadata
     steps:
       - name: Get the release version from the tag
         shell: bash
@@ -47,6 +42,11 @@ jobs:
         run: |
           echo "MED_VERSION=${{needs.crate_metadata.outputs.version}}" >> $GITHUB_ENV
           echo "version is: ${{ env.MED_VERSION }}"
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
       - name: Create GitHub release
         id: release
         uses: actions/create-release@v1
@@ -55,7 +55,7 @@ jobs:
         with:
           tag_name: ${{ env.MED_VERSION }}
           release_name: ${{ env.MED_VERSION }}
-          body: ${{needs.github_release.outputs.changelog}}
+          body: ${{steps.github_release.outputs.changelog}}
   build-release:
     name: ${{ matrix.target }}
     runs-on: ubuntu-latest
