@@ -1,49 +1,56 @@
 name: Release
 
+# on:
+#   release:
+#     types: [created]
+
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - "development"
+  pull_request:
+    branches: [development]
 
 jobs:
-  release:
-    name: ${{ matrix.target }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [x86_64-unknown-linux-gnu,x86_64-unknown-linux-musl]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          target: ${{ matrix.target }}
+  # release:
+  #   name: ${{ matrix.target }}
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       target: [x86_64-unknown-linux-gnu,x86_64-unknown-linux-musl]
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v1
+  #     - name: Install rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         profile: minimal
+  #         override: true
+  #         target: ${{ matrix.target }}
 
-      - name: Build target
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target ${{ matrix.target }}
+  #     - name: Build target
+  #       uses: actions-rs/cargo@v1
+  #       with:
+  #         use-cross: true
+  #         command: build
+  #         args: --release --target ${{ matrix.target }}
 
-      - name: Package
-        shell: bash
-        run: |
-          cp -R demo target/${{ matrix.target }}/release 
-          cd target/${{ matrix.target }}/release          
-          tar czvf ../../../med-${{ matrix.target }}.tar.gz med demo/
-          cd -
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        with:
-            tag_name: ${{ github.ref_name }}
-            files: 'med*'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Package
+  #       shell: bash
+  #       run: |
+  #         cp -R demo target/${{ matrix.target }}/release 
+  #         cd target/${{ matrix.target }}/release          
+  #         tar czvf ../../../med-${{ matrix.target }}.tar.gz med demo/
+  #         cd -
+  #     - name: Publish
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #           tag_name: ${{ github.ref_name }}
+  #           files: 'med*'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   windows-msvc-release:
     name: release windows msvc
@@ -57,6 +64,8 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/release/
+          cd target/release/
+          ls
           tar --directory=target/release -cf win_msvc_archive.tar.gz med.exe demo
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
@@ -66,51 +75,51 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
-  macos-X86-release:
-    name: release macos x86 release
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: check toolchain
-        run: rustup default
-      - name: Build
-        run: |
-          cargo build --release
-      - name: tar
-        run: |
-          cp -R demo target/release/
-          tar --directory=target/release -cf macos_x86_archive.tar.gz med demo/
-      - name: Upload binaries x86 to release  
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: 'macos_x86_archive.tar.gz'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # macos-X86-release:
+  #   name: release macos x86 release
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: check toolchain
+  #       run: rustup default
+  #     - name: Build
+  #       run: |
+  #         cargo build --release
+  #     - name: tar
+  #       run: |
+  #         cp -R demo target/release/
+  #         tar --directory=target/release -cf macos_x86_archive.tar.gz med demo/
+  #     - name: Upload binaries x86 to release  
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         tag_name: ${{ github.ref_name }}
+  #         files: 'macos_x86_archive.tar.gz'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  macos-arm-release:
-    name: release macos arm release
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: check toolchain
-        run: rustup default
-      - name: Build
-        run: |
-          rustup toolchain install stable-aarch64-apple-darwin
-          rustup target add aarch64-apple-darwin
-          cargo build --release --target aarch64-apple-darwin
-      - name: tar
-        run: |
-          cp -R demo target/aarch64-apple-darwin/release
-          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med demo/
-      - name: Upload binaries arm to release  
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: 'macos_arm_archive.tar.gz'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # macos-arm-release:
+  #   name: release macos arm release
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - name: check toolchain
+  #       run: rustup default
+  #     - name: Build
+  #       run: |
+  #         rustup toolchain install stable-aarch64-apple-darwin
+  #         rustup target add aarch64-apple-darwin
+  #         cargo build --release --target aarch64-apple-darwin
+  #     - name: tar
+  #       run: |
+  #         cp -R demo target/aarch64-apple-darwin/release
+  #         tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med demo/
+  #     - name: Upload binaries arm to release  
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         tag_name: ${{ github.ref_name }}
+  #         files: 'macos_arm_archive.tar.gz'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   crate_io_publish:
     name: Crate.io Publish

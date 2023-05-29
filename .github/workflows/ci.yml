@@ -3,16 +3,12 @@ name: ci
 on:
   push:
     branches:
-      - "development"
+      - "main"
   pull_request:
-    branches: [development]
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
-
-# defaults:
-#   run:
-#     working-directory: med_cli
 
 jobs:
   check:
