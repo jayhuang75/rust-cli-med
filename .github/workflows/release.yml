@@ -12,24 +12,35 @@ on:
     branches: [development]
 
 jobs:
+  crate_metadata:
+    name: Extract crate metadata
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Extract crate information
+      id: crate_metadata
+      run: |
+        cargo metadata --no-deps --format-version 1 | jq -r '"name=" + .packages[0].name' | tee -a $GITHUB_OUTPUT
+        cargo metadata --no-deps --format-version 1 | jq -r '"version=" + .packages[0].version' | tee -a $GITHUB_OUTPUT
+        cargo metadata --no-deps --format-version 1 | jq -r '"maintainer=" + .packages[0].authors[0]' | tee -a $GITHUB_OUTPUT
+        cargo metadata --no-deps --format-version 1 | jq -r '"homepage=" + .packages[0].homepage' | tee -a $GITHUB_OUTPUT
+    outputs:
+      name: ${{ steps.crate_metadata.outputs.name }}
+      version: ${{ steps.crate_metadata.outputs.version }}
+      maintainer: ${{ steps.crate_metadata.outputs.maintainer }}
+      homepage: ${{ steps.crate_metadata.outputs.homepage }}
+  
   create-release:
     name: create-release
     runs-on: ubuntu-latest
-    # env:
-      # Set to force version number, e.g., when no tag exists.
-      # RG_VERSION: TEST-0.0.0
-    outputs:
-      # upload_url: ${{ steps.release.outputs.upload_url }}
-      med_version: ${{ env.MED_VERSION }}
+    needs: crate_metadata
     steps:
       - name: Get the release version from the tag
         shell: bash
         if: env.MED_VERSION == ''
         run: |
-          # Apparently, this is the right way to get a tag name. Really?
-          #
-          # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
-          echo "MED_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+          echo "MED_VERSION=${{needs.crate_metadata.outputs.version}}" >> $GITHUB_ENV
           echo "version is: ${{ env.MED_VERSION }}"
       - name: Create GitHub release
         id: release
