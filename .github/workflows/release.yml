@@ -39,7 +39,6 @@ jobs:
         shell: bash
         if: env.MED_VERSION == ''
         run: |
-
           echo "MED_VERSION=${{needs.crate_metadata.outputs.version}}" >> $GITHUB_ENV
           echo "version is: ${{ env.MED_VERSION }}"
       - name: Create GitHub release
