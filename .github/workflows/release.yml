@@ -18,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Build Changelog
+      id: github_release
+      uses: mikepenz/release-changelog-builder-action@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
     - name: Extract crate information
       id: crate_metadata
       run: |
@@ -25,17 +30,12 @@ jobs:
         cargo metadata --no-deps --format-version 1 | jq -r '"version=" + .packages[0].version' | tee -a $GITHUB_OUTPUT
         cargo metadata --no-deps --format-version 1 | jq -r '"maintainer=" + .packages[0].authors[0]' | tee -a $GITHUB_OUTPUT
         cargo metadata --no-deps --format-version 1 | jq -r '"homepage=" + .packages[0].homepage' | tee -a $GITHUB_OUTPUT
-      outputs:
+    outputs:
         name: ${{ steps.crate_metadata.outputs.name }}
         version: ${{ steps.crate_metadata.outputs.version }}
         maintainer: ${{ steps.crate_metadata.outputs.maintainer }}
         homepage: ${{ steps.crate_metadata.outputs.homepage }}  
-    - name: Build Changelog
-      id: github_release
-      uses: mikepenz/release-changelog-builder-action@v3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
-  
+    
   create-release:
     name: create-release
     runs-on: ubuntu-latest
