@@ -12,6 +12,33 @@ on:
     branches: [development]
 
 jobs:
+  create-release:
+    name: create-release
+    runs-on: ubuntu-latest
+    # env:
+      # Set to force version number, e.g., when no tag exists.
+      # RG_VERSION: TEST-0.0.0
+    outputs:
+      # upload_url: ${{ steps.release.outputs.upload_url }}
+      med_version: ${{ env.MED_VERSION }}
+    steps:
+      - name: Get the release version from the tag
+        shell: bash
+        if: env.MED_VERSION == ''
+        run: |
+          # Apparently, this is the right way to get a tag name. Really?
+          #
+          # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
+          echo "RG_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "version is: ${{ env.MED_VERSION }}"
+      - name: Create GitHub release
+        id: release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.MED_VERSION }}
+          release_name: ${{ env.MED_VERSION }}
   # release:
   #   name: ${{ matrix.target }}
   #   runs-on: ubuntu-latest
@@ -42,7 +69,7 @@ jobs:
   #       run: |
   #         cp -R demo target/${{ matrix.target }}/release 
   #         cd target/${{ matrix.target }}/release          
-  #         tar czvf ../../../med-${{ matrix.target }}.tar.gz med demo/
+  #         tar czvf ../../../med-${{ matrix.target }}-${{ env.MED_VERSION }}.tar.gz med demo/
   #         cd -
   #     - name: Publish
   #       uses: softprops/action-gh-release@v1
@@ -52,27 +79,27 @@ jobs:
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  windows-msvc-release:
-    name: release windows msvc
-    runs-on: windows-latest
-    steps:
-      - name: Check Out Code
-        uses: actions/checkout@master
-      - name: Build
-        run: |
-          cargo build --release
-      - name: tar
-        run: |
-          cp -R demo target/release/
-          cd D:\a\rust-cli-med\rust-cli-med\target\release
-          tar -cf win_msvc_archive.tar.gz med.exe demo
-      - name: Upload binaries to release  
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: 'win_msvc_archive.tar.gz'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # windows-msvc-release:
+  #   name: release windows msvc
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Check Out Code
+  #       uses: actions/checkout@master
+  #     - name: Build
+  #       run: |
+  #         cargo build --release
+  #     - name: tar
+  #       run: |
+  #         cp -R demo target/release/
+  #         cd D:\a\rust-cli-med\rust-cli-med\target\release
+  #         tar -cf win_msvc_archive-${{ env.MED_VERSION }}.tar.gz med.exe demo
+  #     - name: Upload binaries to release  
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         tag_name: ${{ github.ref_name }}
+  #         files: 'win_msvc_archive-${{ env.MED_VERSION }}.tar.gz'
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
   # macos-X86-release:
   #   name: release macos x86 release
@@ -87,12 +114,12 @@ jobs:
   #     - name: tar
   #       run: |
   #         cp -R demo target/release/
-  #         tar --directory=target/release -cf macos_x86_archive.tar.gz med demo/
+  #         tar --directory=target/release -cf macos_x86_archive-${{ env.MED_VERSION }}.tar.gz med demo/
   #     - name: Upload binaries x86 to release  
   #       uses: softprops/action-gh-release@v1
   #       with:
   #         tag_name: ${{ github.ref_name }}
-  #         files: 'macos_x86_archive.tar.gz'
+  #         files: 'macos_x86_archive-${{ env.MED_VERSION }}.tar.gz'
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -111,12 +138,12 @@ jobs:
   #     - name: tar
   #       run: |
   #         cp -R demo target/aarch64-apple-darwin/release
-  #         tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive.tar.gz med demo/
+  #         tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive-${{ env.MED_VERSION }}.tar.gz med demo/
   #     - name: Upload binaries arm to release  
   #       uses: softprops/action-gh-release@v1
   #       with:
   #         tag_name: ${{ github.ref_name }}
-  #         files: 'macos_arm_archive.tar.gz'
+  #         files: 'macos_arm_archive-${{ env.MED_VERSION }}.tar.gz'
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
