@@ -49,9 +49,10 @@ jobs:
         with:
           tag_name: ${{ env.MED_VERSION }}
           release_name: ${{ env.MED_VERSION }}
-  release:
+  build-release:
     name: ${{ matrix.target }}
     runs-on: ubuntu-latest
+    needs: crate_metadata
     strategy:
       fail-fast: true
       matrix:
@@ -79,12 +80,12 @@ jobs:
         run: |
           cp -R demo target/${{ matrix.target }}/release 
           cd target/${{ matrix.target }}/release          
-          tar czvf ../../../med-${{ matrix.target }}-${{ env.MED_VERSION }}.tar.gz med demo/
+          tar czvf ../../../med-${{ matrix.target }}-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/
           cd -
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-            tag_name: ${{ github.ref_name }}
+            tag_name: ${{ needs.crate_metadata.outputs.version }}
             files: 'med*'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,6 +93,7 @@ jobs:
   windows-msvc-release:
     name: release windows msvc
     runs-on: windows-latest
+    needs: crate_metadata
     steps:
       - name: Check Out Code
         uses: actions/checkout@master
@@ -102,18 +104,19 @@ jobs:
         run: |
           cp -R demo target/release/
           cd D:\a\rust-cli-med\rust-cli-med\target\release
-          tar -cf win_msvc_archive-${{ env.MED_VERSION }}.tar.gz med.exe demo
+          tar -cf win_msvc_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med.exe demo
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          files: 'win_msvc_archive-${{ env.MED_VERSION }}.tar.gz'
+          tag_name: ${{ needs.crate_metadata.outputs.version }}
+          files: 'win_msvc_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
   macos-X86-release:
     name: release macos x86 release
     runs-on: macos-latest
+    needs: crate_metadata
     steps:
       - uses: actions/checkout@master
       - name: check toolchain
@@ -124,18 +127,19 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/release/
-          tar --directory=target/release -cf macos_x86_archive-${{ env.MED_VERSION }}.tar.gz med demo/
+          tar --directory=target/release -cf macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          files: 'macos_x86_archive-${{ env.MED_VERSION }}.tar.gz'
+          tag_name: ${{ needs.crate_metadata.outputs.version }}
+          files: 'macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   macos-arm-release:
     name: release macos arm release
     runs-on: macos-latest
+    needs: crate_metadata
     steps:
       - uses: actions/checkout@master
       - name: check toolchain
@@ -148,12 +152,12 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/aarch64-apple-darwin/release
-          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive-${{ env.MED_VERSION }}.tar.gz med demo/
+          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/
       - name: Upload binaries arm to release  
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          files: 'macos_arm_archive-${{ env.MED_VERSION }}.tar.gz'
+          tag_name: ${{ needs.crate_metadata.outputs.version }}
+          files: 'macos_arm_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
