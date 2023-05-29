@@ -64,9 +64,8 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/release/
-          cd demo
-          ls
-          tar --directory=target/release/ -cf win_msvc_archive.tar.gz med.exe demo
+          pwd
+          tar -cf win_msvc_archive.tar.gz med.exe demo
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
         with:
