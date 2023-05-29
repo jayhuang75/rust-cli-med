@@ -26,6 +26,18 @@ There are 2 main crates in this package.
 
 ## Contributions
 
-I gladly accept contributions via GitHub pull requests. However please complete the [template](.github/workflows/PULL_REQUEST_TEMPLATE.md) before the PR.
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
 
-Thank you!
+Please complete the [template](.github/workflows/PULL_REQUEST_TEMPLATE.md) before the PR.
+
+Contributions of any kind welcome!
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+## License
+
+Copyright © 2023 [Wei Huang](https://github.com/jayhuang75/)
+
+This project is Apache licensed.
