@@ -64,9 +64,9 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/release/
-          cd target/release/
+          cd target\release
           ls
-          tar --directory=target/release -cf win_msvc_archive.tar.gz med.exe demo
+          tar --directory=target\release -cf win_msvc_archive.tar.gz med.exe demo
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -133,7 +133,10 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - run: cargo publish --token ${CRATE_TOKEN}
+      - name: publish med_core & med_cli
+        run: |
+          cargo publish -p med_core --token ${CRATE_TOKEN}
+          cargo publish -p med_cli --token ${CRATE_TOKEN}
         env:
           CRATE_TOKEN: ${{ secrets.CRATE_TOKEN }}
         
