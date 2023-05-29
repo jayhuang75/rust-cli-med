@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/jayhuang75/rust-cli-med/workflows/ci/badge.svg)](https://github.com/jayhuang75/rust-cli-med/actions) [![codecov](https://codecov.io/gh/jayhuang75/rust-cli-med/branch/main/graph/badge.svg?token=Z1LMSs2tQC)](https://codecov.io/gh/jayhuang75/rust-cli-med)
+[![Actions Status](https://github.com/jayhuang75/rust-cli-med/workflows/ci/badge.svg)](https://github.com/jayhuang75/rust-cli-med/actions) [![codecov](https://codecov.io/gh/jayhuang75/rust-cli-med/branch/main/graph/badge.svg?token=Z1LMSs2tQC)](https://codecov.io/gh/jayhuang75/rust-cli-med) 
 
 # M.E.D. (Mask, Encrypt, Decrypt) - a RUST powered CLI tool for CSV/JSON files
 
@@ -16,8 +16,8 @@ Sometimes in the Enterprise Level, we need a simple enough CLI tool with auditab
 
 There are 2 main crates in this package.
 
-1. [MED_CLI](med_cli/README.md) - the CLI interface for the med binary.
-2. [MED_CORE](med_core/README.md) - the core engineer to execution the CSV/JSON files Masking, Encryption and Decryption, which you can use in your own usecase/project/context implementation.
+1. [MED_CLI](med_cli/README.md) - the CLI interface for the med binary.![Crates.io](https://img.shields.io/crates/v/med_cli) ![Crates.io](https://img.shields.io/crates/d/med_cli)
+2. [MED_CORE](med_core/README.md) - the core engineer to execution the CSV/JSON files Masking, Encryption and Decryption, which you can use in your own usecase/project/context implementation.![Crates.io](https://img.shields.io/crates/v/med_core) ![Crates.io](https://img.shields.io/crates/d/med_core)
 
 ## Documentation (TODO)
 
