@@ -3,9 +3,9 @@ name: ci
 on:
   push:
     branches:
-      - "main"
+      - "development"
   pull_request:
-    branches: [main]
+    branches: [development]
 
 env:
   CARGO_TERM_COLOR: always
