@@ -1,4 +1,4 @@
-[![Crates.io](https://img.shields.io/crates/v/med_core)](https://crates.io/crates/med_core) [![Actions Status](https://github.com/jayhuang75/rust-cli-med/workflows/ci/badge.svg)](https://github.com/jayhuang75/rust-cli-med/actions) [![codecov](https://codecov.io/gh/jayhuang75/rust-cli-med/branch/main/graph/badge.svg?token=Z1LMSs2tQC)](https://codecov.io/gh/jayhuang75/rust-cli-med) [![Crates.io](https://img.shields.io/crates/d/med_cli)](https://crates.io/crates/med_core)
+[![Crates.io](https://img.shields.io/crates/v/med_core)](https://crates.io/crates/med_core) [![Actions Status](https://github.com/jayhuang75/rust-cli-med/workflows/ci/badge.svg)](https://github.com/jayhuang75/rust-cli-med/actions) [![codecov](https://codecov.io/gh/jayhuang75/rust-cli-med/branch/main/graph/badge.svg?token=Z1LMSs2tQC)](https://codecov.io/gh/jayhuang75/rust-cli-med) [![Crates.io](https://img.shields.io/crates/d/med_core)](https://crates.io/crates/med_core)
 
 ### M.E.D. (Mask, Encrypt, Decrypt) - The Core Engine for Masking, Encryption, and Decryption the CSV/JSON files
 
