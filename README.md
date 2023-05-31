@@ -4,7 +4,7 @@
 
 ## Background & Motivation
 
-Sometimes in the Enterprise Level, we need a simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
+This is a personal hobby project; based on the observation, sometimes we need a simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
 
 ## Key Features
 
@@ -40,4 +40,4 @@ Give a ⭐️ if this project helped you!
 
 Copyright © 2023 [Wei Huang](https://github.com/jayhuang75/)
 
-This project is Apache licensed.
+This project Licensed under Apache.
