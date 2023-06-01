@@ -48,6 +48,19 @@ mod tests {
     }
 
     #[test]
+    fn test_worker_in_range_failed() {
+        match worker_in_range("100") {
+            Ok(_) => {
+                unimplemented!()
+            }
+            Err(e) => {
+                assert_eq!(e,format!("worker is over your current max cores, consider lower the workerworker not in range 2-{:?} (max)", num_cpus::get()));
+            }
+        }
+    }
+
+
+    #[test]
     fn test_dir_exist() {
         match dir_exist("./") {
             Ok(path) => {

@@ -10,6 +10,8 @@ use tracing::info;
 
 use crate::utils::error::MaskerError;
 
+use super::app::Summary;
+
 pub struct Database {
     pub pool: sqlx::Pool<sqlx::Sqlite>,
 }
@@ -96,7 +98,7 @@ impl Database {
         Ok(())
     }
 
-    pub async fn insert(&mut self, summary: &AuditSummary) -> Result<i64, MaskerError> {
+    pub async fn insert(&mut self, summary: &Summary) -> Result<i64, MaskerError> {
         let total_files = summary.total_files as i64;
         let total_records = summary.total_records as i64;
         let failed_records: i64 = summary.failed_records as i64;
