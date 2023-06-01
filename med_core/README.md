@@ -17,7 +17,9 @@ new_params.file_type = FileType::JSON;
 let mut new_app = App::new(new_params.clone()).await.unwrap();
 new_app.load_job_config().await.unwrap();
 
-let metrics = new_app.process().await.unwrap();
+let metrics = new_app.process().await?;
+let audit_id = new_app.update_audit().await?;
+
 ```
 
 ### Roadmap
