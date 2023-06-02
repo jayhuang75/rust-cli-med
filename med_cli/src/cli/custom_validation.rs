@@ -59,7 +59,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn test_dir_exist() {
         match dir_exist("./") {
