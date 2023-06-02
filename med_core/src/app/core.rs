@@ -1,4 +1,5 @@
 use crate::app::json::JsonFileProcessor;
+use crate::audit::app::Audit;
 use crate::utils::crypto::Cypher;
 use crate::utils::error::MaskerErrorType;
 use crate::{utils::config::JobConfig, utils::error::MaskerError};
@@ -17,6 +18,8 @@ pub struct App {
     pub params: Params,
     pub user: String,
     pub hostname: String,
+    pub audit: Audit,
+    pub metrics: Metrics,
 }
 
 #[async_trait(?Send)]
@@ -39,6 +42,8 @@ impl App {
 
         let user = whoami::username();
         let hostname = whoami::hostname();
+        let audit = Audit::new().await?;
+        let metrics = Metrics::default();
 
         info!(
             "{} on {} run {} mode for {}",
@@ -54,6 +59,8 @@ impl App {
             params,
             user,
             hostname,
+            audit,
+            metrics,
         })
     }
 
@@ -82,8 +89,6 @@ impl App {
             self.params.conf_path.bold().green(),
             now.elapsed()
         );
-
-        let metrics: Metrics;
 
         match &self.params.file_type {
             FileType::CSV => {
@@ -142,9 +147,26 @@ impl App {
                 }
 
                 let now = Instant::now();
-                metrics = processor
+
+                match processor
                     .write(&self.params.output_path, &self.params.file_path)
-                    .await?;
+                    .await
+                {
+                    Ok(metrics) => {
+                        self.metrics = metrics.clone();
+                        self.audit.summary.total_files = metrics.total_files;
+                        self.audit.summary.total_records = metrics.total_records;
+                        self.audit.summary.failed_records = metrics.failed_records;
+                        self.audit.summary.record_failed_reason = metrics.record_failed_reason;
+                        self.audit.summary.successed = true;
+                    }
+                    Err(err) => {
+                        self.audit.summary.process_failure_reason =
+                            Some(serde_json::to_string(&err)?);
+                        info!("{} {:?}", "error".bold().red(), err.to_string());
+                    }
+                }
+
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),
@@ -208,9 +230,24 @@ impl App {
                 }
 
                 let now = Instant::now();
-                metrics = processor
+                match processor
                     .write(&self.params.output_path, &self.params.file_path)
-                    .await?;
+                    .await
+                {
+                    Ok(metrics) => {
+                        self.metrics = metrics.clone();
+                        self.audit.summary.total_files = metrics.total_files;
+                        self.audit.summary.total_records = metrics.total_records;
+                        self.audit.summary.failed_records = metrics.failed_records;
+                        self.audit.summary.record_failed_reason = metrics.record_failed_reason;
+                        self.audit.summary.successed = true;
+                    }
+                    Err(err) => {
+                        self.audit.summary.process_failure_reason =
+                            Some(serde_json::to_string(&err)?);
+                        info!("{} {:?}", "error".bold().red(), err.to_string());
+                    }
+                }
                 info!(
                     "write to folder {} completed elapsed time {:?}",
                     self.params.output_path.bold().green(),
@@ -218,7 +255,24 @@ impl App {
                 );
             }
         }
-        Ok(metrics)
+
+        debug!("metrics : {:?}", self.metrics);
+        Ok(self.metrics.clone())
+    }
+
+    pub async fn update_audit(&mut self) -> Result<i64, MaskerError> {
+        // update the runtime params for the audit record.
+        if self.params.key.is_some() {
+            self.params.key = Some("****".to_owned());
+        }
+        self.audit.summary.user = self.user.clone();
+        self.audit.summary.hostname = self.hostname.clone();
+        self.audit.summary.runtime_conf = serde_json::to_string(&self.params)?;
+        debug!("audit summary : {:?}", self.audit.summary);
+
+        // audit update
+        let id = self.audit.insert().await?;
+        Ok(id)
     }
 }
 
