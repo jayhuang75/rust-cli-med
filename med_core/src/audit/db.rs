@@ -59,7 +59,7 @@ impl Database {
                 .busy_timeout(pool_timeout);
 
         let pool = SqlitePoolOptions::new()
-            .max_connections(2)
+            .max_connections(20)
             .connect_with(connection_options)
             .await?;
 
