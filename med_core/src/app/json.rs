@@ -11,7 +11,7 @@ use crate::{
     utils::{
         config::JobConfig,
         crypto::Cypher,
-        error::MaskerError,
+        error::MedError,
         helpers::{create_output_dir, json_med_core, read_json, write_json},
         progress_bar::get_progress_bar,
     },
@@ -39,7 +39,7 @@ impl Processor for JsonFileProcessor {
     async fn new() -> Self {
         JsonFileProcessor::default()
     }
-    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MaskerError> {
+    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MedError> {
         let (tx, rx) = flume::unbounded();
         let new_worker = Worker::new(num_workers.to_owned()).await?;
         let mut files_number: u64 = 0;
@@ -78,7 +78,7 @@ impl Processor for JsonFileProcessor {
         mode: &Mode,
         standard: Option<&Standard>,
         cypher: Option<&Cypher>,
-    ) -> Result<(), MaskerError> {
+    ) -> Result<(), MedError> {
         let bar = get_progress_bar(self.metrics.total_files as u64, "processing json files");
         let new_result: Vec<JsonFile> = self
             .result
@@ -100,7 +100,7 @@ impl Processor for JsonFileProcessor {
     }
 
     #[cfg(not(tarpaulin_include))]
-    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
+    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError> {
         create_output_dir(output_dir, file_dir).await?;
         let bar: indicatif::ProgressBar =
             get_progress_bar(self.metrics.total_records as u64, "write files");

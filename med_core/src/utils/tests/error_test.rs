@@ -9,7 +9,7 @@ use crate::{
     utils::{
         config::JobConfig,
         crypto::Cypher,
-        error::{MaskerError, MaskerErrorType},
+        error::{MedError, MedErrorType},
         helpers::{write_csv, write_json},
     },
 };
@@ -18,10 +18,10 @@ use crate::{
 async fn test_message() {
     let msg = "Io Error message".to_string();
 
-    let err = MaskerError {
+    let err = MedError {
         message: Some(msg.to_string()),
         cause: None,
-        error_type: MaskerErrorType::IoError,
+        error_type: MedErrorType::IoError,
     };
     assert_eq!(err.message(), msg, "Io Error message");
 }
@@ -35,7 +35,7 @@ async fn test_serde_yaml_error() {
             unimplemented!()
         }
         Err(err) => {
-            assert_eq!(err.error_type, MaskerErrorType::ConfigError);
+            assert_eq!(err.error_type, MedErrorType::ConfigError);
         }
     }
 }
@@ -44,10 +44,10 @@ async fn test_serde_yaml_error() {
 async fn test_magic_crypt_error() {
     // let sparkle_heart: Vec<i32> = vec![0, 159, 146, 150];
 
-    let expect_magic_crypt_err = MaskerError {
+    let expect_magic_crypt_err = MedError {
         message: Some("Invalid byte 240, offset 0.".to_string()),
         cause: Some("magic_crypt error".to_string()),
-        error_type: MaskerErrorType::CryptoError,
+        error_type: MedErrorType::CryptoError,
     };
 
     let key = "key".to_string();
@@ -89,7 +89,7 @@ async fn test_io_error() {
             unimplemented!()
         }
         Err(e) => {
-            assert_eq!(e.error_type, MaskerErrorType::IoError);
+            assert_eq!(e.error_type, MedErrorType::IoError);
         }
     }
 }
@@ -103,7 +103,7 @@ async fn test_csv_error() {
     let bar = ProgressBar::new(1);
 
     let is_err = write_csv(&new_csv_file, "", &bar).expect_err("msg");
-    assert_eq!(is_err.error_type, MaskerErrorType::CsvError);
+    assert_eq!(is_err.error_type, MedErrorType::CsvError);
 }
 
 // #[tokio::test]
@@ -111,7 +111,7 @@ async fn test_csv_error() {
 //     match Worker::new(0).await {
 //         Ok(_) => unimplemented!(),
 //         Err(e) => {
-//             assert_eq!(e.error_type, MaskerErrorType::WorkerError);
+//             assert_eq!(e.error_type, MedErrorType::WorkerError);
 //         }
 //     }
 // }

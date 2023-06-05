@@ -1,4 +1,4 @@
-use crate::utils::error::MaskerError;
+use crate::utils::error::MedError;
 use std::sync::Once;
 use threadpool::ThreadPool;
 
@@ -9,7 +9,7 @@ pub struct Worker {
 }
 
 impl Worker {
-    pub async fn new(cpu_num: u16) -> Result<Self, MaskerError> {
+    pub async fn new(cpu_num: u16) -> Result<Self, MedError> {
         let pool = ThreadPool::new(cpu_num as usize);
         static START: Once = Once::new();
 

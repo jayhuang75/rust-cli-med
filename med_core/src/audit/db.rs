@@ -8,7 +8,7 @@ use sqlx::{
 };
 use tracing::info;
 
-use crate::utils::error::MaskerError;
+use crate::utils::error::MedError;
 
 use super::app::Summary;
 
@@ -23,7 +23,7 @@ pub struct AuditSummary {
     pub total_files: usize,
     pub total_records: usize,
     pub failed_records: usize,
-    pub record_failed_reason: Vec<MaskerError>,
+    pub record_failed_reason: Vec<MedError>,
     pub runtime_conf: String,
     pub process_failure_reason: Option<String>,
     pub successed: bool,
@@ -31,7 +31,7 @@ pub struct AuditSummary {
 
 #[cfg(not(tarpaulin_include))]
 impl Database {
-    pub async fn new() -> Result<Database, MaskerError> {
+    pub async fn new() -> Result<Database, MedError> {
         let database_url = Self::create_audit_db().await?;
 
         if !Sqlite::database_exists(database_url.to_str().unwrap())
@@ -69,12 +69,12 @@ impl Database {
         Ok(Database { pool })
     }
 
-    async fn create_audit_db() -> Result<PathBuf, MaskerError> {
+    async fn create_audit_db() -> Result<PathBuf, MedError> {
         let path = dirs::config_dir().unwrap().join("med.db");
         Ok(path)
     }
 
-    async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MaskerError> {
+    async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MedError> {
         let _ = sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS audit (
@@ -98,7 +98,7 @@ impl Database {
         Ok(())
     }
 
-    pub async fn insert(&mut self, summary: &Summary) -> Result<i64, MaskerError> {
+    pub async fn insert(&mut self, summary: &Summary) -> Result<i64, MedError> {
         let total_files = summary.total_files as i64;
         let total_records = summary.total_records as i64;
         let failed_records: i64 = summary.failed_records as i64;
