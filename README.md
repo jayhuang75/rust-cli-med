@@ -2,6 +2,8 @@
 
 # M.E.D. (Mask, Encrypt, Decrypt) - a RUST powered CLI tool for CSV/JSON files
 
+![picture](documents/logo/data-encryption.png)
+
 ## Background & Motivation
 
 This is a personal hobby project; based on the observation, sometimes we need a simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.

@@ -51,7 +51,7 @@ jobs:
         with:
           tag_name: ${{ env.MED_VERSION }}
           release_name: ${{ env.MED_VERSION }}
-          body: ${{steps.github_release.outputs.changelog}}
+          body: ${{steps.github_release.outputs.commits	}}
   build-release:
     name: ${{ matrix.target }}
     runs-on: ubuntu-latest

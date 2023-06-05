@@ -2,8 +2,8 @@ use crate::app::core::App;
 use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
 use crate::utils::config::JobConfig;
-use crate::utils::error::MaskerErrorType::ConfigError;
-use crate::utils::error::{MaskerError, MaskerErrorType};
+use crate::utils::error::MedErrorType::ConfigError;
+use crate::utils::error::{MedError, MedErrorType};
 
 #[tokio::test]
 async fn test_csv_mask_app() {
@@ -30,7 +30,7 @@ async fn test_csv_mask_app() {
         Err(e) => {
             assert_eq!(
                 e,
-                MaskerError {
+                MedError {
                     message: Some("No such file or directory (os error 2)".to_owned()),
                     cause: Some("load job configuration yaml file failed!".to_owned()),
                     error_type: ConfigError
@@ -72,7 +72,7 @@ async fn test_csv_cypher_without_key() {
             unimplemented!()
         }
         Err(e) => {
-            assert_eq!(e.error_type, MaskerErrorType::ConfigError);
+            assert_eq!(e.error_type, MedErrorType::ConfigError);
         }
     }
 }
@@ -151,7 +151,7 @@ async fn test_json_cypher_without_key() {
             unimplemented!()
         }
         Err(e) => {
-            assert_eq!(e.error_type, MaskerErrorType::ConfigError);
+            assert_eq!(e.error_type, MedErrorType::ConfigError);
         }
     }
 }

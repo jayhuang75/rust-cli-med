@@ -1,4 +1,4 @@
-use crate::{audit::db::Database, utils::error::MaskerError};
+use crate::{audit::db::Database, utils::error::MedError};
 
 #[derive(Debug, Default, Clone)]
 pub struct Summary {
@@ -7,7 +7,7 @@ pub struct Summary {
     pub total_files: usize,
     pub total_records: usize,
     pub failed_records: usize,
-    pub record_failed_reason: Vec<MaskerError>,
+    pub record_failed_reason: Vec<MedError>,
     pub runtime_conf: String,
     pub process_failure_reason: Option<String>,
     pub successed: bool,
@@ -19,12 +19,12 @@ pub struct Audit {
 }
 
 impl Audit {
-    pub async fn new() -> Result<Self, MaskerError> {
+    pub async fn new() -> Result<Self, MedError> {
         let db = Database::new().await?;
         let summary = Summary::default();
         Ok(Audit { db, summary })
     }
-    pub async fn insert(&mut self) -> Result<i64, MaskerError> {
+    pub async fn insert(&mut self) -> Result<i64, MedError> {
         let id = self.db.insert(&self.summary).await?;
         Ok(id)
     }

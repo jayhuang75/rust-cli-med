@@ -4,7 +4,7 @@ use std::fmt;
 use tokio::io;
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
-pub enum MaskerErrorType {
+pub enum MedErrorType {
     ConfigError,
     IoError,
     CryptoError,
@@ -15,17 +15,17 @@ pub enum MaskerErrorType {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
-pub struct MaskerError {
+pub struct MedError {
     pub message: Option<String>,
     pub cause: Option<String>,
-    pub error_type: MaskerErrorType,
+    pub error_type: MedErrorType,
 }
 
-impl MaskerError {
+impl MedError {
     #[allow(dead_code)]
     pub fn message(&self) -> String {
         match self {
-            MaskerError {
+            MedError {
                 message: Some(message),
                 ..
             } => message.clone(),
@@ -34,89 +34,89 @@ impl MaskerError {
     }
 }
 
-impl From<serde_yaml::Error> for MaskerError {
-    fn from(error: serde_yaml::Error) -> MaskerError {
-        MaskerError {
+impl From<serde_yaml::Error> for MedError {
+    fn from(error: serde_yaml::Error) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some("can not open the conf.yml".to_string()),
-            error_type: MaskerErrorType::ConfigError,
+            error_type: MedErrorType::ConfigError,
         }
     }
 }
 
-impl From<io::Error> for MaskerError {
-    fn from(error: io::Error) -> MaskerError {
-        MaskerError {
+impl From<io::Error> for MedError {
+    fn from(error: io::Error) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some(error.to_string()),
-            error_type: MaskerErrorType::IoError,
+            error_type: MedErrorType::IoError,
         }
     }
 }
 
-impl From<csv::Error> for MaskerError {
-    fn from(error: csv::Error) -> MaskerError {
-        MaskerError {
+impl From<csv::Error> for MedError {
+    fn from(error: csv::Error) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some(error.to_string()),
-            error_type: MaskerErrorType::CsvError,
+            error_type: MedErrorType::CsvError,
         }
     }
 }
 
-impl From<magic_crypt::MagicCryptError> for MaskerError {
-    fn from(error: magic_crypt::MagicCryptError) -> MaskerError {
-        MaskerError {
+impl From<magic_crypt::MagicCryptError> for MedError {
+    fn from(error: magic_crypt::MagicCryptError) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some("magic_crypt error".to_string()),
-            error_type: MaskerErrorType::CryptoError,
+            error_type: MedErrorType::CryptoError,
         }
     }
 }
 
-// impl From<rayon::ThreadPoolBuildError> for MaskerError {
-//     fn from(error: rayon::ThreadPoolBuildError) -> MaskerError {
-//         MaskerError {
+// impl From<rayon::ThreadPoolBuildError> for MedError {
+//     fn from(error: rayon::ThreadPoolBuildError) -> MedError {
+//         MedError {
 //             message: Some(error.to_string()),
 //             cause: Some("rayon worker error".to_string()),
-//             error_type: MaskerErrorType::WorkerError,
+//             error_type: MedErrorType::WorkerError,
 //         }
 //     }
 // }
 #[cfg(not(tarpaulin_include))]
-impl From<Error> for MaskerError {
-    fn from(error: Error) -> MaskerError {
-        MaskerError {
+impl From<Error> for MedError {
+    fn from(error: Error) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some("serde json error".to_string()),
-            error_type: MaskerErrorType::SerdeJsonError,
+            error_type: MedErrorType::SerdeJsonError,
         }
     }
 }
 
 #[cfg(not(tarpaulin_include))]
-impl From<sqlx::Error> for MaskerError {
-    fn from(error: sqlx::Error) -> MaskerError {
-        MaskerError {
+impl From<sqlx::Error> for MedError {
+    fn from(error: sqlx::Error) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some("database error".to_string()),
-            error_type: MaskerErrorType::DatabaseError,
+            error_type: MedErrorType::DatabaseError,
         }
     }
 }
 
 #[cfg(not(tarpaulin_include))]
-impl From<sqlx::migrate::MigrateError> for MaskerError {
-    fn from(error: sqlx::migrate::MigrateError) -> MaskerError {
-        MaskerError {
+impl From<sqlx::migrate::MigrateError> for MedError {
+    fn from(error: sqlx::migrate::MigrateError) -> MedError {
+        MedError {
             message: Some(error.to_string()),
             cause: Some("database migration error".to_string()),
-            error_type: MaskerErrorType::DatabaseError,
+            error_type: MedErrorType::DatabaseError,
         }
     }
 }
 
-impl fmt::Display for MaskerError {
+impl fmt::Display for MedError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{:?}", self)
     }

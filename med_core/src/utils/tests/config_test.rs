@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::utils::{config::JobConfig, error::MaskerErrorType};
+use crate::utils::{config::JobConfig, error::MedErrorType};
 
 #[tokio::test]
 async fn test_new_config_failed_load() {
@@ -11,7 +11,7 @@ async fn test_new_config_failed_load() {
             unimplemented!()
         }
         Err(err) => {
-            assert_eq!(err.error_type, MaskerErrorType::ConfigError);
+            assert_eq!(err.error_type, MedErrorType::ConfigError);
         }
     }
 }
