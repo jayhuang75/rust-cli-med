@@ -2,7 +2,7 @@ use crate::cli::custom_validation::{dir_exist, worker_in_range};
 use clap::{arg, command, value_parser, ArgMatches};
 use med_core::models::enums::{FileType, Mode, Standard};
 use med_core::models::params::Params;
-use med_core::utils::error::MaskerError;
+use med_core::utils::error::MedError;
 use std::path::PathBuf;
 use tracing::log::info;
 
@@ -54,7 +54,7 @@ impl Cli {
     /// ```
     /// let CliApp = Cli::new().await?;
     /// ```
-    pub async fn new() -> Result<Self, MaskerError> {
+    pub async fn new() -> Result<Self, MedError> {
         // Initial Default CLI params
         let new_cli = Params::default();
 
@@ -69,7 +69,7 @@ impl Cli {
     }
 
     /// Privite function fulfill the Cli Struct
-    async fn fulfill_cli(matches: ArgMatches, mut params: Params) -> Result<Params, MaskerError> {
+    async fn fulfill_cli(matches: ArgMatches, mut params: Params) -> Result<Params, MedError> {
         // Note, it's safe to call unwrap() because the arg is required
         match matches
             .get_one::<Mode>("MODE")

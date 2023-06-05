@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use std::path::Path;
 
-use crate::utils::error::{MaskerError, MaskerErrorType};
+use crate::utils::error::{MedError, MedErrorType};
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct JobConfig {
@@ -10,14 +10,14 @@ pub struct JobConfig {
 }
 
 impl JobConfig {
-    pub async fn new(path: &Path) -> Result<Self, MaskerError> {
+    pub async fn new(path: &Path) -> Result<Self, MedError> {
         let f = match std::fs::File::open(path) {
             Ok(f) => f,
             Err(e) => {
-                return Err(MaskerError {
+                return Err(MedError {
                     message: Some(e.to_string()),
                     cause: Some("load job configuration yaml file failed!".to_string()),
-                    error_type: MaskerErrorType::ConfigError,
+                    error_type: MedErrorType::ConfigError,
                 })
             }
         };

@@ -4,7 +4,7 @@ use magic_crypt::{
 
 use crate::models::enums::Standard;
 
-use super::error::MaskerError;
+use super::error::MedError;
 
 #[derive(Debug, Clone)]
 pub struct Cypher {
@@ -24,7 +24,7 @@ impl Cypher {
         }
     }
 
-    pub fn encrypt(&self, data: &str, standard: &Standard) -> Result<String, MaskerError> {
+    pub fn encrypt(&self, data: &str, standard: &Standard) -> Result<String, MedError> {
         let encrypted_str: String = match standard {
             Standard::DES64 => self.key64.encrypt_str_to_base64(data),
             Standard::AES128 => self.key128.encrypt_str_to_base64(data),
@@ -35,7 +35,7 @@ impl Cypher {
     }
 
     #[allow(dead_code)]
-    pub fn decrypt(&self, data: &str, standard: &Standard) -> Result<String, MaskerError> {
+    pub fn decrypt(&self, data: &str, standard: &Standard) -> Result<String, MedError> {
         let decrypted_str: String = match standard {
             Standard::DES64 => self.key64.decrypt_base64_to_string(data)?,
             Standard::AES128 => self.key128.decrypt_base64_to_string(data)?,

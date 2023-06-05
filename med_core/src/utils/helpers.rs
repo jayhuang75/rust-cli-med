@@ -1,6 +1,6 @@
 use crate::app::json::JsonFile;
 use crate::utils::config::JobConfig;
-use crate::utils::error::MaskerError;
+use crate::utils::error::MedError;
 use csv::StringRecord;
 use serde_json::Value;
 use std::fs::{self, File};
@@ -26,7 +26,7 @@ pub fn csv_fields_exist(headers: StringRecord, fields: &[String]) -> Vec<usize> 
 }
 
 #[cfg(not(tarpaulin_include))]
-pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), MaskerError> {
+pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), MedError> {
     WalkDir::new(file_dir)
         .follow_links(true)
         .into_iter()
@@ -151,18 +151,18 @@ pub fn json_med_core(
 }
 
 #[cfg(not(tarpaulin_include))]
-pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MaskerError> {
+pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MedError> {
     use colored::Colorize;
     use tracing::info;
 
-    use crate::utils::error::MaskerErrorType;
+    use crate::utils::error::MedErrorType;
 
     let mut reader = csv::Reader::from_path(path.clone())?;
     let headers = reader.headers()?.to_owned();
     let mut data: Vec<StringRecord> = Vec::new();
     let mut total_records: usize = 0;
     let mut failed_records: usize = 0;
-    let mut record_failed_reason: Vec<MaskerError> = Vec::new();
+    let mut record_failed_reason: Vec<MedError> = Vec::new();
 
     reader.records().for_each(|record| {
         match record {
@@ -171,10 +171,10 @@ pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MaskerEr
                 data.push(r);
             }
             Err(err) => {
-                let record_error = MaskerError {
+                let record_error = MedError {
                     message: Some(format!("please check {} csv format", path)),
                     cause: Some(err.to_string()),
-                    error_type: MaskerErrorType::CsvError,
+                    error_type: MedErrorType::CsvError,
                 };
                 let error_str = serde_json::to_string(&record_error).unwrap();
                 record_failed_reason.push(record_error);
@@ -200,7 +200,7 @@ pub fn write_csv(
     masked_data: &CsvFile,
     output_file: &str,
     bar: &indicatif::ProgressBar,
-) -> Result<(), MaskerError> {
+) -> Result<(), MedError> {
     use csv::Writer;
 
     let mut wtr = Writer::from_path(output_file)?;
@@ -216,7 +216,7 @@ pub fn write_csv(
 }
 
 #[cfg(not(tarpaulin_include))]
-pub fn read_json(tx: flume::Sender<JsonFile>, path: String) -> Result<(), MaskerError> {
+pub fn read_json(tx: flume::Sender<JsonFile>, path: String) -> Result<(), MedError> {
     let text = std::fs::read_to_string(&path)?;
     let data = serde_json::from_str::<Value>(&text)?;
     let mut total_records: usize = 0;
@@ -233,7 +233,7 @@ pub fn read_json(tx: flume::Sender<JsonFile>, path: String) -> Result<(), Masker
 }
 
 #[cfg(not(tarpaulin_include))]
-pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MaskerError> {
+pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MedError> {
     let mut json_file = File::create(output_file)?;
     let data = serde_json::to_string(masked_data)?;
     json_file.write_all(data.as_bytes())?;
