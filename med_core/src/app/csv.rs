@@ -4,7 +4,7 @@ use crate::models::enums::Standard;
 use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
-use crate::utils::error::MaskerError;
+use crate::utils::error::MedError;
 use crate::utils::helpers::read_csv;
 use crate::utils::helpers::write_csv;
 use crate::utils::helpers::{create_output_dir, csv_fields_exist};
@@ -22,7 +22,7 @@ pub struct CsvFile {
     pub path: String,
     pub total_records: usize,
     pub failed_records: usize,
-    pub record_failed_reason: Vec<MaskerError>,
+    pub record_failed_reason: Vec<MedError>,
     pub headers: StringRecord,
     pub data: Vec<StringRecord>,
 }
@@ -38,7 +38,7 @@ impl Processor for CsvFileProcessor {
     async fn new() -> Self {
         CsvFileProcessor::default()
     }
-    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MaskerError> {
+    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MedError> {
         let (tx, rx) = flume::unbounded();
         let new_worker = Worker::new(num_workers.to_owned()).await?;
         let mut files_number: u64 = 0;
@@ -82,7 +82,7 @@ impl Processor for CsvFileProcessor {
         mode: &Mode,
         standard: Option<&Standard>,
         cypher: Option<&Cypher>,
-    ) -> Result<(), MaskerError> {
+    ) -> Result<(), MedError> {
         let bar = get_progress_bar(self.metrics.total_records as u64, "masking csv files");
 
         let new_result: Vec<CsvFile> = self
@@ -147,7 +147,7 @@ impl Processor for CsvFileProcessor {
     }
 
     #[cfg(not(tarpaulin_include))]
-    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError> {
+    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError> {
         create_output_dir(output_dir, file_dir).await?;
         let bar: indicatif::ProgressBar =
             get_progress_bar(self.metrics.total_records as u64, "write files");

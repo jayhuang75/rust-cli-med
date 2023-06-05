@@ -4,13 +4,13 @@ use tracing::info;
 mod cli;
 
 use med_core::app::core::App;
-use med_core::utils::error::MaskerError;
+use med_core::utils::error::MedError;
 
 use cli::app::Cli;
 
 #[tokio::main]
 #[cfg(not(tarpaulin_include))]
-async fn main() -> Result<(), MaskerError> {
+async fn main() -> Result<(), MedError> {
     let now = Instant::now();
     let new_cli = Cli::new().await?;
     let params = new_cli.params;

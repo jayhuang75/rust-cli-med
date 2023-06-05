@@ -1,8 +1,8 @@
 use crate::app::json::JsonFileProcessor;
 use crate::audit::app::Audit;
 use crate::utils::crypto::Cypher;
-use crate::utils::error::MaskerErrorType;
-use crate::{utils::config::JobConfig, utils::error::MaskerError};
+use crate::utils::error::MedErrorType;
+use crate::{utils::config::JobConfig, utils::error::MedError};
 use async_trait::async_trait;
 use colored::Colorize;
 use std::path::Path;
@@ -25,19 +25,19 @@ pub struct App {
 #[async_trait(?Send)]
 pub trait Processor {
     async fn new() -> Self;
-    async fn load(&mut self, num_worker: &u16, file_path: &str) -> Result<(), MaskerError>;
+    async fn load(&mut self, num_worker: &u16, file_path: &str) -> Result<(), MedError>;
     async fn run(
         &mut self,
         job_conf: &JobConfig,
         mode: &Mode,
         standard: Option<&Standard>,
         cypher: Option<&Cypher>,
-    ) -> Result<(), MaskerError>;
-    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MaskerError>;
+    ) -> Result<(), MedError>;
+    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError>;
 }
 
 impl App {
-    pub async fn new(params: Params) -> Result<Self, MaskerError> {
+    pub async fn new(params: Params) -> Result<Self, MedError> {
         logging(params.debug).await;
 
         let user = whoami::username();
@@ -65,13 +65,13 @@ impl App {
     }
 
     /// Privite function Returns job config
-    async fn load_job_config(&self) -> Result<JobConfig, MaskerError> {
+    async fn load_job_config(&self) -> Result<JobConfig, MedError> {
         let conf = JobConfig::new(Path::new(&self.params.conf_path)).await?;
         debug!("{} {:?}", "job config".bold().green(), conf);
         Ok(conf)
     }
 
-    pub async fn process(&mut self) -> Result<Metrics, MaskerError> {
+    pub async fn process(&mut self) -> Result<Metrics, MedError> {
         info!(
             "processing '{}' files start",
             self.params.file_type.to_string().bold().green()
@@ -135,12 +135,12 @@ impl App {
                             );
                         }
                         None => {
-                            return Err(MaskerError {
+                            return Err(MedError {
                                 message: Some(
                                     "Missing key for Encyption and Decryption input!".to_string(),
                                 ),
                                 cause: Some("missing -k or --key".to_string()),
-                                error_type: MaskerErrorType::ConfigError,
+                                error_type: MedErrorType::ConfigError,
                             })
                         }
                     },
@@ -218,12 +218,12 @@ impl App {
                             );
                         }
                         None => {
-                            return Err(MaskerError {
+                            return Err(MedError {
                                 message: Some(
                                     "Missing key for Encyption and Decryption input!".to_string(),
                                 ),
                                 cause: Some("missing -k or --key".to_string()),
-                                error_type: MaskerErrorType::ConfigError,
+                                error_type: MedErrorType::ConfigError,
                             })
                         }
                     },
@@ -260,7 +260,7 @@ impl App {
         Ok(self.metrics.clone())
     }
 
-    pub async fn update_audit(&mut self) -> Result<i64, MaskerError> {
+    pub async fn update_audit(&mut self) -> Result<i64, MedError> {
         // update the runtime params for the audit record.
         if self.params.key.is_some() {
             self.params.key = Some("****".to_owned());
