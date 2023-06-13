@@ -28,12 +28,12 @@ sqlx = { version = "0.6.3", features = ["runtime-tokio-native-tls", "sqlite", "o
 serde = { version = "1.0.163", features = ["derive"] }
 serde_yaml = "0.9.21"
 
-csv = "1.2.1"
+csv = "1.2.2"
 flume = "0.10.14"
 walkdir = "2.3.3"
 threadpool = "1.8.1"
 magic-crypt = "3.1.12"
-indicatif = {version = "0.17.3", features = ["rayon"]}
+indicatif = {version = "0.17.5", features = ["rayon"]}
 whoami = "1.4.0"
 
 dirs = "5.0.1"

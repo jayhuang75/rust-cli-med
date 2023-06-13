@@ -1,7 +1,6 @@
-use crate::app::json::JsonFileProcessor;
+use crate::app::csv::CsvFileProcessor;
 use crate::audit::app::Audit;
 use crate::utils::crypto::Cypher;
-use crate::utils::error::MedErrorType;
 use crate::{utils::config::JobConfig, utils::error::MedError};
 use async_trait::async_trait;
 use colored::Colorize;
@@ -9,7 +8,6 @@ use std::path::Path;
 use tokio::time::Instant;
 use tracing::{debug, info};
 
-use crate::app::csv::CsvFileProcessor;
 use crate::models::enums::{FileType, Mode, Standard};
 use crate::models::{metrics::Metrics, params::Params};
 use crate::utils::logger::logging;
@@ -90,74 +88,14 @@ impl App {
             now.elapsed()
         );
 
+        let now = Instant::now();
         match &self.params.file_type {
             FileType::CSV => {
-                let mut processor: CsvFileProcessor = Processor::new().await;
-
-                let now = Instant::now();
-                processor
-                    .load(&self.params.worker, &self.params.file_path)
-                    .await?;
-                info!(
-                    "load {:?} files to processor {} elapsed time {:?}",
-                    self.params.file_type,
-                    "completed".bold().green(),
-                    now.elapsed()
-                );
-
-                let now = Instant::now();
-                match &self.params.mode {
-                    Mode::MASK => {
-                        processor
-                            .run(&job_conf, &self.params.mode, None, None)
-                            .await?;
-                        info!(
-                            "{} data completed elapsed time {:?}",
-                            Mode::MASK.to_string().bold().green(),
-                            now.elapsed()
-                        );
-                    }
-                    Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
-                        Some(key) => {
-                            let cypher = Cypher::new(key);
-                            processor
-                                .run(
-                                    &job_conf,
-                                    &self.params.mode,
-                                    Some(&self.params.standard),
-                                    Some(&cypher),
-                                )
-                                .await?;
-                            info!(
-                                "{} completed elapsed time {:?}",
-                                "cipher".bold().green(),
-                                now.elapsed()
-                            );
-                        }
-                        None => {
-                            return Err(MedError {
-                                message: Some(
-                                    "Missing key for Encyption and Decryption input!".to_string(),
-                                ),
-                                cause: Some("missing -k or --key".to_string()),
-                                error_type: MedErrorType::ConfigError,
-                            })
-                        }
-                    },
-                }
-
-                let now = Instant::now();
-
-                match processor
-                    .write(&self.params.output_path, &self.params.file_path)
-                    .await
-                {
+                let mut csv_processor = CsvFileProcessor::new(self.params.clone(), job_conf).await;
+                match csv_processor.run().await {
                     Ok(metrics) => {
                         self.metrics = metrics.clone();
-                        self.audit.summary.total_files = metrics.total_files;
-                        self.audit.summary.total_records = metrics.total_records;
-                        self.audit.summary.failed_records = metrics.failed_records;
-                        self.audit.summary.record_failed_reason = metrics.record_failed_reason;
+                        self.audit.summary.metrics = metrics.clone();
                         self.audit.summary.successed = true;
                     }
                     Err(err) => {
@@ -166,97 +104,16 @@ impl App {
                         info!("{} {:?}", "error".bold().red(), err.to_string());
                     }
                 }
-
-                info!(
-                    "write to folder {} completed elapsed time {:?}",
-                    self.params.output_path.bold().green(),
-                    now.elapsed()
-                );
             }
             FileType::JSON => {
-                let mut processor: JsonFileProcessor = Processor::new().await;
-
-                let now = Instant::now();
-                processor
-                    .load(&self.params.worker, &self.params.file_path)
-                    .await?;
-                info!(
-                    "load {:?} files to processor {} elapsed time {:?}",
-                    self.params.file_type,
-                    "completed".bold().green(),
-                    now.elapsed()
-                );
-
-                let now = Instant::now();
-                match &self.params.mode {
-                    Mode::MASK => {
-                        // processor.run_mask(&job_conf).await?;
-                        processor
-                            .run(&job_conf, &self.params.mode, None, None)
-                            .await?;
-                        info!(
-                            "{} data completed elapsed time {:?}",
-                            Mode::MASK.to_string().bold().green(),
-                            now.elapsed()
-                        );
-                    }
-                    Mode::ENCRYPT | Mode::DECRYPT => match &self.params.key {
-                        Some(key) => {
-                            let cypher = Cypher::new(key);
-                            processor
-                                .run(
-                                    &job_conf,
-                                    &self.params.mode,
-                                    Some(&self.params.standard),
-                                    Some(&cypher),
-                                )
-                                .await?;
-                            info!(
-                                "{} completed elapsed time {:?}",
-                                "cipher".bold().green(),
-                                now.elapsed()
-                            );
-                        }
-                        None => {
-                            return Err(MedError {
-                                message: Some(
-                                    "Missing key for Encyption and Decryption input!".to_string(),
-                                ),
-                                cause: Some("missing -k or --key".to_string()),
-                                error_type: MedErrorType::ConfigError,
-                            })
-                        }
-                    },
-                }
-
-                let now = Instant::now();
-                match processor
-                    .write(&self.params.output_path, &self.params.file_path)
-                    .await
-                {
-                    Ok(metrics) => {
-                        self.metrics = metrics.clone();
-                        self.audit.summary.total_files = metrics.total_files;
-                        self.audit.summary.total_records = metrics.total_records;
-                        self.audit.summary.failed_records = metrics.failed_records;
-                        self.audit.summary.record_failed_reason = metrics.record_failed_reason;
-                        self.audit.summary.successed = true;
-                    }
-                    Err(err) => {
-                        self.audit.summary.process_failure_reason =
-                            Some(serde_json::to_string(&err)?);
-                        info!("{} {:?}", "error".bold().red(), err.to_string());
-                    }
-                }
-                info!(
-                    "write to folder {} completed elapsed time {:?}",
-                    self.params.output_path.bold().green(),
-                    now.elapsed()
-                );
+                todo!()
             }
         }
-
-        debug!("metrics : {:?}", self.metrics);
+        info!(
+            "process {} completed elapsed time {:?}",
+            self.params.output_path.bold().green(),
+            now.elapsed()
+        );
         Ok(self.metrics.clone())
     }
 

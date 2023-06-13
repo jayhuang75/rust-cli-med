@@ -1,162 +1,237 @@
-use crate::app::worker::Worker;
-use crate::models::enums::Mode;
-use crate::models::enums::Standard;
-use crate::models::metrics::Metrics;
-use crate::utils::config::JobConfig;
-use crate::utils::crypto::Cypher;
-use crate::utils::error::MedError;
-use crate::utils::helpers::read_csv;
-use crate::utils::helpers::write_csv;
-use crate::utils::helpers::{create_output_dir, csv_fields_exist};
-use crate::utils::progress_bar::get_progress_bar;
-use async_trait::async_trait;
-use csv::StringRecord;
-use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
-use tracing::debug;
+use std::sync::Arc;
+
+use colored::Colorize;
+use csv::{StringRecord, Writer};
+use indicatif::{MultiProgress, ProgressStyle, ProgressBar};
+use tracing::{debug, info};
 use walkdir::WalkDir;
 
-use crate::app::core::Processor;
+use crate::app::worker::Worker;
+use crate::models::enums::{Mode, Standard};
+use crate::models::metrics::{Metadata, Metrics};
+use crate::utils::config::JobConfig;
+use crate::utils::crypto::Cypher;
+use crate::utils::error::MedErrorType;
+use crate::utils::helpers::{create_output_dir, csv_fields_exist};
+use crate::utils::progress_bar::get_progress_bar;
+use crate::{models::params::Params, utils::error::MedError};
 
-#[derive(Debug, Clone, Default)]
-pub struct CsvFile {
-    pub path: String,
-    pub total_records: usize,
-    pub failed_records: usize,
-    pub record_failed_reason: Vec<MedError>,
-    pub headers: StringRecord,
-    pub data: Vec<StringRecord>,
-}
-
-#[derive(Debug, Default, Clone)]
 pub struct CsvFileProcessor {
-    pub metrics: Metrics,
-    pub result: Vec<CsvFile>,
+    metrics: Metrics,
+    runtime_params: Params,
+    fields: Vec<String>,
+    mask_symbols: Option<String>,
+    cypher: Option<Cypher>,
+    standard: Option<Standard>,
 }
 
-#[async_trait(?Send)]
-impl Processor for CsvFileProcessor {
-    async fn new() -> Self {
-        CsvFileProcessor::default()
+impl CsvFileProcessor {
+    pub async fn new(runtime_params: Params, job_conf: JobConfig) -> Self {
+        CsvFileProcessor {
+            metrics: Metrics::default(),
+            runtime_params,
+            fields: job_conf.fields,
+            mask_symbols: Some(job_conf.mask_symbols),
+            cypher: None,
+            standard: None,
+        }
     }
-    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MedError> {
-        let (tx, rx) = flume::unbounded();
-        let new_worker = Worker::new(num_workers.to_owned()).await?;
+
+    pub async fn run(&mut self) -> Result<Metrics, MedError> {
+        match self.runtime_params.mode {
+            Mode::ENCRYPT | Mode::DECRYPT => match &self.runtime_params.key {
+                Some(key) => {
+                    self.cypher = Some(Cypher::new(key));
+                    self.standard = Some(self.runtime_params.standard);
+                }
+                None => {
+                    return Err(MedError {
+                        message: Some(
+                            "Missing key for Encyption and Decryption input!".to_string(),
+                        ),
+                        cause: Some("missing -k or --key".to_string()),
+                        error_type: MedErrorType::ConfigError,
+                    })
+                }
+            },
+            Mode::MASK => (),
+        }
+        self.metrics = self.load().await?;
+
+        Ok(self.metrics.clone())
+    }
+
+    async fn load(&mut self) -> Result<Metrics, MedError> {
+        // prepare the channel to send back the metrics
+        let (tx_metadata, rx_metadata) = flume::unbounded();
+
+        // inital worker based on the input
+        let new_worker = Worker::new(self.runtime_params.worker).await?;
+
+        // init the files number as 0
         let mut files_number: u64 = 0;
 
-        for entry in WalkDir::new(file_path)
+        // create outpu dir
+        create_output_dir(
+            &self.runtime_params.output_path,
+            &self.runtime_params.file_path,
+        )
+        .await?;
+
+        // loop over the files path
+        for entry in WalkDir::new(&self.runtime_params.file_path)
             .follow_links(true)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| !e.path().is_dir())
         {
-            let tx = tx.clone();
+            // prepare the worker processing
+            let tx_metadata = tx_metadata.clone();
+            let mode = self.runtime_params.mode.clone();
+            let files_path = entry.path().display().to_string();
+            let output_dir = format!("{}/{}", self.runtime_params.output_path, files_path);
+            let fields = self.fields.clone();
+
+            let cypher = self.cypher.clone();
+            let standard = self.standard.clone();
+            let mask_symbols = self.mask_symbols.clone();
+
+            // debug ensure the files have been process
             debug!("load csv files: {:?}", entry.path().display().to_string());
+
+            // increase file number
             files_number += 1;
+
+            // worker execution
             new_worker.pool.execute(move || {
-                read_csv(tx, entry.path().display().to_string()).unwrap();
+                Self::process(
+                    tx_metadata,
+                    cypher,
+                    standard,
+                    mask_symbols,
+                    &files_path,
+                    &output_dir,
+                    &mode,
+                    &fields,
+                )
+                .unwrap();
             });
         }
 
-        drop(tx);
+        // drop the channel once it done.
+        drop(tx_metadata);
 
-        let bar = get_progress_bar(files_number, "load csv files to processor");
-        rx.iter().for_each(|item| {
+        let bar = get_progress_bar(files_number, "processing csv files");
+        rx_metadata.iter().for_each(|item| {
             bar.inc(1);
-            self.metrics.total_files += 1;
-            self.metrics.total_records += item.total_records;
-            self.metrics.failed_records += item.failed_records;
+            self.metrics.total_files = files_number as usize;
+            self.metrics.metadata.total_records += item.total_records;
+            self.metrics.metadata.failed_records += item.failed_records;
             self.metrics
+                .metadata
                 .record_failed_reason
-                .extend(item.record_failed_reason.clone());
-            self.result.push(item);
+                .extend(item.record_failed_reason);
         });
         bar.finish_and_clear();
 
-        Ok(())
+        debug!("metrics {:?}", self.metrics);
+
+        Ok(self.metrics.clone())
     }
 
-    #[cfg(not(tarpaulin_include))]
-    async fn run(
-        &mut self,
-        job_conf: &JobConfig,
+    fn process(
+        tx_metadata: flume::Sender<Metadata>,
+        cypher: Option<Cypher>,
+        standard: Option<Standard>,
+        mask_symbols: Option<String>,
+        files_path: &str,
+        output_path: &str,
         mode: &Mode,
-        standard: Option<&Standard>,
-        cypher: Option<&Cypher>,
+        fields: &Vec<String>,
     ) -> Result<(), MedError> {
-        let bar = get_progress_bar(self.metrics.total_records as u64, "masking csv files");
+        // prepare the reader and read the file
+        let mut reader = csv::Reader::from_path(files_path)?;
 
-        let new_result: Vec<CsvFile> = self
-            .result
-            .par_iter()
-            .map(|item| {
-                let mut new_csv = CsvFile {
-                    headers: item.headers.clone(),
-                    ..Default::default()
-                };
+        // get the header of the file
+        let headers = reader.headers()?.to_owned();
 
-                let indexs = csv_fields_exist(item.headers.clone(), &job_conf.fields);
+        // prepare the metrics
+        let mut failed_records: usize = 0;
+        let mut record_failed_reason: Vec<MedError> = Vec::new();
 
-                let masked_data: Vec<StringRecord> = item
-                    .clone()
-                    .data
-                    .into_par_iter()
-                    .inspect(|_| bar.inc(1))
-                    .map(|records| {
-                        let mut masked_record: StringRecord = StringRecord::new();
-                        records.iter().enumerate().for_each(|(i, item)| {
-                            match indexs.contains(&i) {
-                                true => {
-                                    let mut masked: String = String::new();
-                                    match mode {
-                                        Mode::MASK => {
-                                            masked = job_conf.mask_symbols.clone();
+        let indexs = csv_fields_exist(headers.clone(), fields);
+        debug!("write to location : {:?}", output_path);
+
+        let mut total_records = 0;
+
+        // prepare the writer
+        let mut wtr = Writer::from_path(output_path)?;
+
+        // write the header
+        wtr.write_record(&headers)?;
+
+        reader.into_records().inspect(|_| {
+            total_records += 1;
+        }).for_each(|record| {
+            match record {
+                Ok(records) => {
+                    let mut masked_record: StringRecord = StringRecord::new();
+                    records.iter().enumerate().for_each(|(i, item)| {
+                        match indexs.contains(&i) {
+                            true => {
+                                let mut masked: String = String::new();
+                                match mode {
+                                    Mode::MASK => {
+                                        if let Some(symbols) = mask_symbols.clone() {
+                                            masked = symbols;
                                         }
-                                        Mode::ENCRYPT => {
-                                            if let Some(cypher) = cypher {
-                                                if let Some(standard) = standard {
-                                                    masked = cypher.encrypt(item, standard).unwrap()
-                                                }
-                                            }
-                                        }
-                                        Mode::DECRYPT => {
-                                            if let Some(cypher) = cypher {
-                                                if let Some(standard) = standard {
-                                                    masked = cypher.decrypt(item, standard).unwrap()
-                                                }
+                                    }
+                                    Mode::ENCRYPT => {
+                                        if let Some(cypher) = cypher.clone() {
+                                            if let Some(standard) = standard {
+                                                masked = cypher.encrypt(item, &standard).unwrap()
                                             }
                                         }
                                     }
-                                    masked_record.push_field(&masked);
+                                    Mode::DECRYPT => {
+                                        if let Some(cypher) = cypher.clone() {
+                                            if let Some(standard) = standard {
+                                                masked = cypher.decrypt(item, &standard).unwrap()
+                                            }
+                                        }
+                                    }
                                 }
-                                false => masked_record.push_field(item),
+                                masked_record.push_field(&masked);
                             }
-                        });
-                        masked_record
-                    })
-                    .collect();
-                new_csv.path = item.path.clone();
-                new_csv.data = masked_data;
-                new_csv
-            })
-            .collect::<Vec<CsvFile>>();
+                            false => masked_record.push_field(item),
+                        };
+                    });
+                    wtr.write_record(&masked_record).unwrap();
+                }
+                Err(err) => {
+                    let record_error = MedError {
+                        message: Some(format!("please check {} csv format", files_path)),
+                        cause: Some(err.to_string()),
+                        error_type: MedErrorType::CsvError,
+                    };
+                    let error_str = serde_json::to_string(&record_error).unwrap();
+                    info!("{}: {}", "warning".bold().yellow(), error_str);
+                    record_failed_reason.push(record_error);
+                    failed_records += 1;
+                }
+            };
+        });
+        // clear the writer
+        wtr.flush()?;
 
-        self.result = new_result;
-        bar.finish_and_clear();
+        tx_metadata
+            .send(Metadata {
+                total_records,
+                failed_records,
+                record_failed_reason,
+            })
+            .unwrap();
 
         Ok(())
-    }
-
-    #[cfg(not(tarpaulin_include))]
-    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError> {
-        create_output_dir(output_dir, file_dir).await?;
-        let bar: indicatif::ProgressBar =
-            get_progress_bar(self.metrics.total_records as u64, "write files");
-        self.result.par_iter().for_each(|item| {
-            let output_files = format!("{}/{}", output_dir, item.path);
-            debug!("write to path: {:?}", output_files);
-            write_csv(item, &output_files, &bar).unwrap();
-        });
-        bar.finish_and_clear();
-        Ok(self.metrics.clone())
     }
 }

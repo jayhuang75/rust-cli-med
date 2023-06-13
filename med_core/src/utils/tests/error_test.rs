@@ -1,17 +1,12 @@
 use std::path::Path;
 
-use csv::StringRecord;
-use indicatif::ProgressBar;
 use serde_json::Value;
 
-use crate::{
-    app::csv::CsvFile,
-    utils::{
-        config::JobConfig,
-        crypto::Cypher,
-        error::{MedError, MedErrorType},
-        helpers::{write_csv, write_json},
-    },
+use crate::utils::{
+    config::JobConfig,
+    crypto::Cypher,
+    error::{MedError, MedErrorType},
+    helpers::write_json,
 };
 
 #[tokio::test]
@@ -92,18 +87,6 @@ async fn test_io_error() {
             assert_eq!(e.error_type, MedErrorType::IoError);
         }
     }
-}
-
-#[tokio::test]
-async fn test_csv_error() {
-    let mut new_csv_file = CsvFile::default();
-    let mut headers = StringRecord::default();
-    headers.push_field("iter");
-    new_csv_file.headers = headers;
-    let bar = ProgressBar::new(1);
-
-    let is_err = write_csv(&new_csv_file, "", &bar).expect_err("msg");
-    assert_eq!(is_err.error_type, MedErrorType::CsvError);
 }
 
 // #[tokio::test]

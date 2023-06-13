@@ -64,7 +64,7 @@ impl Processor for JsonFileProcessor {
         rx.iter().for_each(|item| {
             bar.inc(1);
             self.metrics.total_files += 1;
-            self.metrics.total_records += item.total_records;
+            self.metrics.metadata.total_records += item.total_records;
             self.result.push(item);
         });
         bar.finish_and_clear();
@@ -90,7 +90,7 @@ impl Processor for JsonFileProcessor {
                     json_med_core(&mut item.data.clone(), job_conf, mode, standard, cypher);
                 new_json.path = item.path.clone();
                 new_json.data = masked;
-                new_json.total_records = self.metrics.total_records;
+                new_json.total_records = self.metrics.metadata.total_records;
                 new_json
             })
             .collect::<Vec<JsonFile>>();
@@ -103,7 +103,7 @@ impl Processor for JsonFileProcessor {
     async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError> {
         create_output_dir(output_dir, file_dir).await?;
         let bar: indicatif::ProgressBar =
-            get_progress_bar(self.metrics.total_records as u64, "write files");
+            get_progress_bar(self.metrics.metadata.total_records as u64, "write files");
         self.result
             .par_iter()
             .inspect(|_| bar.inc(1))

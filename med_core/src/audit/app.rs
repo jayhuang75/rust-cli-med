@@ -1,13 +1,10 @@
-use crate::{audit::db::Database, utils::error::MedError};
+use crate::{audit::db::Database, models::metrics::Metrics, utils::error::MedError};
 
 #[derive(Debug, Default, Clone)]
 pub struct Summary {
     pub user: String,
     pub hostname: String,
-    pub total_files: usize,
-    pub total_records: usize,
-    pub failed_records: usize,
-    pub record_failed_reason: Vec<MedError>,
+    pub metrics: Metrics,
     pub runtime_conf: String,
     pub process_failure_reason: Option<String>,
     pub successed: bool,

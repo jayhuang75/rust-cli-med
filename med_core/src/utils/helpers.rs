@@ -7,7 +7,6 @@ use std::fs::{self, File};
 use std::io::Write;
 use walkdir::WalkDir;
 
-use crate::app::csv::CsvFile;
 use crate::models::enums::{Mode, Standard};
 use crate::utils::crypto::Cypher;
 
@@ -148,71 +147,6 @@ pub fn json_med_core(
         _ => {}
     }
     value.clone()
-}
-
-#[cfg(not(tarpaulin_include))]
-pub fn read_csv(tx: flume::Sender<CsvFile>, path: String) -> Result<(), MedError> {
-    use colored::Colorize;
-    use tracing::info;
-
-    use crate::utils::error::MedErrorType;
-
-    let mut reader = csv::Reader::from_path(path.clone())?;
-    let headers = reader.headers()?.to_owned();
-    let mut data: Vec<StringRecord> = Vec::new();
-    let mut total_records: usize = 0;
-    let mut failed_records: usize = 0;
-    let mut record_failed_reason: Vec<MedError> = Vec::new();
-
-    reader.records().for_each(|record| {
-        match record {
-            Ok(r) => {
-                total_records += 1;
-                data.push(r);
-            }
-            Err(err) => {
-                let record_error = MedError {
-                    message: Some(format!("please check {} csv format", path)),
-                    cause: Some(err.to_string()),
-                    error_type: MedErrorType::CsvError,
-                };
-                let error_str = serde_json::to_string(&record_error).unwrap();
-                record_failed_reason.push(record_error);
-                failed_records += 1;
-                info!("{}: {}", "warning".bold().yellow(), error_str);
-            }
-        };
-    });
-    tx.send(CsvFile {
-        path,
-        total_records,
-        failed_records,
-        record_failed_reason,
-        headers,
-        data,
-    })
-    .unwrap();
-    Ok(())
-}
-
-#[cfg(not(tarpaulin_include))]
-pub fn write_csv(
-    masked_data: &CsvFile,
-    output_file: &str,
-    bar: &indicatif::ProgressBar,
-) -> Result<(), MedError> {
-    use csv::Writer;
-
-    let mut wtr = Writer::from_path(output_file)?;
-    // write the header
-    wtr.write_record(&masked_data.headers)?;
-
-    masked_data.data.iter().for_each(|item| {
-        bar.inc(1);
-        wtr.write_record(item).unwrap();
-    });
-    wtr.flush()?;
-    Ok(())
 }
 
 #[cfg(not(tarpaulin_include))]
