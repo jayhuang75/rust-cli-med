@@ -130,7 +130,7 @@ impl FileProcessor {
 
         let bar = get_progress_bar(
             files_number,
-            &format!("processing {:?} files", self.runtime_params.mode),
+            &format!("processing {:?} files", self.runtime_params.file_type),
         );
         rx_metadata.iter().for_each(|item| {
             bar.inc(1);
