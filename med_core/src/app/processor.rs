@@ -101,7 +101,7 @@ impl FileProcessor {
             // debug ensure the files have been process
             debug!(
                 "load {:?} files: {:?}",
-                self.runtime_params.mode,
+                self.runtime_params.file_type,
                 entry.path().display().to_string()
             );
 
