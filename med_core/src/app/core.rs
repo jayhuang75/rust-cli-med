@@ -1,14 +1,11 @@
-use crate::app::csv::CsvFileProcessor;
+use crate::app::processor::FileProcessor;
 use crate::audit::app::Audit;
-use crate::utils::crypto::Cypher;
 use crate::{utils::config::JobConfig, utils::error::MedError};
-use async_trait::async_trait;
 use colored::Colorize;
 use std::path::Path;
 use tokio::time::Instant;
 use tracing::{debug, info};
 
-use crate::models::enums::{FileType, Mode, Standard};
 use crate::models::{metrics::Metrics, params::Params};
 use crate::utils::logger::logging;
 
@@ -18,20 +15,6 @@ pub struct App {
     pub hostname: String,
     pub audit: Audit,
     pub metrics: Metrics,
-}
-
-#[async_trait(?Send)]
-pub trait Processor {
-    async fn new() -> Self;
-    async fn load(&mut self, num_worker: &u16, file_path: &str) -> Result<(), MedError>;
-    async fn run(
-        &mut self,
-        job_conf: &JobConfig,
-        mode: &Mode,
-        standard: Option<&Standard>,
-        cypher: Option<&Cypher>,
-    ) -> Result<(), MedError>;
-    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError>;
 }
 
 impl App {
@@ -89,24 +72,16 @@ impl App {
         );
 
         let now = Instant::now();
-        match &self.params.file_type {
-            FileType::CSV => {
-                let mut csv_processor = CsvFileProcessor::new(self.params.clone(), job_conf).await;
-                match csv_processor.run().await {
-                    Ok(metrics) => {
-                        self.metrics = metrics.clone();
-                        self.audit.summary.metrics = metrics.clone();
-                        self.audit.summary.successed = true;
-                    }
-                    Err(err) => {
-                        self.audit.summary.process_failure_reason =
-                            Some(serde_json::to_string(&err)?);
-                        info!("{} {:?}", "error".bold().red(), err.to_string());
-                    }
-                }
+        let mut processor = FileProcessor::new(self.params.clone(), job_conf).await;
+        match processor.run().await {
+            Ok(metrics) => {
+                self.metrics = metrics.clone();
+                self.audit.summary.metrics = metrics;
+                self.audit.summary.successed = true;
             }
-            FileType::JSON => {
-                todo!()
+            Err(err) => {
+                self.audit.summary.process_failure_reason = Some(serde_json::to_string(&err)?);
+                info!("{} {:?}", "error".bold().red(), err.to_string());
             }
         }
         info!(

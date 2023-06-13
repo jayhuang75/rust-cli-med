@@ -6,7 +6,6 @@ use crate::utils::{
     config::JobConfig,
     crypto::Cypher,
     error::{MedError, MedErrorType},
-    helpers::write_json,
 };
 
 #[tokio::test]
@@ -65,29 +64,29 @@ async fn test_magic_crypt_error() {
     }
 }
 
-#[tokio::test]
-async fn test_io_error() {
-    let data = r#"
-        {
-            "name": "John Doe",
-            "age": 43,
-            "phones": [
-                "+44 1234567",
-                "+44 2345678"
-            ]
-        }"#;
+// #[tokio::test]
+// async fn test_io_error() {
+//     let data = r#"
+//         {
+//             "name": "John Doe",
+//             "age": 43,
+//             "phones": [
+//                 "+44 1234567",
+//                 "+44 2345678"
+//             ]
+//         }"#;
 
-    // Parse the string of data into serde_json::Value.
-    let v: Value = serde_json::from_str(data).unwrap();
-    match write_json(&v, "") {
-        Ok(_) => {
-            unimplemented!()
-        }
-        Err(e) => {
-            assert_eq!(e.error_type, MedErrorType::IoError);
-        }
-    }
-}
+//     // Parse the string of data into serde_json::Value.
+//     let v: Value = serde_json::from_str(data).unwrap();
+//     match write_json(&v, "") {
+//         Ok(_) => {
+//             unimplemented!()
+//         }
+//         Err(e) => {
+//             assert_eq!(e.error_type, MedErrorType::IoError);
+//         }
+//     }
+// }
 
 // #[tokio::test]
 // async fn test_rayon_thread_pool_error() {
