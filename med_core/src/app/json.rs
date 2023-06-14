@@ -60,7 +60,6 @@ pub fn json_processor(
     Ok(())
 }
 
-#[cfg(not(tarpaulin_include))]
 fn json_med_core(value: &mut Value, process_runtime: &ProcessRuntime) -> Value {
     match value {
         Value::Array(arr) => {
@@ -172,7 +171,6 @@ fn json_med_core(value: &mut Value, process_runtime: &ProcessRuntime) -> Value {
     value.clone()
 }
 
-#[cfg(not(tarpaulin_include))]
 pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MedError> {
     let mut json_file = File::create(output_file)?;
     let data = serde_json::to_string(masked_data)?;
@@ -180,3 +178,7 @@ pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MedError
     json_file.sync_data()?;
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "../tests/json_test.rs"]
+mod json_test;

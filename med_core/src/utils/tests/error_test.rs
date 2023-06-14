@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use serde_json::Value;
-
 use crate::utils::{
     config::JobConfig,
     crypto::Cypher,
