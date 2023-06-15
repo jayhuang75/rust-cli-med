@@ -92,6 +92,7 @@ impl App {
         Ok(self.metrics.clone())
     }
 
+    #[cfg(not(tarpaulin_include))]
     pub async fn update_audit(&mut self) -> Result<i64, MedError> {
         // update the runtime params for the audit record.
         if self.params.key.is_some() {

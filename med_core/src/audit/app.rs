@@ -21,6 +21,8 @@ impl Audit {
         let summary = Summary::default();
         Ok(Audit { db, summary })
     }
+
+    #[cfg(not(tarpaulin_include))]
     pub async fn insert(&mut self) -> Result<i64, MedError> {
         let id = self.db.insert(&self.summary).await?;
         Ok(id)

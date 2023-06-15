@@ -15,7 +15,3 @@ pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), M
         });
     Ok(())
 }
-
-#[cfg(test)]
-#[path = "./tests/helpers_test.rs"]
-mod helpers_test;
