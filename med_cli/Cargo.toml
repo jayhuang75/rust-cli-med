@@ -1,6 +1,6 @@
 [package]
 name = "med_cli"
-version = "0.3.1"
+version = "0.5.0"
 edition = "2021"
 authors = ["Wei Huang <jayhuang75@hotmail.com>"]
 license = "Apache-2.0"

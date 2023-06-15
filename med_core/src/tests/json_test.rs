@@ -50,8 +50,8 @@ async fn test_json_processor_mask() {
         mask_symbols: Some("#####".to_string()),
         mode: Mode::MASK,
     };
-    let files_path: &str = "../demo/data/json/generated.json";
-    let output_path = "../output/demo/data/json/mask/generated.json";
+    let files_path: &str = "../demo/data/input/json/generated.json";
+    let output_path = "../demo/data/output/json/mask/generated.json";
 
     json_processor(
         tx_metadata.clone(),
@@ -80,8 +80,8 @@ async fn test_json_processor_encrypt() {
         mode: Mode::ENCRYPT,
     };
 
-    let files_path: &str = "../demo/data/json/generated.json";
-    let output_path = "../output/demo/data/json/encrypt/generated.json";
+    let files_path: &str = "../demo/data/input/json/generated.json";
+    let output_path = "../demo/data/output/json/encrypt/generated.json";
 
     json_processor(
         tx_metadata.clone(),
@@ -106,11 +106,11 @@ async fn test_json_processor_decrypt() {
         fields: vec!["name".to_string()],
         cypher: Some(Cypher::new(KEY)),
         standard: Some(Standard::DES64),
-        mask_symbols: Some("#####".to_string()),
+        mask_symbols: None,
         mode: Mode::DECRYPT,
     };
-    let output_path: &str = "../demo/data/json/generated.json";
-    let files_path = "../output/demo/data/json/encrypt/generated.json";
+    let output_path: &str = "../demo/data/input/json/generated.json";
+    let files_path = "../demo/data/output/json/encrypt/generated.json";
 
     json_processor(
         tx_metadata.clone(),
@@ -138,8 +138,8 @@ async fn test_json_processor_format_err() {
         mask_symbols: Some("#####".to_string()),
         mode: Mode::MASK,
     };
-    let files_path: &str = "../demo/data/format_err/json/format_err.json";
-    let output_path = "../output/demo/data/json/encrypt/generated.json";
+    let files_path: &str = "../demo/data/input/format_err/json/format_err.json";
+    let output_path = "../demo/data/output/json/format_err/generated.json";
 
     json_processor(
         tx_metadata.clone(),

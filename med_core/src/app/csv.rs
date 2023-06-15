@@ -54,29 +54,7 @@ pub fn csv_processor(
                                 Mode::ENCRYPT => {
                                     if let Some(cypher) = process_runtime.cypher.clone() {
                                         if let Some(standard) = process_runtime.standard {
-                                            match cypher.encrypt(item, &standard) {
-                                                Ok(m) => masked = m,
-                                                Err(err) => {
-                                                    let record_error = MedError {
-                                                        message: Some(format!(
-                                                            "please check {} {:?} format",
-                                                            files_path, process_runtime.mode
-                                                        )),
-                                                        cause: Some(err.to_string()),
-                                                        error_type: MedErrorType::CsvError,
-                                                    };
-                                                    let error_str =
-                                                        serde_json::to_string(&record_error)
-                                                            .unwrap();
-                                                    info!(
-                                                        "{}: {}",
-                                                        "warning".bold().yellow(),
-                                                        error_str
-                                                    );
-                                                    record_failed_reason.push(record_error);
-                                                    failed_records += 1;
-                                                }
-                                            }
+                                            masked = cypher.encrypt(item, &standard).unwrap();
                                         }
                                     }
                                 }
