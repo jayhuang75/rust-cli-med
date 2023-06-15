@@ -99,7 +99,8 @@ async fn test_csv_processor_encrypt() {
         files_path,
         output_path,
         process_runtime,
-    ).unwrap();
+    )
+    .unwrap();
 
     // drop the channel once it done.
     drop(tx_metadata);
@@ -187,13 +188,13 @@ async fn test_csv_processor_decrypt_error() {
         files_path,
         output_path,
         process_runtime,
-    ).unwrap();
+    )
+    .unwrap();
 
     // drop the channel once it done.
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        println!("{:?}",item);
         assert_eq!(item.failed_records, 1);
     });
 }

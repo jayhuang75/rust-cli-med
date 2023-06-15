@@ -3,7 +3,7 @@ use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
 use crate::utils::config::JobConfig;
 use crate::utils::error::MedError;
-use crate::utils::error::MedErrorType::{ConfigError};
+use crate::utils::error::MedErrorType::ConfigError;
 
 #[tokio::test]
 async fn test_csv_mask_app() {

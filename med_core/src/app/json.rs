@@ -23,15 +23,17 @@ pub fn json_processor(
     let mut total_records: usize = 0;
     let mut failed_records: usize = 0;
     let mut record_failed_reason: Vec<MedError> = Vec::new();
-
+    
     match serde_json::from_str::<Value>(&text) {
         Ok(data) => {
             if data.is_array() {
                 total_records = data.as_array().unwrap().len();
-                let mut json_data = data;
+            } else{
+                total_records = 1;
+            }
+            let mut json_data = data;
                 let new_json_data = json_med_core(&mut json_data, &process_runtime);
                 write_json(&new_json_data, output_path).unwrap();
-            }
         }
         Err(err) => {
             let record_error = MedError {

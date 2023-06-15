@@ -8,18 +8,18 @@ update_debian:
 
 .PHONY:
 json_encrypt:
-	cargo run --bin med encrypt -t json -f demo/data/json -c demo/conf/conf_json.yaml -w 12 -k 1q2w3er -s des64
+	cargo run --bin med encrypt -t json -f demo/data/input/json -c demo/conf/conf_json.yaml -w 12 -k 1q2w3er -s des64
 
 .PHONY:
 json_mask:
-	cargo run --bin med mask -t json -f demo/data/json -c demo/conf/conf_json.yaml -w 12
+	cargo run --bin med mask -t json -f demo/data/input/json -c demo/conf/conf_json.yaml -w 12
 
 .PHONY:
 csv_mask:
-	cargo run --bin med mask -f demo/data/csv -c demo/conf/conf_csv.yaml -w 12
+	cargo run --bin med mask -f demo/data/input/csv -c demo/conf/conf_csv.yaml -w 12
 
 .PHONY:
 csv_encrypt:
-	cargo run --bin med encrypt -f demo/data/csv -c demo/conf/conf_csv.yaml -w 12 -k 1q2w3e4r -s des64
+	cargo run --bin med encrypt -f demo/data/input/csv -c demo/conf/conf_csv.yaml -w 12 -k 1q2w3e4r -s des64
 
 

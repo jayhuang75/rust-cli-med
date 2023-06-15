@@ -1,6 +1,6 @@
 use colored::Colorize;
 use csv::{StringRecord, Writer};
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::{
     models::{enums::Mode, metrics::Metadata},
@@ -134,6 +134,7 @@ fn csv_fields_exist(headers: StringRecord, fields: &[String]) -> Vec<usize> {
         .collect::<Vec<_>>();
 
     if indexs.is_empty() {
+        warn!("Please check your csv file, there is no marched header found in the csv files");
         std::process::exit(1);
     }
     indexs

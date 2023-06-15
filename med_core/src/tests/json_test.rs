@@ -156,3 +156,63 @@ async fn test_json_processor_format_err() {
         assert_eq!(item.failed_records, 1);
     });
 }
+
+#[tokio::test]
+async fn test_json_is_obj() {
+    let (tx_metadata, rx_metadata) = flume::unbounded();
+    let process_runtime = ProcessRuntime {
+        fields: vec!["name".to_string()],
+        cypher: None,
+        standard: None,
+        mask_symbols: Some("#####".to_string()),
+        mode: Mode::MASK,
+    };
+    let files_path: &str = "../demo/data/input/json/is_obj.json";
+    let output_path = "../demo/data/output/json/mask/is_obj.json";
+
+    json_processor(
+        tx_metadata.clone(),
+        files_path,
+        output_path,
+        process_runtime,
+    )
+    .unwrap();
+
+    // drop the channel once it done.
+    drop(tx_metadata);
+
+    rx_metadata.iter().for_each(|item| {
+        // println!("item : {:?}", item );
+        assert_eq!(item.total_records, 1);
+    });
+}
+
+#[tokio::test]
+async fn test_json_arr_in_arr() {
+    let (tx_metadata, rx_metadata) = flume::unbounded();
+    let process_runtime = ProcessRuntime {
+        fields: vec!["name".to_string()],
+        cypher: None,
+        standard: None,
+        mask_symbols: Some("#####".to_string()),
+        mode: Mode::MASK,
+    };
+    let files_path: &str = "../demo/data/input/json/arr_in_arr.json";
+    let output_path = "../demo/data/output/json/mask/arr_in_arr.json";
+
+    json_processor(
+        tx_metadata.clone(),
+        files_path,
+        output_path,
+        process_runtime,
+    )
+    .unwrap();
+
+    // drop the channel once it done.
+    drop(tx_metadata);
+
+    rx_metadata.iter().for_each(|item| {
+        // println!("item : {:?}", item );
+        assert_eq!(item.total_records, 1);
+    });
+}
