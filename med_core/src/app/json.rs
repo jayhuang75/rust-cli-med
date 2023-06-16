@@ -1,8 +1,6 @@
-use colored::Colorize;
 use serde_json::Value;
 use std::fs::File;
 use std::io::Write;
-use tracing::info;
 
 use crate::{
     models::{enums::Mode, metrics::Metadata},
@@ -17,24 +15,36 @@ pub fn json_processor(
     output_path: &str,
     process_runtime: ProcessRuntime,
 ) -> Result<(), MedError> {
-    let text = std::fs::read_to_string(files_path)?;
-
     // prepare the metrics
     let mut total_records: usize = 0;
     let mut failed_records: usize = 0;
     let mut record_failed_reason: Vec<MedError> = Vec::new();
 
-    match serde_json::from_str::<Value>(&text) {
-        Ok(data) => {
-            if data.is_array() {
-                total_records = data.as_array().unwrap().len();
-            } else {
-                total_records = 1;
+    match std::fs::read_to_string(files_path) {
+        Ok(text) => match serde_json::from_str::<Value>(&text) {
+            Ok(data) => {
+                if data.is_array() {
+                    total_records = data.as_array().unwrap().len();
+                } else {
+                    total_records = 1;
+                }
+                let mut json_data = data;
+                let new_json_data = json_med_core(&mut json_data, &process_runtime);
+                write_json(&new_json_data, output_path).unwrap();
             }
-            let mut json_data = data;
-            let new_json_data = json_med_core(&mut json_data, &process_runtime);
-            write_json(&new_json_data, output_path).unwrap();
-        }
+            Err(err) => {
+                let record_error = MedError {
+                    message: Some(format!(
+                        "please check {} {:?} format",
+                        files_path, process_runtime.mode
+                    )),
+                    cause: Some(err.to_string()),
+                    error_type: MedErrorType::CsvError,
+                };
+                record_failed_reason.push(record_error);
+                failed_records += 1;
+            }
+        },
         Err(err) => {
             let record_error = MedError {
                 message: Some(format!(
@@ -44,8 +54,6 @@ pub fn json_processor(
                 cause: Some(err.to_string()),
                 error_type: MedErrorType::CsvError,
             };
-            let error_str = serde_json::to_string(&record_error).unwrap();
-            info!("{}: {}", "warning".bold().yellow(), error_str);
             record_failed_reason.push(record_error);
             failed_records += 1;
         }

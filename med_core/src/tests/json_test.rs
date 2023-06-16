@@ -12,7 +12,7 @@ async fn test_json_processor_error() {
     // files_path: &str,
     // output_path: &str,
     // process_runtime: ProcessRuntime,
-    let (tx_metadata, _) = flume::unbounded();
+    let (tx_metadata, rx_metadata) = flume::unbounded();
     let process_runtime = ProcessRuntime {
         fields: vec!["name".to_string()],
         cypher: None,
@@ -38,6 +38,10 @@ async fn test_json_processor_error() {
 
     // drop the channel once it done.
     drop(tx_metadata);
+
+    rx_metadata.iter().for_each(|item| {
+        assert_eq!(item.total_records, 0);
+    });
 }
 
 #[tokio::test]

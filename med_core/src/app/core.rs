@@ -76,7 +76,10 @@ impl App {
         match processor.run().await {
             Ok(metrics) => {
                 self.metrics = metrics.clone();
-                self.audit.summary.metrics = metrics;
+                self.audit.summary.metrics = metrics.clone();
+                if !metrics.metadata.record_failed_reason.is_empty() {
+                    info!("{}: {:?}", "warning".bold().yellow(), metrics.metadata.record_failed_reason);
+                }
                 self.audit.summary.successed = true;
             }
             Err(err) => {
