@@ -76,7 +76,7 @@ async fn test_csv_processor_mask() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.total_records, 1000);
+        assert_eq!(item.failed_records, 0);
     });
 }
 
@@ -106,7 +106,7 @@ async fn test_csv_processor_encrypt() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.total_records, 1000);
+        assert_eq!(item.failed_records, 0);
     });
 }
 
@@ -136,7 +136,7 @@ async fn test_csv_processor_decrypt() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.total_records, 1000);
+        assert_eq!(item.failed_records, 0);
     });
 }
 

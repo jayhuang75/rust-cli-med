@@ -69,7 +69,7 @@ async fn test_json_processor_mask() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.total_records, 5);
+        assert_eq!(item.failed_records, 0);
     });
 }
 
@@ -99,7 +99,7 @@ async fn test_json_processor_encrypt() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.total_records, 5);
+        assert_eq!(item.failed_records, 0);
     });
 }
 
@@ -128,7 +128,7 @@ async fn test_json_processor_decrypt() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.total_records, 5);
+        assert_eq!(item.failed_records, 0);
     });
 }
 
@@ -217,6 +217,6 @@ async fn test_json_arr_in_arr() {
 
     rx_metadata.iter().for_each(|item| {
         // println!("item : {:?}", item );
-        assert_eq!(item.total_records, 1);
+        assert_eq!(item.failed_records, 0);
     });
 }

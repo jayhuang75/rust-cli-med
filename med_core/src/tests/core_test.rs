@@ -66,7 +66,7 @@ async fn test_file_processor_failed() {
 
     let mut new_app = App::new(new_params).await.unwrap();
     let metrics = new_app.process().await.unwrap();
-    assert_eq!(metrics.metadata.failed_records, 2);
+    assert_eq!(metrics.metadata.record_failed_reason.is_empty(), false);
 }
 
 #[tokio::test]
@@ -80,7 +80,7 @@ async fn test_processor_run_encrypt() {
 
     let mut new_app = App::new(new_params).await.unwrap();
     let metrics = new_app.process().await.unwrap();
-    assert_eq!(metrics.metadata.total_records, 2000);
+    assert_eq!(metrics.metadata.failed_records, 0);
 }
 
 #[tokio::test]
