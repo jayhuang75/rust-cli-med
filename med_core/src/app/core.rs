@@ -78,7 +78,11 @@ impl App {
                 self.metrics = metrics.clone();
                 self.audit.summary.metrics = metrics.clone();
                 if !metrics.metadata.record_failed_reason.is_empty() {
-                    info!("{}: {:?}", "warning".bold().yellow(), metrics.metadata.record_failed_reason);
+                    info!(
+                        "{}: {:?}",
+                        "warning".bold().yellow(),
+                        metrics.metadata.record_failed_reason
+                    );
                 }
                 self.audit.summary.successed = true;
             }

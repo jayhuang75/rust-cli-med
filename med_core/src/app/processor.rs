@@ -1,4 +1,4 @@
-use tracing::{debug};
+use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::app::csv::csv_processor;
