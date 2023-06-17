@@ -59,7 +59,7 @@ impl Database {
                 .busy_timeout(pool_timeout);
 
         let pool = SqlitePoolOptions::new()
-            .max_connections(2)
+            .max_connections(20)
             .connect_with(connection_options)
             .await?;
 
@@ -99,10 +99,11 @@ impl Database {
     }
 
     pub async fn insert(&mut self, summary: &Summary) -> Result<i64, MedError> {
-        let total_files = summary.total_files as i64;
-        let total_records = summary.total_records as i64;
-        let failed_records: i64 = summary.failed_records as i64;
-        let record_failed_reason = serde_json::to_string(&summary.record_failed_reason)?;
+        let total_files = summary.metrics.total_files as i64;
+        let total_records = summary.metrics.metadata.total_records as i64;
+        let failed_records: i64 = summary.metrics.metadata.failed_records as i64;
+        let record_failed_reason =
+            serde_json::to_string(&summary.metrics.metadata.record_failed_reason)?;
 
         let id = sqlx::query!(
             r#"

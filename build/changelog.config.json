@@ -1,0 +1,41 @@
+{
+    "categories": [
+      {
+        "title": "## 🚀 Features",
+        "labels": [
+          "feature"
+        ]
+      },
+      {
+        "title": "## 🐛 Fixes",
+        "labels": [
+          "bug"
+        ]
+      },
+      {
+        "title": "## 🧪 Tests",
+        "labels": [
+          "test"
+        ]
+      },
+      {
+        "title": "## 🧪 Tests and some ✨ Magic",
+        "labels": [
+          "test",
+          "magic"
+        ],
+        "exclude_labels": [
+          "no-magic"
+        ],
+        "exhaustive": true,
+        "empty_content": "- no matching PRs",
+        "rules": [
+          {
+            "pattern": "open",
+            "on_property": "status",
+            "flags": "gu"
+          }
+        ]
+      }
+    ]
+  }
