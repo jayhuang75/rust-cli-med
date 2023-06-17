@@ -41,6 +41,8 @@ jobs:
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v3
+        with:
+          configuration: "./build/changelog.config.json"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
       - name: Create GitHub release
@@ -51,7 +53,7 @@ jobs:
         with:
           tag_name: ${{ env.MED_VERSION }}
           release_name: ${{ env.MED_VERSION }}
-          body: ${{steps.github_release.outputs.commits	}}
+          body: ${{steps.github_release.outputs.changelog	}}
   build-release:
     name: ${{ matrix.target }}
     runs-on: ubuntu-latest

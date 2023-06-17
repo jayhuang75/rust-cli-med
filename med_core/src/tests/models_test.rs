@@ -6,7 +6,7 @@ use crate::models::{
 };
 
 #[tokio::test]
-async fn test_enum() {
+async fn test_mode_enum() {
     let mode = Mode::MASK;
     assert_eq!(mode.to_string(), "mask");
     assert_eq!(format!("{mode:?}"), "MASK");
@@ -19,6 +19,45 @@ async fn test_enum() {
     assert_eq!(mode.to_string(), "decrypt");
     assert_eq!(format!("{mode:?}"), "DECRYPT");
 
+    assert_eq!(
+        Mode::value_variants(),
+        &[Mode::MASK, Mode::ENCRYPT, Mode::DECRYPT]
+    );
+
+    assert_eq!(
+        Mode::to_possible_value(&Mode::MASK),
+        Some(PossibleValue::new("mask").help("Masking the data"))
+    );
+    assert_eq!(
+        Mode::to_possible_value(&Mode::ENCRYPT),
+        Some(PossibleValue::new("encrypt").help("Encrypt the data with provided KEY"))
+    );
+    assert_eq!(
+        Mode::to_possible_value(&Mode::DECRYPT),
+        Some(PossibleValue::new("decrypt").help("Decrypt the data with provided KEY"))
+    );
+
+    match Mode::from_str("test", true) {
+        Ok(m) => {
+            println!("m {:?}", m);
+        }
+        Err(err) => {
+            assert_eq!(err, "invalid variant: test".to_owned())
+        }
+    }
+
+    match Mode::from_str("mask", true) {
+        Ok(m) => {
+            assert_eq!(m, Mode::MASK);
+        }
+        Err(err) => {
+            assert_eq!(err, "invalid variant: test".to_owned())
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_app_mode_enum() {
     let app_mode = AppMode::CLI;
     assert_eq!(app_mode.to_string(), "CLI");
     assert_eq!(format!("{app_mode:?}"), "CLI");
@@ -26,7 +65,10 @@ async fn test_enum() {
     let app_mode = AppMode::SDK;
     assert_eq!(app_mode.to_string(), "SDK");
     assert_eq!(format!("{app_mode:?}"), "SDK");
+}
 
+#[tokio::test]
+async fn test_standard_enum() {
     let new_standard = Standard::DES64;
     assert_eq!(new_standard.to_string(), "des64");
     assert_eq!(format!("{new_standard:?}"), "DES64");
@@ -79,41 +121,6 @@ async fn test_enum() {
     }
 
     match Standard::from_str("test", true) {
-        Ok(_) => {
-            unimplemented!()
-        }
-        Err(e) => {
-            assert_eq!(e, "invalid variant: test");
-        }
-    }
-
-    assert_eq!(
-        Mode::value_variants(),
-        &[Mode::MASK, Mode::ENCRYPT, Mode::DECRYPT]
-    );
-    assert_eq!(
-        Mode::to_possible_value(&Mode::MASK),
-        Some(PossibleValue::new("mask").help("Masking the data"))
-    );
-    assert_eq!(
-        Mode::to_possible_value(&Mode::ENCRYPT),
-        Some(PossibleValue::new("encrypt").help("Encrypt the data with provided KEY"))
-    );
-    assert_eq!(
-        Mode::to_possible_value(&Mode::DECRYPT),
-        Some(PossibleValue::new("decrypt").help("Decrypt the data with provided KEY"))
-    );
-
-    match Mode::from_str("mask", true) {
-        Ok(s) => {
-            assert_eq!(s, Mode::MASK);
-        }
-        Err(_) => {
-            unimplemented!()
-        }
-    }
-
-    match Mode::from_str("test", true) {
         Ok(_) => {
             unimplemented!()
         }

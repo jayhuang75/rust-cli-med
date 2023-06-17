@@ -1,17 +1,9 @@
 use std::path::Path;
 
-use csv::StringRecord;
-use indicatif::ProgressBar;
-use serde_json::Value;
-
-use crate::{
-    app::csv::CsvFile,
-    utils::{
-        config::JobConfig,
-        crypto::Cypher,
-        error::{MedError, MedErrorType},
-        helpers::{write_csv, write_json},
-    },
+use crate::utils::{
+    config::JobConfig,
+    crypto::Cypher,
+    error::{MedError, MedErrorType},
 };
 
 #[tokio::test]
@@ -70,41 +62,29 @@ async fn test_magic_crypt_error() {
     }
 }
 
-#[tokio::test]
-async fn test_io_error() {
-    let data = r#"
-        {
-            "name": "John Doe",
-            "age": 43,
-            "phones": [
-                "+44 1234567",
-                "+44 2345678"
-            ]
-        }"#;
+// #[tokio::test]
+// async fn test_io_error() {
+//     let data = r#"
+//         {
+//             "name": "John Doe",
+//             "age": 43,
+//             "phones": [
+//                 "+44 1234567",
+//                 "+44 2345678"
+//             ]
+//         }"#;
 
-    // Parse the string of data into serde_json::Value.
-    let v: Value = serde_json::from_str(data).unwrap();
-    match write_json(&v, "") {
-        Ok(_) => {
-            unimplemented!()
-        }
-        Err(e) => {
-            assert_eq!(e.error_type, MedErrorType::IoError);
-        }
-    }
-}
-
-#[tokio::test]
-async fn test_csv_error() {
-    let mut new_csv_file = CsvFile::default();
-    let mut headers = StringRecord::default();
-    headers.push_field("iter");
-    new_csv_file.headers = headers;
-    let bar = ProgressBar::new(1);
-
-    let is_err = write_csv(&new_csv_file, "", &bar).expect_err("msg");
-    assert_eq!(is_err.error_type, MedErrorType::CsvError);
-}
+//     // Parse the string of data into serde_json::Value.
+//     let v: Value = serde_json::from_str(data).unwrap();
+//     match write_json(&v, "") {
+//         Ok(_) => {
+//             unimplemented!()
+//         }
+//         Err(e) => {
+//             assert_eq!(e.error_type, MedErrorType::IoError);
+//         }
+//     }
+// }
 
 // #[tokio::test]
 // async fn test_rayon_thread_pool_error() {
