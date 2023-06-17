@@ -22,8 +22,8 @@ async fn main() -> Result<(), MedError> {
     info!(
         "total processed {} files, {} records, with {} records failed, elapsed time {:?}, audit record_id {}",
         metrics.total_files.to_string().bold().green(),
-        metrics.total_records.to_string().bold().green(),
-        metrics.failed_records.to_string().bold().green(),
+        metrics.metadata.total_records.to_string().bold().green(),
+        metrics.metadata.failed_records.to_string().bold().green(),
         now.elapsed(),
         audit_id
     );

@@ -1,118 +1,194 @@
-use async_trait::async_trait;
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use tracing::debug;
-use walkdir::WalkDir;
+use serde_json::Value;
+use std::fs::File;
+use std::io::Write;
 
-// use async_trait::async_trait;
-// use tracing::info;
-// use crate::utils::config::JobConfig;
 use crate::{
-    models::{enums::Mode, enums::Standard, metrics::Metrics},
-    utils::{
-        config::JobConfig,
-        crypto::Cypher,
-        error::MedError,
-        helpers::{create_output_dir, json_med_core, read_json, write_json},
-        progress_bar::get_progress_bar,
-    },
+    models::{enums::Mode, metrics::Metadata},
+    utils::error::{MedError, MedErrorType},
 };
 
-use super::{core::Processor, worker::Worker};
-// use crate::cmd::cli::Cli;
-// use crate::cmd::worker::Worker;
+use crate::app::processor::ProcessRuntime;
 
-#[derive(Debug, Clone, Default)]
-pub struct JsonFile {
-    pub path: String,
-    pub total_records: usize,
-    pub data: serde_json::Value,
-}
+pub fn json_processor(
+    tx_metadata: flume::Sender<Metadata>,
+    files_path: &str,
+    output_path: &str,
+    process_runtime: ProcessRuntime,
+) -> Result<(), MedError> {
+    // prepare the metrics
+    let mut total_records: usize = 0;
+    let mut failed_records: usize = 0;
+    let mut record_failed_reason: Vec<MedError> = Vec::new();
 
-#[derive(Debug, Default, Clone)]
-pub struct JsonFileProcessor {
-    pub metrics: Metrics,
-    pub result: Vec<JsonFile>,
-}
-
-#[async_trait(?Send)]
-impl Processor for JsonFileProcessor {
-    async fn new() -> Self {
-        JsonFileProcessor::default()
-    }
-    async fn load(&mut self, num_workers: &u16, file_path: &str) -> Result<(), MedError> {
-        let (tx, rx) = flume::unbounded();
-        let new_worker = Worker::new(num_workers.to_owned()).await?;
-        let mut files_number: u64 = 0;
-
-        for entry in WalkDir::new(file_path)
-            .follow_links(true)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| !e.path().is_dir())
-        {
-            let tx = tx.clone();
-            debug!("load json files: {:?}", entry.path().display().to_string());
-            files_number += 1;
-            new_worker.pool.execute(move || {
-                read_json(tx, entry.path().display().to_string()).unwrap();
-            });
+    match std::fs::read_to_string(files_path) {
+        Ok(text) => match serde_json::from_str::<Value>(&text) {
+            Ok(data) => {
+                if data.is_array() {
+                    total_records = data.as_array().unwrap().len();
+                } else {
+                    total_records = 1;
+                }
+                let mut json_data = data;
+                let new_json_data = json_med_core(&mut json_data, &process_runtime);
+                write_json(&new_json_data, output_path).unwrap();
+            }
+            Err(err) => {
+                let record_error = MedError {
+                    message: Some(format!(
+                        "please check {} {:?} format",
+                        files_path, process_runtime.mode
+                    )),
+                    cause: Some(err.to_string()),
+                    error_type: MedErrorType::CsvError,
+                };
+                record_failed_reason.push(record_error);
+                failed_records += 1;
+            }
+        },
+        Err(err) => {
+            let record_error = MedError {
+                message: Some(format!(
+                    "please check {} {:?} format",
+                    files_path, process_runtime.mode
+                )),
+                cause: Some(err.to_string()),
+                error_type: MedErrorType::CsvError,
+            };
+            record_failed_reason.push(record_error);
+            failed_records += 1;
         }
-
-        drop(tx);
-
-        let bar = get_progress_bar(files_number, "load json files to processor");
-        rx.iter().for_each(|item| {
-            bar.inc(1);
-            self.metrics.total_files += 1;
-            self.metrics.total_records += item.total_records;
-            self.result.push(item);
-        });
-        bar.finish_and_clear();
-        Ok(())
     }
 
-    #[cfg(not(tarpaulin_include))]
-    async fn run(
-        &mut self,
-        job_conf: &JobConfig,
-        mode: &Mode,
-        standard: Option<&Standard>,
-        cypher: Option<&Cypher>,
-    ) -> Result<(), MedError> {
-        let bar = get_progress_bar(self.metrics.total_files as u64, "processing json files");
-        let new_result: Vec<JsonFile> = self
-            .result
-            .par_iter()
-            .inspect(|_| bar.inc(1))
-            .map(|item| {
-                let mut new_json = JsonFile::default();
-                let masked =
-                    json_med_core(&mut item.data.clone(), job_conf, mode, standard, cypher);
-                new_json.path = item.path.clone();
-                new_json.data = masked;
-                new_json.total_records = self.metrics.total_records;
-                new_json
-            })
-            .collect::<Vec<JsonFile>>();
-        bar.finish_and_clear();
-        self.result = new_result;
-        Ok(())
-    }
+    tx_metadata
+        .send(Metadata {
+            total_records,
+            failed_records,
+            record_failed_reason,
+        })
+        .unwrap();
 
-    #[cfg(not(tarpaulin_include))]
-    async fn write(&self, output_dir: &str, file_dir: &str) -> Result<Metrics, MedError> {
-        create_output_dir(output_dir, file_dir).await?;
-        let bar: indicatif::ProgressBar =
-            get_progress_bar(self.metrics.total_records as u64, "write files");
-        self.result
-            .par_iter()
-            .inspect(|_| bar.inc(1))
-            .for_each(|item| {
-                let output_files = format!("{}/{}", output_dir, item.path);
-                debug!("write to path: {:?}", output_files);
-                write_json(&item.data, &output_files).unwrap();
-            });
-        bar.finish_and_clear();
-        Ok(self.metrics.clone())
-    }
+    Ok(())
 }
+
+fn json_med_core(value: &mut Value, process_runtime: &ProcessRuntime) -> Value {
+    match value {
+        Value::Array(arr) => {
+            // debug!("[arr] {:?}", arr);
+            for item in arr {
+                if item.is_array() {
+                    json_med_core(item, process_runtime);
+                }
+
+                if item.is_object() {
+                    // info!("is obj {:?} ", val);
+                    item.as_object_mut()
+                        .unwrap()
+                        .into_iter()
+                        .for_each(|(key, val)| {
+                            //debug!("key: {:?}, val: {:?} ", key, val);
+                            //mask parent lvl
+                            if process_runtime.fields.contains(key) {
+                                if let Value::String(mut masked_val) = val.to_owned() {
+                                    match process_runtime.mode {
+                                        Mode::MASK => {
+                                            masked_val.clear();
+                                            let symbols =
+                                                process_runtime.to_owned().mask_symbols.unwrap();
+                                            masked_val.push_str(&symbols);
+                                        }
+                                        Mode::ENCRYPT => {
+                                            if let Some(cypher) = process_runtime.to_owned().cypher
+                                            {
+                                                if let Some(standard) = process_runtime.standard {
+                                                    let masked = cypher
+                                                        .encrypt(&masked_val, &standard)
+                                                        .unwrap();
+                                                    masked_val.clear();
+                                                    masked_val.push_str(&masked);
+                                                }
+                                            }
+                                        }
+                                        Mode::DECRYPT => {
+                                            if let Some(cypher) = process_runtime.to_owned().cypher
+                                            {
+                                                if let Some(standard) = process_runtime.standard {
+                                                    let masked = cypher
+                                                        .decrypt(&masked_val, &standard)
+                                                        .unwrap();
+                                                    masked_val.clear();
+                                                    masked_val.push_str(&masked);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    *val = Value::String(masked_val);
+                                }
+                            }
+
+                            if val.is_array() {
+                                json_med_core(val, process_runtime);
+                            }
+
+                            if val.is_object() {
+                                json_med_core(val, process_runtime);
+                            }
+                        });
+                }
+            }
+        }
+        Value::Object(obj) => {
+            for (key, val) in obj {
+                // debug!("key : {:?}, val: {:?}", key, val);
+                if val.is_array() {
+                    json_med_core(val, process_runtime);
+                }
+                if process_runtime.fields.contains(key) {
+                    if let Value::String(mut masked_val) = val.to_owned() {
+                        match process_runtime.mode {
+                            Mode::MASK => {
+                                masked_val.clear();
+                                masked_val
+                                    .push_str(&process_runtime.to_owned().mask_symbols.unwrap());
+                            }
+                            Mode::ENCRYPT => {
+                                if let Some(cypher) = process_runtime.to_owned().cypher {
+                                    if let Some(standard) = process_runtime.standard {
+                                        let masked =
+                                            cypher.encrypt(&masked_val, &standard).unwrap();
+                                        masked_val.clear();
+                                        masked_val.push_str(&masked);
+                                    }
+                                }
+                            }
+                            Mode::DECRYPT => {
+                                if let Some(cypher) = process_runtime.to_owned().cypher {
+                                    if let Some(standard) = process_runtime.standard {
+                                        let masked =
+                                            cypher.decrypt(&masked_val, &standard).unwrap();
+                                        masked_val.clear();
+                                        masked_val.push_str(&masked);
+                                    }
+                                }
+                            }
+                        }
+                        *val = Value::String(masked_val);
+                    }
+                }
+            }
+        }
+        _ => {}
+    }
+    value.clone()
+}
+
+pub fn write_json(masked_data: &Value, output_file: &str) -> Result<(), MedError> {
+    let mut json_file = File::create(output_file)?;
+    let data = serde_json::to_string(masked_data)?;
+    json_file.write_all(data.as_bytes())?;
+    json_file.sync_data()?;
+    Ok(())
+}
+
+#[cfg(test)]
+#[path = "../tests/json_test.rs"]
+mod json_test;
