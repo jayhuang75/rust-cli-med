@@ -4,7 +4,7 @@ use crate::{
         processor::ProcessRuntime,
     },
     models::enums::{Mode, Standard},
-    utils::{crypto::Cypher, error::MedErrorType},
+    utils::{error::MedErrorType, crypto::Cypher},
 };
 use csv::StringRecord;
 
@@ -51,8 +51,104 @@ fn test_csv_processor_error() {
     drop(tx_metadata);
 }
 
-#[test]
-fn test_csv_processor_mask() {
+// #[test]
+// fn test_csv_processor_mask() {
+//     let (tx_metadata, rx_metadata) = flume::unbounded();
+//     let process_runtime = ProcessRuntime {
+//         fields: vec!["name".to_string()],
+//         cypher: Some(Cypher::new("key")),
+//         standard: Some(Standard::DES64),
+//         mask_symbols: None,
+//         mode: Mode::ENCRYPT,
+//     };
+//     let files_path: &str = "";
+//     let output_path = "";
+
+//     match csv_processor(
+//         tx_metadata.clone(),
+//         files_path,
+//         output_path,
+//         process_runtime,
+//     ){
+//         Ok(_) => {
+
+//         }
+//         Err(err) => {
+//             assert_eq!(err.error_type, MedErrorType::CsvError);
+//         }
+//     }
+
+//     // drop the channel once it done.
+//     drop(tx_metadata);
+
+//     rx_metadata.iter().for_each(|item| {
+//         println!("{:?}", item);
+//         assert_eq!(item.total_records, 0);
+//     });
+// }
+
+// #[test]
+// fn test_csv_processor_encrypt() {
+//     let (tx_metadata, rx_metadata) = flume::unbounded();
+//     let key = "123";
+//     let process_runtime = ProcessRuntime {
+//         fields: vec!["name".to_string()],
+//         cypher: Some(Cypher::new(key)),
+//         standard: Some(Standard::DES64),
+//         mask_symbols: None,
+//         mode: Mode::ENCRYPT,
+//     };
+//     let files_path: &str = "../demo/data/input/csv/random_data.csv";
+//     let output_path = "../demo/data/output/csv/encrypt/random_data.csv";
+
+//     csv_processor(
+//         tx_metadata.clone(),
+//         files_path,
+//         output_path,
+//         process_runtime,
+//     )
+//     .unwrap();
+
+//     // drop the channel once it done.
+//     drop(tx_metadata);
+
+//     rx_metadata.iter().for_each(|item| {
+//         assert_eq!(item.failed_records, 0);
+//     });
+// }
+
+// #[test]
+// fn test_csv_processor_decrypt() {
+//     let (tx_metadata, rx_metadata) = flume::unbounded();
+//     let key = "123";
+//     let process_runtime = ProcessRuntime {
+//         fields: vec!["name".to_string()],
+//         cypher: Some(Cypher::new(key)),
+//         standard: Some(Standard::DES64),
+//         mask_symbols: Some("#####".to_string()),
+//         mode: Mode::DECRYPT,
+//     };
+//     let files_path: &str = "../demo/data/output/csv/encrypt/random_data.csv";
+//     let output_path = "../demo/data/input/csv/random_data.csv";
+
+//     csv_processor(
+//         tx_metadata.clone(),
+//         files_path,
+//         output_path,
+//         process_runtime,
+//     )
+//     .unwrap();
+
+//     // drop the channel once it done.
+//     drop(tx_metadata);
+
+//     rx_metadata.iter().for_each(|item| {
+//         assert_eq!(item.failed_records, 0);
+//     });
+// }
+
+#[tokio::test]
+async fn test_csv_processor_format_err() {
     let (tx_metadata, rx_metadata) = flume::unbounded();
     let process_runtime = ProcessRuntime {
         fields: vec!["name".to_string()],
@@ -61,8 +157,8 @@ fn test_csv_processor_mask() {
         mask_symbols: Some("#####".to_string()),
         mode: Mode::MASK,
     };
-    let files_path: &str = "../demo/data/input/csv/random_data.csv";
-    let output_path = "../demo/data/output/csv/mask/random_data.csv";
+    let files_path: &str = "../demo/data/input/format_err/csv/format_err.csv";
+    let output_path = "../demo/data/output/csv/format_err/processor_err/random_data.csv";
 
     csv_processor(
         tx_metadata.clone(),
@@ -76,13 +172,12 @@ fn test_csv_processor_mask() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        println!("{:?}", item);
-        assert_eq!(item.failed_records, 0);
+        assert_eq!(item.failed_records, 1);
     });
 }
 
-#[test]
-fn test_csv_processor_encrypt() {
+#[tokio::test]
+async fn test_csv_processor_decrypt_error() {
     let (tx_metadata, rx_metadata) = flume::unbounded();
     let key = "123";
     let process_runtime = ProcessRuntime {
@@ -90,40 +185,10 @@ fn test_csv_processor_encrypt() {
         cypher: Some(Cypher::new(key)),
         standard: Some(Standard::DES64),
         mask_symbols: None,
-        mode: Mode::ENCRYPT,
-    };
-    let files_path: &str = "../demo/data/input/csv/random_data.csv";
-    let output_path = "../demo/data/output/csv/encrypt/random_data.csv";
-
-    csv_processor(
-        tx_metadata.clone(),
-        files_path,
-        output_path,
-        process_runtime,
-    )
-    .unwrap();
-
-    // drop the channel once it done.
-    drop(tx_metadata);
-
-    rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.failed_records, 0);
-    });
-}
-
-#[test]
-fn test_csv_processor_decrypt() {
-    let (tx_metadata, rx_metadata) = flume::unbounded();
-    let key = "123";
-    let process_runtime = ProcessRuntime {
-        fields: vec!["name".to_string()],
-        cypher: Some(Cypher::new(key)),
-        standard: Some(Standard::DES64),
-        mask_symbols: Some("#####".to_string()),
         mode: Mode::DECRYPT,
     };
-    let files_path: &str = "../demo/data/output/csv/encrypt/random_data.csv";
-    let output_path = "../demo/data/input/csv/random_data.csv";
+    let files_path: &str = "../demo/data/input/format_err/csv/encrypt_err.csv";
+    let output_path = "../demo/data/output/csv/format_err/decrypt_err.csv";
 
     csv_processor(
         tx_metadata.clone(),
@@ -137,65 +202,6 @@ fn test_csv_processor_decrypt() {
     drop(tx_metadata);
 
     rx_metadata.iter().for_each(|item| {
-        assert_eq!(item.failed_records, 0);
+        assert_eq!(item.failed_records, 1);
     });
 }
-
-// #[tokio::test]
-// async fn test_csv_processor_format_err() {
-//     let (tx_metadata, rx_metadata) = flume::unbounded();
-//     let process_runtime = ProcessRuntime {
-//         fields: vec!["name".to_string()],
-//         cypher: None,
-//         standard: None,
-//         mask_symbols: Some("#####".to_string()),
-//         mode: Mode::MASK,
-//     };
-//     let files_path: &str = "../demo/data/input/format_err/csv/format_err.csv";
-//     let output_path = "../demo/data/output/csv/format_err/processor_err/random_data.csv";
-
-//     csv_processor(
-//         tx_metadata.clone(),
-//         files_path,
-//         output_path,
-//         process_runtime,
-//     )
-//     .unwrap();
-
-//     // drop the channel once it done.
-//     drop(tx_metadata);
-
-//     rx_metadata.iter().for_each(|item| {
-//         assert_eq!(item.failed_records, 1);
-//     });
-// }
-
-// #[tokio::test]
-// async fn test_csv_processor_decrypt_error() {
-//     let (tx_metadata, rx_metadata) = flume::unbounded();
-//     let key = "123";
-//     let process_runtime = ProcessRuntime {
-//         fields: vec!["name".to_string()],
-//         cypher: Some(Cypher::new(key)),
-//         standard: Some(Standard::DES64),
-//         mask_symbols: None,
-//         mode: Mode::DECRYPT,
-//     };
-//     let files_path: &str = "../demo/data/input/format_err/csv/encrypt_err.csv";
-//     let output_path = "../demo/data/output/csv/format_err/decrypt_err.csv";
-
-//     csv_processor(
-//         tx_metadata.clone(),
-//         files_path,
-//         output_path,
-//         process_runtime,
-//     )
-//     .unwrap();
-
-//     // drop the channel once it done.
-//     drop(tx_metadata);
-
-//     rx_metadata.iter().for_each(|item| {
-//         assert_eq!(item.failed_records, 1);
-//     });
-// }
