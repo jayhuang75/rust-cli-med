@@ -4,7 +4,7 @@ use crate::{
         processor::ProcessRuntime,
     },
     models::enums::{Mode, Standard},
-    utils::{error::MedErrorType, crypto::Cypher},
+    utils::{crypto::Cypher, error::MedErrorType},
 };
 use csv::StringRecord;
 

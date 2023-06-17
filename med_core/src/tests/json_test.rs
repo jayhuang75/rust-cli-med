@@ -1,7 +1,7 @@
 use crate::{
     app::{json::json_processor, processor::ProcessRuntime},
-    models::enums::{Mode},
-    utils::{error::MedErrorType},
+    models::enums::Mode,
+    utils::error::MedErrorType,
 };
 
 // const KEY: &str = "123";
