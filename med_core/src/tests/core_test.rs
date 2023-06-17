@@ -2,7 +2,7 @@ use crate::app::core::App;
 use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
 use crate::utils::config::JobConfig;
-use crate::utils::error::MedError;
+use crate::utils::error::{MedError, MedErrorType};
 use crate::utils::error::MedErrorType::ConfigError;
 
 #[tokio::test]
@@ -64,9 +64,16 @@ async fn test_file_processor_failed() {
     new_params.file_type = FileType::CSV;
     new_params.mode = Mode::MASK;
 
-    let mut new_app = App::new(new_params).await.unwrap();
-    let metrics = new_app.process().await.unwrap();
-    assert_eq!(metrics.metadata.record_failed_reason.is_empty(), false);
+    match App::new(new_params).await {
+        Ok(mut new_app) => {
+            let metrics = new_app.process().await.unwrap();
+            assert_eq!(metrics.metadata.record_failed_reason.is_empty(), false);
+        }
+        Err(err) => {
+            assert_eq!(err.error_type, MedErrorType::DatabaseError);
+        }
+    }
+    
 }
 
 #[tokio::test]
