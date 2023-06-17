@@ -2,8 +2,8 @@ use crate::app::core::App;
 use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
 use crate::utils::config::JobConfig;
-use crate::utils::error::{MedError, MedErrorType};
 use crate::utils::error::MedErrorType::ConfigError;
+use crate::utils::error::{MedError, MedErrorType};
 
 #[tokio::test]
 async fn test_csv_mask_app() {
@@ -73,7 +73,6 @@ async fn test_file_processor_failed() {
             assert_eq!(err.error_type, MedErrorType::DatabaseError);
         }
     }
-    
 }
 
 #[tokio::test]
