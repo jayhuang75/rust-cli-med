@@ -1,6 +1,6 @@
 use crate::utils::error::MedError;
 use std::fs;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 #[cfg(not(tarpaulin_include))]
 pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), MedError> {
@@ -15,3 +15,15 @@ pub async fn create_output_dir(output_dir: &str, file_dir: &str) -> Result<(), M
         });
     Ok(())
 }
+
+pub fn is_not_hidden(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map(|s| entry.depth() == 0 || !s.starts_with('.'))
+        .unwrap_or(false)
+}
+
+#[cfg(test)]
+#[path = "./tests/helpers_test.rs"]
+mod helpers_test;

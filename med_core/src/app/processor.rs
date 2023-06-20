@@ -9,7 +9,7 @@ use crate::models::metrics::Metrics;
 use crate::utils::config::JobConfig;
 use crate::utils::crypto::Cypher;
 use crate::utils::error::MedErrorType;
-use crate::utils::helpers::create_output_dir;
+use crate::utils::helpers::{create_output_dir, is_not_hidden};
 use crate::utils::progress_bar::get_progress_bar;
 use crate::{models::params::Params, utils::error::MedError};
 
@@ -89,6 +89,7 @@ impl FileProcessor {
         for entry in WalkDir::new(&self.runtime_params.file_path)
             .follow_links(true)
             .into_iter()
+            .filter_entry(is_not_hidden)
             .filter_map(|e| e.ok())
             .filter(|e| !e.path().is_dir())
         {
