@@ -1,4 +1,4 @@
-use std::{path::PathBuf, str::FromStr, time::Duration};
+use std::{env, path::PathBuf, str::FromStr, time::Duration};
 
 use colored::Colorize;
 use sqlx::{
@@ -33,6 +33,7 @@ pub struct AuditSummary {
 impl Database {
     pub async fn new() -> Result<Database, MedError> {
         let database_url = Self::create_audit_db().await?;
+        info!("audit database {:?} create successed", database_url);
 
         if !Sqlite::database_exists(database_url.to_str().unwrap())
             .await
@@ -64,6 +65,7 @@ impl Database {
             .await?;
 
         Self::create_table(&pool).await?;
+        Self::migrate().await?;
 
         // Self::migrate(&pool).await?;
         Ok(Database { pool })
@@ -72,6 +74,12 @@ impl Database {
     async fn create_audit_db() -> Result<PathBuf, MedError> {
         let path = dirs::config_dir().unwrap().join("med.db");
         Ok(path)
+    }
+
+    async fn migrate() -> Result<(), MedError> {
+        let dir = env::current_dir().unwrap();
+        info!("audit database {:?} alert successed", dir);
+        Ok(())
     }
 
     async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MedError> {
@@ -88,6 +96,7 @@ impl Database {
                 runtime_conf TEXT NOT NULL,
                 process_failure_reason TEXT,
                 successed BOOLEAN NOT NULL DEFAULT FALSE,
+                elapsed_time TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
             );
             ",
@@ -104,13 +113,14 @@ impl Database {
         let failed_records: i64 = summary.metrics.metadata.failed_records as i64;
         let record_failed_reason =
             serde_json::to_string(&summary.metrics.metadata.record_failed_reason)?;
+        let elapsed_time = summary.elapsed_time.to_owned();
 
         let id = sqlx::query!(
             r#"
-                INSERT INTO audit ( user, hostname, total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )
-                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+                INSERT INTO audit ( user, hostname, total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed, elapsed_time )
+                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
         "#,
-        summary.user, summary.hostname, total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed
+        summary.user, summary.hostname, total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed, elapsed_time
         )
         .execute(&self.pool)
         .await?

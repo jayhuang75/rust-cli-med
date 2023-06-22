@@ -100,7 +100,7 @@ impl App {
     }
 
     #[cfg(not(tarpaulin_include))]
-    pub async fn update_audit(&mut self) -> Result<i64, MedError> {
+    pub async fn update_audit(&mut self, elapsed_time: String) -> Result<i64, MedError> {
         // update the runtime params for the audit record.
         if self.params.key.is_some() {
             self.params.key = Some("****".to_owned());
@@ -108,6 +108,7 @@ impl App {
         self.audit.summary.user = self.user.clone();
         self.audit.summary.hostname = self.hostname.clone();
         self.audit.summary.runtime_conf = serde_json::to_string(&self.params)?;
+        self.audit.summary.elapsed_time = elapsed_time;
         debug!("audit summary : {:?}", self.audit.summary);
 
         // audit update

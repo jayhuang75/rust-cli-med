@@ -1,6 +1,6 @@
 use serde::Serialize;
 use serde_json::Error;
-use std::fmt;
+use std::{env::VarError, fmt};
 use tokio::io;
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
@@ -39,6 +39,16 @@ impl From<serde_yaml::Error> for MedError {
         MedError {
             message: Some(error.to_string()),
             cause: Some("can not open the conf.yml".to_string()),
+            error_type: MedErrorType::ConfigError,
+        }
+    }
+}
+
+impl From<VarError> for MedError {
+    fn from(error: VarError) -> MedError {
+        MedError {
+            message: Some(error.to_string()),
+            cause: Some("can not read env variable".to_string()),
             error_type: MedErrorType::ConfigError,
         }
     }
