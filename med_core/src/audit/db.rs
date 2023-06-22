@@ -33,7 +33,7 @@ pub struct AuditSummary {
 impl Database {
     pub async fn new() -> Result<Database, MedError> {
         let database_url = Self::create_audit_db().await?;
-        
+
         if !Sqlite::database_exists(database_url.to_str().unwrap())
             .await
             .unwrap_or(false)
