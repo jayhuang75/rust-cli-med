@@ -17,7 +17,7 @@ async fn main() -> Result<(), MedError> {
 
     let mut new_app = App::new(params).await?;
     let metrics = new_app.process().await?;
-    let audit_id = new_app.update_audit().await?;
+    let audit_id = new_app.update_audit(format!("{:?}", now.elapsed())).await?;
 
     info!(
         "total processed {} files, {} records, with {} records failed, elapsed time {:?}, audit record_id {}",

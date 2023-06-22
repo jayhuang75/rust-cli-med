@@ -44,6 +44,16 @@ impl From<serde_yaml::Error> for MedError {
     }
 }
 
+// impl From<VarError> for MedError {
+//     fn from(error: VarError) -> MedError {
+//         MedError {
+//             message: Some(error.to_string()),
+//             cause: Some("can not read env variable".to_string()),
+//             error_type: MedErrorType::ConfigError,
+//         }
+//     }
+// }
+
 impl From<io::Error> for MedError {
     fn from(error: io::Error) -> MedError {
         MedError {
