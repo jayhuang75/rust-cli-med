@@ -1,4 +1,4 @@
-use std::{path::PathBuf, str::FromStr, time::Duration};
+use std::{env, path::PathBuf, str::FromStr, time::Duration};
 
 use colored::Colorize;
 use sqlx::{
@@ -63,7 +63,8 @@ impl Database {
             .connect_with(connection_options)
             .await?;
 
-        Self::create_table(&pool).await?;
+        // Self::create_table(&pool).await?;
+        Self::migrate(&pool).await?;
 
         // Self::migrate(&pool).await?;
         Ok(Database { pool })
@@ -74,27 +75,15 @@ impl Database {
         Ok(path)
     }
 
-    async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MedError> {
-        let _ = sqlx::query(
-            "
-            CREATE TABLE IF NOT EXISTS audit (
-                id INTEGER PRIMARY KEY,
-                user TEXT NOT NULL,
-                hostname TEXT NOT NULL,
-                total_files INTEGER NOT NULL,
-                total_records INTEGER NOT NULL,
-                failed_records INTEGER NOT NULL,
-                record_failed_reason TEXT,
-                runtime_conf TEXT NOT NULL,
-                process_failure_reason TEXT,
-                successed BOOLEAN NOT NULL DEFAULT FALSE,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
-            );
-            ",
-        )
-        .execute(pool)
-        .await?;
-        // info!("audit database {:?} create successed", result);
+    async fn migrate(pool: &Pool<Sqlite>) -> Result<(), MedError> {
+        let curr_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+        let migrations = std::path::Path::new(&curr_dir).join("./migrations");
+        sqlx::migrate::Migrator::new(migrations)
+            .await
+            .unwrap()
+            .run(pool)
+            .await?;
         Ok(())
     }
 
@@ -104,13 +93,14 @@ impl Database {
         let failed_records: i64 = summary.metrics.metadata.failed_records as i64;
         let record_failed_reason =
             serde_json::to_string(&summary.metrics.metadata.record_failed_reason)?;
+        let elapsed_time = summary.elapsed_time.to_owned();
 
         let id = sqlx::query!(
             r#"
-                INSERT INTO audit ( user, hostname, total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed )
-                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+                INSERT INTO audit ( user, hostname, total_files, total_records, failed_records, record_failed_reason, runtime_conf, process_failure_reason, successed, elapsed_time )
+                VALUES ( ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
         "#,
-        summary.user, summary.hostname, total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed
+        summary.user, summary.hostname, total_files, total_records, failed_records, record_failed_reason, summary.runtime_conf, summary.process_failure_reason, summary.successed, elapsed_time
         )
         .execute(&self.pool)
         .await?

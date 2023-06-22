@@ -8,6 +8,7 @@ pub struct Summary {
     pub runtime_conf: String,
     pub process_failure_reason: Option<String>,
     pub successed: bool,
+    pub elapsed_time: String,
 }
 
 pub struct Audit {
