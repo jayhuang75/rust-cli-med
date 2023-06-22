@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf, str::FromStr, time::Duration};
+use std::{path::PathBuf, str::FromStr, time::Duration};
 
 use colored::Colorize;
 use sqlx::{
@@ -76,12 +76,9 @@ impl Database {
     }
 
     async fn migrate(pool: &Pool<Sqlite>) -> Result<(), MedError> {
-        let curr_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-
-        let migrations = std::path::Path::new(&curr_dir).join("./migrations");
+        let migrations = std::path::Path::new("./migrations");
         sqlx::migrate::Migrator::new(migrations)
-            .await
-            .unwrap()
+            .await?
             .run(pool)
             .await?;
         Ok(())

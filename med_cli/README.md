@@ -102,3 +102,7 @@ The audit db location will be different depending on your OS.
 | Linux  | $HOME/.config/med  | /home/bob/.config/med |
 | MacOS  | $HOME/Library/Application Support/med  | /Users/Bob/Library/Application Support/med |
 | Windows  | {FOLDERID_RoamingAppData}/med  | C:\Users\Bob\AppData\Roaming\med |
+
+#### database migration
+
+We prepare the database migration capabilites and this migrations folder NEED to be in the same directoy of your binary.
