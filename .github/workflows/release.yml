@@ -84,7 +84,7 @@ jobs:
         shell: bash
         run: |
           cp -R demo target/${{ matrix.target }}/release 
-          cp -r ./med_core/migrations target/${{ matrix.target }}/release
+          cp -r migrations target/${{ matrix.target }}/release
           cd target/${{ matrix.target }}/release          
           tar czvf ../../../med-${{ matrix.target }}-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/ migrations/
           cd -
@@ -109,7 +109,7 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/release/
-          cp -r ./med_core/migrations target/release/
+          cp -r migrations target/release/
           cd D:\a\rust-cli-med\rust-cli-med\target\release
           tar -cf win_msvc_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med.exe demo migrations
       - name: Upload binaries to release  
@@ -134,7 +134,7 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/release/
-          cp -r ./med_core/migrations target/release/
+          cp -r migrations target/release/
           tar --directory=target/release -cf macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/ migrations/
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
@@ -160,7 +160,7 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/aarch64-apple-darwin/release
-          cp -r ./med_core/migrations target/aarch64-apple-darwin/release
+          cp -r migrations target/aarch64-apple-darwin/release
           tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/ migrations/
       - name: Upload binaries arm to release  
         uses: softprops/action-gh-release@v1
