@@ -25,3 +25,16 @@ csv_encrypt:
 .PHONY:
 csv_mask_performance:
 	cargo run --bin med mask -f /Users/huangwh/rust/rust-design-pattern/demo -c demo/conf/conf_csv.yaml -w 6
+
+.PHONY:
+test_package:
+	cargo build --release
+	cp -R demo target/release
+	cp -r migrations target/release
+	tar --directory=target/release -cf macos_x86_archive-test.tar.gz med demo migrations
+
+.PHONY:
+pre_release:
+	cargo fmt
+	cargo clippy
+	cargo tarpaulin
