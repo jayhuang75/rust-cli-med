@@ -33,8 +33,7 @@ pub struct AuditSummary {
 impl Database {
     pub async fn new() -> Result<Database, MedError> {
         let database_url = Self::create_audit_db().await?;
-        info!("audit database {:?} create successed", database_url);
-
+        
         if !Sqlite::database_exists(database_url.to_str().unwrap())
             .await
             .unwrap_or(false)
@@ -64,8 +63,8 @@ impl Database {
             .connect_with(connection_options)
             .await?;
 
-        Self::create_table(&pool).await?;
-        Self::migrate().await?;
+        // Self::create_table(&pool).await?;
+        Self::migrate(&pool).await?;
 
         // Self::migrate(&pool).await?;
         Ok(Database { pool })
@@ -76,34 +75,15 @@ impl Database {
         Ok(path)
     }
 
-    async fn migrate() -> Result<(), MedError> {
-        let dir = env::current_dir().unwrap();
-        info!("audit database {:?} alert successed", dir);
-        Ok(())
-    }
+    async fn migrate(pool: &Pool<Sqlite>) -> Result<(), MedError> {
+        let curr_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MedError> {
-        let _ = sqlx::query(
-            "
-            CREATE TABLE IF NOT EXISTS audit (
-                id INTEGER PRIMARY KEY,
-                user TEXT NOT NULL,
-                hostname TEXT NOT NULL,
-                total_files INTEGER NOT NULL,
-                total_records INTEGER NOT NULL,
-                failed_records INTEGER NOT NULL,
-                record_failed_reason TEXT,
-                runtime_conf TEXT NOT NULL,
-                process_failure_reason TEXT,
-                successed BOOLEAN NOT NULL DEFAULT FALSE,
-                elapsed_time TEXT NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
-            );
-            ",
-        )
-        .execute(pool)
-        .await?;
-        // info!("audit database {:?} create successed", result);
+        let migrations = std::path::Path::new(&curr_dir).join("./migrations");
+        sqlx::migrate::Migrator::new(migrations)
+            .await
+            .unwrap()
+            .run(pool)
+            .await?;
         Ok(())
     }
 
