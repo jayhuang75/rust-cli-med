@@ -1,6 +1,6 @@
 [package]
 name = "med_cli"
-version = "0.5.4"
+version = "0.5.5"
 edition = "2021"
 authors = ["Wei Huang <jayhuang75@hotmail.com>"]
 license = "Apache-2.0"
@@ -25,6 +25,6 @@ tracing-subscriber = { workspace = true }
 colored = { workspace = true }
 num_cpus = { workspace = true }
 serde_json = { workspace = true}
-med_core = { version = "0.5.4", path = "../med_core"}
+med_core = { version = "0.5.5", path = "../med_core"}
 
 

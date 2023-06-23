@@ -1,6 +1,6 @@
 [package]
 name = "med_core"
-version = "0.5.4"
+version = "0.5.5"
 edition = "2021"
 authors = ["Wei Huang <jayhuang75@hotmail.com>"]
 license = "Apache-2.0"
@@ -33,7 +33,7 @@ flume = "0.10.14"
 walkdir = "2.3.3"
 threadpool = "1.8.1"
 magic-crypt = "3.1.12"
-indicatif = {version = "0.17.5", features = ["rayon"]}
+indicatif = {version = "0.17.4", features = ["rayon"]}
 whoami = "1.4.0"
 
 dirs = "5.0.1"
