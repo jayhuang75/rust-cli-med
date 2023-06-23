@@ -1,6 +1,6 @@
 [package]
 name = "med_core"
-version = "0.5.6"
+version = "0.5.7"
 edition = "2021"
 authors = ["Wei Huang <jayhuang75@hotmail.com>"]
 license = "Apache-2.0"
