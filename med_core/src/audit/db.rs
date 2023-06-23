@@ -4,9 +4,9 @@ use colored::Colorize;
 use sqlx::{
     migrate::MigrateDatabase,
     sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions, SqliteSynchronous},
-    Pool, Sqlite,
+    Pool, Row, Sqlite,
 };
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::utils::error::MedError;
 
@@ -76,11 +76,61 @@ impl Database {
     }
 
     async fn migrate(pool: &Pool<Sqlite>) -> Result<(), MedError> {
-        let migrations = std::path::Path::new("./migrations");
-        sqlx::migrate::Migrator::new(migrations)
-            .await?
-            .run(pool)
+        // this is the implementation for the migrations folder
+        // let migrations = std::path::Path::new("./migrations");
+        // sqlx::migrate::Migrator::new(migrations)
+        //     .await?
+        //     .run(pool)
+        //     .await?;
+        Self::create_table(pool).await?;
+        Self::alter_table(pool).await?;
+        Ok(())
+    }
+
+    async fn create_table(pool: &Pool<Sqlite>) -> Result<(), MedError> {
+        let result = sqlx::query(
+            "
+            CREATE TABLE IF NOT EXISTS audit (
+                id INTEGER PRIMARY KEY,
+                user TEXT NOT NULL,
+                hostname TEXT NOT NULL,
+                total_files INTEGER NOT NULL,
+                total_records INTEGER NOT NULL,
+                failed_records INTEGER NOT NULL,
+                record_failed_reason TEXT,
+                runtime_conf TEXT NOT NULL,
+                process_failure_reason TEXT,
+                successed BOOLEAN NOT NULL DEFAULT FALSE,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+            );
+            ",
+        )
+        .execute(pool)
+        .await?;
+        debug!("audit database {:?} create table successed", result);
+        Ok(())
+    }
+
+    async fn alter_table(pool: &Pool<Sqlite>) -> Result<(), MedError> {
+        let res = sqlx::query(
+            "select count(*) as count from pragma_table_info('audit') where name='elapsed_time';",
+        )
+        .fetch_one(pool)
+        .await?;
+
+        if res.get::<i32, &str>("count") == 0 {
+            let result = sqlx::query(
+                "
+                ALTER TABLE audit ADD COLUMN elapsed_time TEXT;
+                ",
+            )
+            .execute(pool)
             .await?;
+            debug!("audit database {:?} alter table successed", result);
+        } else {
+            debug!("audit database alter cols exist skip");
+        }
+
         Ok(())
     }
 
