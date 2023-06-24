@@ -9,16 +9,18 @@ Currently its the [CLI interface](../med_cli/README.md). If you have different p
 ### Example
 
 ```Rust
+
+let now = Instant::now();
+
 let mut new_params = Params::default();
 new_params.conf_path = "../demo/conf/conf_json.yaml".to_owned();
+new_params.file_path = "../demo/data/input/csv".to_owned();
 new_params.mode = Mode::MASK;
-new_params.file_type = FileType::JSON;
+new_params.file_type = FileType::CSV;
 
 let mut new_app = App::new(new_params.clone()).await.unwrap();
-new_app.load_job_config().await.unwrap();
-
-let metrics = new_app.process().await?;
-let audit_id = new_app.update_audit().await?;
+let metrics = new_app.process().await.unwrap();
+let audit_id = new_app.update_audit(format!("{:?}", now.elapsed())).await.unwrap();
 
 ```
 
