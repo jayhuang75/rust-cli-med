@@ -134,7 +134,7 @@ async fn test_standard_enum() {
 async fn test_params_init() {
     let new_params = Params::default();
     assert_eq!(new_params.app_mode, AppMode::CLI);
-    assert_eq!(new_params.debug, false);
+    assert!(!new_params.debug);
     assert_eq!(new_params.file_type, FileType::CSV);
     assert_eq!(new_params.file_path, "");
     assert_eq!(new_params.conf_path, "");

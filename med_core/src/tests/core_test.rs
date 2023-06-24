@@ -7,9 +7,11 @@ use crate::utils::error::{MedError, MedErrorType};
 
 #[tokio::test]
 async fn test_csv_mask_app() {
-    let mut new_params = Params::default();
-    new_params.conf_path = "../demo/conf/conf_csv.yaml".to_owned();
-    new_params.debug = true;
+    let new_params = Params {
+        conf_path: "../demo/conf/conf_csv.yaml".to_owned(),
+        debug: true,
+        ..Default::default()
+    };
 
     let mut new_app = App::new(new_params.clone()).await.unwrap();
     assert_eq!(new_app.hostname, whoami::hostname());
