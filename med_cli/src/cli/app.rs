@@ -14,45 +14,12 @@ pub struct Cli {
 impl Cli {
     /// Returns a Cli with the input config
     ///
-    /// Usage: masker <MODE> --file <FILE> [OPTIONS]
-    ///
-    /// Arguments:
-    ///     <MODE>
-    ///         What mode to run the program in
-    ///         Possible values:
-    ///             - mask:    Mask the data by *
-    ///             - encrypt: Encrypt the data with provided KEY
-    ///             - decrypt: Decrypt the data with provided KEY
-    ///    
-    /// Options:
-    ///     -t, --type <TYPE>
-    ///         type of file we will process, available option [csv, json]
-    ///         [default: csv]
-    ///     -k, --key <KEY>
-    ///         key for Encrypt and Decrypt the file
-    ///     -s, --standard <STANDARD>
-    ///         encryption standard, available option [DES64, AES128, AES192, AES256]
-    ///     -f, --file <FILE>
-    ///         file path for the
-    ///     -c, --config <CONFIG>
-    ///         Sets a custom config yml path
-    ///         [default: conf.yaml]
-    ///     -o, --output <OUTPUT>
-    ///         Sets a file/directory path for output
-    ///         [default: output]
-    ///     -d, --debug <DEBUG>
-    ///         Sets debug flag
-    ///         [possible values: true, false]
-    ///     -w, --worker <WORKER>
-    ///         Sets work flag
-    ///     -h, --help
-    ///         Print help (see a summary with '-h')
-    ///     -V, --version
-    ///         Print version
-    ///
     /// # Examples
     /// ```
-    /// let CliApp = Cli::new().await?;
+    ///
+    /// let new_cli = Cli::new().await?;
+    /// let params = new_cli.params;
+    ///
     /// ```
     pub async fn new() -> Result<Self, MedError> {
         // Initial Default CLI params
