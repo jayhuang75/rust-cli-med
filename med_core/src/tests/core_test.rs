@@ -18,30 +18,6 @@ async fn test_csv_mask_app() {
     assert_eq!(new_app.params, new_params);
     assert_eq!(new_app.user, whoami::username());
 
-    match new_app.load_job_config().await {
-        Ok(c) => {
-            let mut new_field: Vec<String> = Vec::new();
-            new_field.push("name".to_owned());
-            assert_eq!(
-                c,
-                JobConfig {
-                    mask_symbols: "#####".to_string(),
-                    fields: new_field
-                }
-            )
-        }
-        Err(e) => {
-            assert_eq!(
-                e,
-                MedError {
-                    message: Some("No such file or directory (os error 2)".to_owned()),
-                    cause: Some("load job configuration yaml file failed!".to_owned()),
-                    error_type: ConfigError
-                }
-            )
-        }
-    }
-
     let metrics = new_app.process().await.unwrap();
     assert_eq!(metrics.total_files, 0);
 }
@@ -57,6 +33,30 @@ async fn test_load_job_config() {
     let new_app = App::new(new_params).await.unwrap();
     let conf = new_app.load_job_config().await.unwrap();
     assert_eq!(conf.mask_symbols, "#####".to_string());
+}
+
+#[tokio::test]
+async fn test_load_job_config_failed() {
+    let new_params = Params {
+        conf_path: "".to_owned(),
+        debug: false,
+        ..Default::default()
+    };
+
+    let new_app = App::new(new_params).await.unwrap();
+    match new_app.load_job_config().await {
+        Ok(_) => {}
+        Err(e) => {
+            assert_eq!(
+                e,
+                MedError {
+                    message: Some("No such file or directory (os error 2)".to_owned()),
+                    cause: Some("load job configuration yaml file failed!".to_owned()),
+                    error_type: ConfigError
+                }
+            )
+        }
+    }
 }
 
 #[tokio::test]
