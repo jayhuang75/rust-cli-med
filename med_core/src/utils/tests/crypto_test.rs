@@ -3,7 +3,7 @@ use crate::utils::crypto::Cypher;
 
 #[tokio::test]
 async fn test_crypto_data() {
-    let crypto = Cypher::new(&"magickey".to_string());
+    let crypto = Cypher::new("magickey");
 
     // test AES256
     let data = crypto

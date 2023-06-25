@@ -1,5 +1,18 @@
 use std::{ops::RangeInclusive, path::PathBuf};
 
+/// Return the worker range of current runtime machine
+///
+/// # Examples
+/// ```
+/// match worker_in_range(&num_cpus::get().to_string()) {
+///     Ok(num) => {
+///         assert_eq!(num, num_cpus::get() as u16);
+///     }
+///     Err(e) => {
+///         assert_eq!(e,format!("worker is over your current max cores, consider lower the workerworker not in range 2-{:?} (max)", num_cpus::get()));
+///     }
+/// }
+/// ```
 pub fn worker_in_range(s: &str) -> Result<u16, String> {
     let worker: usize = s
         .parse()
@@ -18,6 +31,19 @@ pub fn worker_in_range(s: &str) -> Result<u16, String> {
     }
 }
 
+/// Check and Return if the path exist
+///
+/// # Examples
+/// ```
+/// match dir_exist("./") {
+///     Ok(path) => {
+///         assert_eq!(path, PathBuf::from("./"));
+///     }
+///     Err(e) => {
+///         assert_eq!(e, "");
+///     }
+/// }
+/// ```
 pub fn dir_exist(s: &str) -> Result<PathBuf, String> {
     let path = PathBuf::from(s);
     match path.is_dir() {

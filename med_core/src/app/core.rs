@@ -18,6 +18,27 @@ pub struct App {
 }
 
 impl App {
+    /// Returns a App Struct for processing
+    ///
+    /// # Arguments
+    ///
+    /// * `params` [Params] - params passed by the CLI or other integration
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use med_core::app::core::App;
+    /// use med_core::utils::error::MedError;
+    /// use med_core::models::params::Params;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), MedError> {
+    ///     let params = Params::default();
+    ///     let app = App::new(params).await.unwrap();
+    ///     Ok(())
+    /// }
+    ///
+    /// ```
     pub async fn new(params: Params) -> Result<Self, MedError> {
         logging(params.debug).await;
 
@@ -52,6 +73,33 @@ impl App {
         Ok(conf)
     }
 
+    /// Returns metrics [Metrics]
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use med_core::app::core::App;
+    /// use med_core::utils::error::MedError;
+    /// use med_core::models::params::Params;
+    /// use med_core::models::enums::{FileType, Mode};
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), MedError> {
+    ///     let params = Params::default();
+    ///     let params = Params {
+    ///         conf_path: "../demo/conf/conf_csv.yaml".to_owned(),
+    ///         file_path: "../demo/data/input/format_err/csv".to_owned(),
+    ///         output_path: "../demo/data/output/csv/format_err/processor_err".to_owned(),
+    ///         file_type: FileType::CSV,
+    ///         mode: Mode::MASK,
+    ///         ..Default::default()
+    ///     };
+    ///     let mut app = App::new(params).await.unwrap();
+    ///     let metrics = app.process().await.unwrap();
+    ///     Ok(())
+    /// }
+    ///
+    /// ```
     pub async fn process(&mut self) -> Result<Metrics, MedError> {
         info!(
             "processing '{}' files start",
@@ -99,6 +147,39 @@ impl App {
         Ok(self.metrics.clone())
     }
 
+    /// Returns audit_id [i64]
+    ///
+    /// # Arguments
+    ///
+    /// * `elapsed_time` - A string slice for the elasped_time
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use med_core::app::core::App;
+    /// use med_core::utils::error::MedError;
+    /// use med_core::models::params::Params;
+    /// use med_core::models::enums::{FileType, Mode};
+    /// use tokio::time::Instant;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), MedError> {
+    ///     let now = Instant::now();
+    ///     let params = Params {
+    ///         conf_path: "../demo/conf/conf_csv.yaml".to_owned(),
+    ///         file_path: "../demo/data/input/format_err/csv".to_owned(),
+    ///         output_path: "../demo/data/output/csv/format_err/processor_err".to_owned(),
+    ///         file_type: FileType::CSV,
+    ///         mode: Mode::MASK,
+    ///         ..Default::default()
+    ///     };    
+    ///     let mut app = App::new(params).await.unwrap();
+    ///     let metrics = app.process().await.unwrap();
+    ///     let audit_id = app.update_audit(format!("{:?}", now.elapsed())).await?;
+    ///     Ok(())
+    /// }
+    ///
+    /// ```
     #[cfg(not(tarpaulin_include))]
     pub async fn update_audit(&mut self, elapsed_time: String) -> Result<i64, MedError> {
         // update the runtime params for the audit record.
