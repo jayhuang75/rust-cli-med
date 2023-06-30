@@ -21,9 +21,11 @@ There are 2 main crates in this package.
 1. [MED_CLI](med_cli/README.md) - the CLI interface for the med binary.[![Crates.io](https://img.shields.io/crates/v/med_cli)](https://crates.io/crates/med_cli) [![Crates.io](https://img.shields.io/crates/d/med_cli)](https://crates.io/crates/med_cli)
 2. [MED_CORE](med_core/README.md) - the core engineer to execution the CSV/JSON files Masking, Encryption and Decryption, which you can use in your own usecase/project/context implementation. [![Crates.io](https://img.shields.io/crates/v/med_core)](https://crates.io/crates/med_core) [![Crates.io](https://img.shields.io/crates/d/med_core)](https://crates.io/crates/med_core)
 
-## Documentation
+## Publication
 
-- [Application Architecture Design](https://medium.com/better-programming/build-a-cli-tool-for-data-masking-encryption-and-decryption-with-rust-ad36bea27559)
+- [Introduction M.E.D.](https://medium.com/dev-genius/introduction-m-e-d-e001cd83a39f)
+- [Build a CLI Tool for Data Masking, Encryption, and Decryption With Rust](https://medium.com/better-programming/build-a-cli-tool-for-data-masking-encryption-and-decryption-with-rust-ad36bea27559)
+- [Reduce memory footprint by about 600% for M.E.D. — Performance Matters](https://medium.com/gitconnected/reduce-memory-footprint-by-about-600-for-m-e-d-performance-matters-bec407833e7c)
 
 ## Benchmark
 
