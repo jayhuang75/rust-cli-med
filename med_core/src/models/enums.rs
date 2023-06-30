@@ -1,7 +1,6 @@
-use std::fmt;
-
 use clap::{builder::PossibleValue, ValueEnum};
 use serde::Serialize;
+use std::fmt;
 
 #[derive(Debug, Clone, Serialize, Default, PartialEq)]
 pub enum FileType {
