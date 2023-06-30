@@ -18,6 +18,7 @@ Cargo.lock
 /target
 /output/**/*.csv
 /output/**/*.json
+/demo/data/input/demo/**
 
 .env
 *.db

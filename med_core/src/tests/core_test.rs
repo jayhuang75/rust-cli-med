@@ -1,7 +1,6 @@
 use crate::app::core::App;
 use crate::models::enums::{FileType, Mode};
 use crate::models::params::Params;
-use crate::utils::config::JobConfig;
 use crate::utils::error::MedErrorType::ConfigError;
 use crate::utils::error::{MedError, MedErrorType};
 
@@ -89,6 +88,21 @@ async fn test_processor_run_encrypt() {
         output_path: "../demo/data/output/csv/mask".to_owned(),
         file_type: FileType::CSV,
         mode: Mode::ENCRYPT,
+        key: Some("123".to_owned()),
+        ..Default::default()
+    };
+
+    let mut new_app = App::new(new_params).await.unwrap();
+    let metrics = new_app.process().await.unwrap();
+    assert_eq!(metrics.metadata.failed_records, 0);
+
+    let new_params = Params {
+        conf_path: "../demo/conf/conf_csv.yaml".to_owned(),
+        output_path: "../demo/data/input/csv".to_owned(),
+        file_path: "../demo/data/output/csv/demo/data/input/csv".to_owned(),
+        file_type: FileType::CSV,
+        mode: Mode::DECRYPT,
+        key: Some("123".to_owned()),
         ..Default::default()
     };
 
