@@ -13,15 +13,12 @@ jobs:
             - name: build
               shell: bash
               run: |
-                echo ">>> apt update & upgrade" 
-                sudo apt-get update && sudo apt-get -y upgrade
-
                 echo ">>> install rpm & wget" 
-                sudo apt-get install rpm wget
+                sudo apt-get install rpm
 
-                echo ">>> setup tree"
-                rpmdev-setuptree
-
+                echo ">>> setup build dir SOURCES & SPECS"
+                mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+                
                 echo ">>> cd to SOURCES"
                 cd ~/rpmbuild/SOURCES
                 pwd
