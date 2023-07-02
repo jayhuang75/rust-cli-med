@@ -30,4 +30,4 @@ cp $RPM_BUILD/med-0.6.0/med $HOME/rpmbuild
 
 echo build the rpm
 cd $HOME/rpmbuild
-rpmbuild -ba --build-in-place --define "_topdir $(pwd)" SPECS/med.spec
+rpmbuild -ba --build-in-place SPECS/med.spec
