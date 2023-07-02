@@ -26,10 +26,11 @@ jobs:
                 echo ">>> move spec file from source code"
                 pwd
                 cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec /home/runner/rpmbuild/rpm/SPECS
-                cd /home/runner/rpmbuild
+                pwd
                 tree
 
                 echo ">>> build the spec"
+                cd /home/runner/rpmbuild/rpm
                 pwd
                 tree
                 rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" SPECS/med.spec
