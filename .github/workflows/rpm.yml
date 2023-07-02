@@ -25,8 +25,9 @@ jobs:
                 ls -la
 
                 echo ">> tar"
-                # tar -xvzf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
-                # mv test-med-x86-unknow-linux-gnu-0.6.0.tar.gz/med-0.6.0/med /home/runner/
+                file test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                tar -xvf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                mv test-med-x86-unknow-linux-gnu-0.6.0.tar.gz/med-0.6.0/med /home/runner/
                 tree
 
                 echo ">>> move spec file from source code"
