@@ -33,7 +33,7 @@ jobs:
                 pwd
                 tree
                 # rpmbuild -ba /home/runner/rpmbuild/SPECS/med.spec
-                rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" med.spec
+                rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" SPECS/med.spec
                 tree
 
 
