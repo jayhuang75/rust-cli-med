@@ -10,14 +10,14 @@ jobs:
             - name: Checkout
               uses: actions/checkout@master
             
-            - name: Package
+            - name: build
               shell: bash
               run: |
                 echo ">>> apt update & upgrade" 
-                apt-get update && apt-get -y upgrade
+                sudo apt-get update && sudo apt-get -y upgrade
 
                 echo ">>> install rpm & wget" 
-                apt-get install rpm wget
+                sudo apt-get install rpm wget
 
                 echo ">>> setup tree"
                 rpmdev-setuptree
