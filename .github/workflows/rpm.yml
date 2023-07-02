@@ -14,23 +14,23 @@ jobs:
               shell: bash
               run: |
                 echo ">>> setup build dir SOURCES & SPECS"
-                mkdir -p ~/rpmbuild/rpm/SOURCES ~/rpmbuild/rpm/SPECS ~/rpmbuild/rpm/BUILD
+                mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
                 
-                echo ">>> cd to SOURCES"
-                cd ~/rpmbuild/rpm/SOURCES
+                echo ">>> entre to SOURCES"
+                cd ~/rpmbuild/SOURCES
                 pwd
 
                 echo ">>> wget source file"
-                wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
 
                 echo ">>> move spec file from source code"
                 pwd
-                cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec /home/runner/rpmbuild/rpm/SPECS
+                cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec /home/runner/rpmbuild/SPECS
                 pwd
                 tree
 
                 echo ">>> build the spec"
-                cd /home/runner/rpmbuild/rpm
+                cd /home/runner/rpmbuild
                 pwd
                 tree
                 rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" SPECS/med.spec

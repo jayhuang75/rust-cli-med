@@ -14,7 +14,7 @@ A simple enough CLI tool with auditable capability for Data Masking/Encyption/De
 
 %global debug_package %{nil}
 %prep
-%setup -q #unpack tarball
+%setup #unpack tarball
 
 %build
 
