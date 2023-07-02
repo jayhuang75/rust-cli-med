@@ -13,10 +13,6 @@ jobs:
             - name: build
               shell: bash
               run: |
-                echo ">>> current dir" 
-                pwd
-                ls
-
                 echo ">>> setup build dir SOURCES & SPECS"
                 mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
                 
@@ -29,11 +25,12 @@ jobs:
 
                 echo ">>> move spec file from source code"
                 pwd
-                cp ./build/med.spec ~/rpmbuild/SPECS
-                cd ~/rpmbuild
+                cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec /home/runner/rpmbuild/SPECS
+                cd /home/runner/rpmbuild
                 tree
 
                 echo ">>> build the spec"
+                ls
                 rpmbuild -ba ./SPECS/med.spec
                 tree
 
