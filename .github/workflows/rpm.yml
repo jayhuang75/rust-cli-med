@@ -15,7 +15,7 @@ jobs:
               shell: bash
               run: |
                 echo ">>> setup "
-                sudo dnf install fedora-packager rpmdevtools tree -y
+                sudo dnf install fedora-packager rpmdevtools tree wget gcc -y -q
                 rpmdev-setuptree
                 pwd
                 ls -la
