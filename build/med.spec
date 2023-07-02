@@ -17,10 +17,10 @@ A simple enough CLI tool with auditable capability for Data Masking/Encyption/De
 %setup -q #unpack tarball
 
 %build
+pwd
+tree
 
 %install
-rm -rf %{_builddir}
-mkdir %{_builddir}
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 tree
