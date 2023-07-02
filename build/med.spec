@@ -19,6 +19,8 @@ A simple enough CLI tool with auditable capability for Data Masking/Encyption/De
 %build
 
 %install
+rm -rf $RPM_BUILD
+mkdir -p $RPM_BUILD
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 tree
