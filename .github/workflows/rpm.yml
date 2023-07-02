@@ -13,8 +13,9 @@ jobs:
             - name: build
               shell: bash
               run: |
-                echo ">>> install rpm & wget" 
-                sudo apt-get install rpm
+                echo ">>> current dir" 
+                pwd
+                ls
 
                 echo ">>> setup build dir SOURCES & SPECS"
                 mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
