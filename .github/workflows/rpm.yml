@@ -22,7 +22,6 @@ jobs:
 
                 echo ">>> wget source file"
                 wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
-                cp test-med-x86-unknow-linux-gnu-0.6.0.tar.gz /home/runner/rpmbuild/rpm/SOURCES/
 
                 echo ">> tar"
                 file test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
