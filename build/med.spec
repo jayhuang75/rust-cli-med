@@ -17,9 +17,6 @@ A simple enough CLI tool with auditable capability for Data Masking/Encyption/De
 %setup -q #unpack tarball
 
 %build
-echo "spec build section"
-pwd
-tree
 
 %install
 rm -rf $RPM_BUILD_ROOT
