@@ -26,6 +26,7 @@ jobs:
                 echo ">> tar"
                 file test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
                 tar -xf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                ls
                 cp med-0.6.0/med /home/runner/rpmbuild
 
                 echo ">>> move spec file from source code"
@@ -34,7 +35,7 @@ jobs:
                 echo ">>> build the spec"
                 cd /home/runner/rpmbuild
                 ls
-                rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" SPECS/med.spec
+                rpmbuild -ba --build-in-place --define "_topdir $(pwd)" SPECS/med.spec
 
 
 
