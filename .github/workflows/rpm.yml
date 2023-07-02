@@ -6,6 +6,7 @@ jobs:
     rpm_build:
         name: rpm build
         runs-on: ubuntu-latest
+        container: docker.io/fedora:latest
         steps:
             - name: Checkout
               uses: actions/checkout@master
@@ -13,28 +14,23 @@ jobs:
             - name: build
               shell: bash
               run: |
-                echo ">>> setup build dir SOURCES & SPECS"
-                mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+                echo ">>> setup "
+                sudo dnf install fedora-packager @development-tools -Y
+                rpmdev-setuptree
+                tree
                 
-                echo ">>> entre to SOURCES"
+                echo ">>> entre SOURCES dir"
                 cd ~/rpmbuild/SOURCES
-                pwd
 
                 echo ">>> wget source file"
                 wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
 
-                echo ">> tar"
-                file test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
-                tar -xf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
-                ls -la
 
-                echo ">>> move spec and bin file from source code"
-                cp med-0.6.0/med /home/runner/rpmbuild
-                cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec /home/runner/rpmbuild/SPECS
+                echo ">>> move spec file"
+                cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec ~/rpmbuild/SPECS
 
                 echo ">>> build the spec"
-                cd /home/runner/rpmbuild
-                ls
+                cd ~/rpmbuild
                 rpmbuild -ba --build-in-place --define "_topdir $(pwd)" SPECS/med.spec
 
 
