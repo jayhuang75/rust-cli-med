@@ -28,7 +28,7 @@ jobs:
 
 
                 echo ">>> move spec file"
-                cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec ~/rpmbuild/SPECS
+                cp /build/med.spec ~/rpmbuild/SPECS
 
                 echo ">>> build the spec"
                 cd ~/rpmbuild
