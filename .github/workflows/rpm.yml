@@ -33,7 +33,6 @@ jobs:
 
                 echo ">>> build the spec"
                 cd ~/rpmbuild
-                tree
                 rpmbuild -ba ./SPECS/med.spec
 
 
