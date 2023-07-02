@@ -19,7 +19,7 @@ jobs:
                 pwd
                 ls -la
 
-                ehco ">>> create build structure"
+                echo ">>> create build structure"
                 rpmdev-setuptree
 
                 echo ">>> move spec file"
