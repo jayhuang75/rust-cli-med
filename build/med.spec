@@ -14,7 +14,8 @@ A simple enough CLI tool with auditable capability for Data Masking/Encyption/De
 
 %global debug_package %{nil}
 %prep
-cp SOURCES/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz /home/runner/rpmbuild/rpm/SOURCES/
+ls
+cp SOURCES/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz /home/runner/rpmbuild/rpm/SOURCES
 
 %setup #unpack tarball
 
