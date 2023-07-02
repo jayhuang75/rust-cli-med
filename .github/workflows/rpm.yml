@@ -15,9 +15,10 @@ jobs:
               shell: bash
               run: |
                 echo ">>> setup "
-                sudo dnf install fedora-packager @development-tools -y
+                sudo dnf install fedora-packager rpmdevtools tree -y
                 rpmdev-setuptree
-                tree
+                pwd
+                ls -la
                 
                 echo ">>> entre SOURCES dir"
                 cd ~/rpmbuild/SOURCES
