@@ -15,7 +15,7 @@ jobs:
               shell: bash
               run: |
                 echo ">>> setup "
-                sudo dnf install fedora-packager @development-tools -Y
+                sudo dnf install fedora-packager @development-tools -y
                 rpmdev-setuptree
                 tree
                 
