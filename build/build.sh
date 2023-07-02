@@ -26,6 +26,9 @@ tar -xf $RELEASES_PACKAGE_NAME -C $RPM_BUILD
 ls -la
 
 echo copy med bin to the build root
+cp $RELEASES_PACKAGE_NAME $RPM_BUILD_SOURCES
+
+echo copy package files
 cp $RPM_BUILD/med-0.6.0/med $HOME/rpmbuild
 
 echo build the rpm
