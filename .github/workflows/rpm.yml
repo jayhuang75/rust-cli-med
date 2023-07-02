@@ -22,8 +22,7 @@ jobs:
                 tree
 
                 echo ">>> build the spec"
-                pwd
-                rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" med.spec
+                rpmbuild -ba --build-in-place --define "_topdir $(pwd)/rpm" build/med.spec
                 tree
 
 
