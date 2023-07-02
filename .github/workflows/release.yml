@@ -80,9 +80,11 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cp -R demo target/${{ matrix.target }}/release 
-          cd target/${{ matrix.target }}/release          
-          tar czvf ../../../med-${{ matrix.target }}-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/
+          cp -R demo target/${{ matrix.target }}/release
+          cd target/${{ matrix.target }}/release
+          mkdir med-${{ needs.crate_metadata.outputs.version }}
+          mv med med-${{ needs.crate_metadata.outputs.version }}
+          tar czvf ../../../med-${{ matrix.target }}-${{ needs.crate_metadata.outputs.version }}.tar.gz med-${{ needs.crate_metadata.outputs.version }} demo/
           cd -
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -128,8 +130,10 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp -R demo target/release/
-          tar --directory=target/release -cf macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/
+          cp -R demo target/release/ 
+          mkdir target/release/med-${{ needs.crate_metadata.outputs.version }}
+          mv target/release/med target/release/med-${{ needs.crate_metadata.outputs.version }}
+          tar --directory=target/release -cf macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med-${{ needs.crate_metadata.outputs.version }} demo/
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
@@ -154,7 +158,9 @@ jobs:
       - name: tar
         run: |
           cp -R demo target/aarch64-apple-darwin/release
-          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med demo/
+          mkdir target/aarch64-apple-darwin/release/med-${{ needs.crate_metadata.outputs.version }}
+          mv target/aarch64-apple-darwin/release/med target/aarch64-apple-darwin/release/med-${{ needs.crate_metadata.outputs.version }}
+          tar --directory=target/aarch64-apple-darwin/release -cf macos_arm_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med-${{ needs.crate_metadata.outputs.version }} demo/
       - name: Upload binaries arm to release  
         uses: softprops/action-gh-release@v1
         with:

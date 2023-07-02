@@ -30,8 +30,9 @@ csv_mask_performance:
 test_package:
 	cargo build --release
 	cp -R demo target/release
-	cp -r migrations target/release
-	tar --directory=target/release -cf macos_x86_archive-test.tar.gz med demo migrations
+	mkdir target/release/med-0.6.0
+	mv target/release/med target/release/med-0.6.0
+	tar --directory=target/release -cf macos_x86_archive-test.tar.gz med-0.6.0 demo
 
 .PHONY:
 pre_release:

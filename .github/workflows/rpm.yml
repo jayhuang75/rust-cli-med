@@ -1,0 +1,43 @@
+name: Rpm
+
+on: push
+
+jobs:
+    rpm_build:
+        name: rpm build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@master
+            
+            - name: Package
+              shell: bash
+              run: |
+                echo ">>> apt update & upgrade" 
+                apt-get update && apt-get -y upgrade
+
+                echo ">>> install rpm & wget" 
+                apt-get install rpm wget
+
+                echo ">>> setup tree"
+                rpmdev-setuptree
+
+                echo ">>> cd to SOURCES"
+                cd ~/rpmbuild/SOURCES
+                pwd
+
+                echo ">>> wget source file"
+                wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+
+                echo ">>> move spec file from source code"
+                pwd
+                cp ./build/med.spec ~/rpmbuild/SPECS
+                cd ~/rpmbuild
+                tree
+
+                echo ">>> build the spec"
+                rpmbuild -ba ./SPECS/med.spec
+                tree
+
+
+
