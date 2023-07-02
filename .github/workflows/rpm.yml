@@ -24,10 +24,10 @@ jobs:
                 wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
 
                 echo ">> tar"
-                file test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
-                tar -xf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
-                ls
-                cp med-0.6.0/med /home/runner/rpmbuild
+                # file test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                # tar -xf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                # ls
+                # cp med-0.6.0/med /home/runner/rpmbuild
 
                 echo ">>> move spec file from source code"
                 cp /home/runner/work/rust-cli-med/rust-cli-med/build/med.spec /home/runner/rpmbuild/SPECS
