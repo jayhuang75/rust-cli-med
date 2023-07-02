@@ -23,7 +23,7 @@ jobs:
                 rpmdev-setuptree
 
                 echo ">>> move spec file"
-                cp /build/med.spec ~/rpmbuild/SPECS
+                cp ./build/med.spec ~/rpmbuild/SPECS
                 
                 echo ">>> entre SOURCES dir"
                 cd ~/rpmbuild/SOURCES
