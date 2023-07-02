@@ -22,10 +22,11 @@ jobs:
 
                 echo ">>> wget source file"
                 wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
+                ls -la
 
                 echo ">> tar"
-                tar -xvzf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
-                mv test-med-x86-unknow-linux-gnu-0.6.0.tar.gz/med-0.6.0/med /home/runner/
+                # tar -xvzf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
+                # mv test-med-x86-unknow-linux-gnu-0.6.0.tar.gz/med-0.6.0/med /home/runner/
                 tree
 
                 echo ">>> move spec file from source code"
