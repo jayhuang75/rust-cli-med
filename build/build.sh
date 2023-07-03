@@ -6,6 +6,7 @@ echo ">>> create build structure"
 rpmdev-setuptree
 
 echo ">>> move spec file"
+pwd
 cp ./build/med.spec ~/rpmbuild/SPECS
 
 echo ">>> wget source file"
@@ -17,4 +18,4 @@ rpmbuild -ba ./SPECS/med.spec
 tree
 
 echo ">>> update fedora corp"
-copr-cli build med ./SRPMS/med-*.src.rpm 
+copr-cli --config ${{ github.workspace }}/build/fedora_conf build med ./SRPMS/med-*.src.rpm 
