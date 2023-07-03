@@ -17,3 +17,5 @@ jobs:
                 echo ">>> running build script"
                 pwd
                 ./build/build.sh
+              env:
+                FEDORA_COPR: ${{secrets.FEDORA_COPR}}
