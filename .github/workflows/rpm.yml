@@ -15,10 +15,10 @@ jobs:
               shell: bash
               run: |
                 echo ">>> write to ~/.config/copr"
-                printf $FEDORA_COPR >> ./build/fedora_conf
+                printf $FEDORA_COPR > ./build/fedora_conf
                 cat ./build/fedora_conf
 
                 echo ">>> running build script"
-                ./build/build.sh
+                ./build/build.sh        
               env:
-                FEDORA_COPR: ${{secrets.FEDORA_COPR}}
+                FEDORA_COPR : ${{secrets.FEDORA_COPR}}
