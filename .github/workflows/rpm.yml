@@ -16,7 +16,7 @@ jobs:
               run: |
                 echo ">>> write to ~/.config/copr"
                 printf $FEDORA_COPR >> ./build/fedora_conf
-                less ./build/fedora_conf
+                cat ./build/fedora_conf
 
                 echo ">>> running build script"
                 ./build/build.sh
