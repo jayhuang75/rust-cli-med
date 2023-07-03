@@ -223,7 +223,8 @@ jobs:
         run: |
           echo ">>> write to ~/.config/copr"
           printf "\nlogin = $FEDORA_LOGIN\n" >> ./build/fedora_conf
-          printf "token = $FEDORA_TOKEN\n" >> ./build/fedora_conf
+          printf "username = $FEDORA_USERNAME\n" >> ./build/fedora_conf
+          printf "token = $FEDORA_TOKEN" >> ./build/fedora_conf
           cat ./build/fedora_conf
     
           echo ">>> running build script"
@@ -231,3 +232,4 @@ jobs:
         env:
           FEDORA_LOGIN : ${{ secrets.FEDORA_LOGIN }}
           FEDORA_TOKEN : ${{ secrets.FEDORA_TOKEN }}
+          FEDORA_USERNAME: ${{ secrets.FEDORA_USERNAME }}
