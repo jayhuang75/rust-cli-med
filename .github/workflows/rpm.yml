@@ -31,6 +31,13 @@ jobs:
                 echo ">>> wget source file"
                 wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
 
+                echo ">>>> tar release packages"
+                tar -xf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -C ~/rpmbuild/BUILD
+                ls -la
+
+                echo ">>>> copy spec & bin file to target"
+                cp ~/rpmbuild/BUILD/med-0.6.0/med ~/rpmbuild
+
                 echo ">>> build the spec"
                 cd ~/rpmbuild
                 tree
