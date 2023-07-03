@@ -15,7 +15,7 @@ jobs:
               shell: bash
               run: |
                 echo ">>> write to ~/.config/copr"
-                printf "login = $FEDORA_LOGIN\n" >> ./build/fedora_conf
+                printf "\nlogin = $FEDORA_LOGIN\n" >> ./build/fedora_conf
                 printf "token = $FEDORA_TOKEN\n" >> ./build/fedora_conf
                 cat ./build/fedora_conf
                 echo ">>> running build script"
