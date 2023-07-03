@@ -18,4 +18,4 @@ rpmbuild -ba ./SPECS/med.spec
 tree
 
 echo ">>> update fedora corp"
-copr-cli --config ${{ github.workspace }}/build/fedora_conf build med ./SRPMS/med-*.src.rpm 
+copr-cli --config /__w/rust-cli-med/rust-cli-med/build/fedora_conf build med ./SRPMS/med-*.src.rpm 
