@@ -15,10 +15,14 @@ jobs:
               shell: bash
               run: |
                 echo ">>> write to ~/.config/copr"
-                printf $FEDORA_COPR > ./build/fedora_conf
+                echo "$FEDORA_LOGIN" >> ./build/fedora_conf
+                echo "$FEDORA_USERNAME" >> ./build/fedora_conf
+                echo "$FEDORA_TOKEN" >> ./build/fedora_conf
                 cat ./build/fedora_conf
 
                 echo ">>> running build script"
-                ./build/build.sh        
+                ./build/build.sh
               env:
-                FEDORA_COPR : ${{secrets.FEDORA_COPR}}
+                FEDORA_LOGIN : ${{ secrets.FEDORA_LOGIN }}
+                FEDORA_TOKEN : ${{ secrets.FEDORA_TOKEN }}
+                FEDORA_USERNAME: ${{ secrets.FEDORA_USERNAME }}
