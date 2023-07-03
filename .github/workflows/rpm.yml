@@ -14,34 +14,6 @@ jobs:
             - name: build
               shell: bash
               run: |
-                echo ">>> install tools needed "
-                sudo dnf install fedora-packager rpmdevtools tree wget gcc -y -q
+                echo ">>> running build script"
                 pwd
-                ls -la
-
-                echo ">>> create build structure"
-                rpmdev-setuptree
-
-                echo ">>> move spec file"
-                cp ./build/med.spec ~/rpmbuild/SPECS
-                
-                echo ">>> entre SOURCES dir"
-                cd ~/rpmbuild/SOURCES
-
-                echo ">>> wget source file"
-                wget https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -q
-
-                echo ">>>> tar release packages"
-                tar -xf test-med-x86-unknow-linux-gnu-0.6.0.tar.gz -C ~/rpmbuild/BUILD
-                ls -la
-
-                echo ">>>> copy spec & bin file to target"
-                cp ~/rpmbuild/BUILD/med-0.6.0/med ~/rpmbuild
-
-                echo ">>> build the spec"
-                cd ~/rpmbuild
-                tree
-                rpmbuild -ba --build-in-place --define "%_topdir $(pwd)" ./SPECS/med.spec
-
-
-
+                ./build/build.sh

@@ -1,35 +1,18 @@
 #!/bin/bash
+echo ">>> install tools needed "
+sudo dnf install fedora-packager rpmdevtools tree wget gcc -y -q
 
-RPM_BUILD_SOURCES="$HOME/rpmbuild/SOURCES"
-RPM_BUILD_SPECS="$HOME/rpmbuild/SPECS"
-RPM_BUILD="$HOME/rpmbuild/BUILD"
-BUILD_SPECS_LOCATION="$HOME/rust/rust-cli-masker/build/med.spec"
+echo ">>> create build structure"
+rpmdev-setuptree
 
-RELEASES_PACKAGE_URL="https://github.com/jayhuang75/rust-cli-med/releases/download"
-RELEASES_PACKAGE_VERSION="0.6.0"
-RELEASES_PACKAGE_NAME="test-med-x86-unknow-linux-gnu-0.6.0.tar.gz"
-
-echo ">>>> create structure"
-mkdir -p $RPM_BUILD_SOURCES $RPM_BUILD_SPECS $RPM_BUILD
-
-echo ">>>> copy specs to build specs"
-cp $BUILD_SPECS_LOCATION $RPM_BUILD_SPECS
-
-echo ">>>> download release packages"
-cd $RPM_BUILD_SOURCES
-wget -N $RELEASES_PACKAGE_URL/$RELEASES_PACKAGE_VERSION/$RELEASES_PACKAGE_NAME -q
-ls -la
+echo ">>> move spec file"
 pwd
+cp ./build/med.spec ~/rpmbuild/SPECS
 
-echo ">>>> tar release packages"
-tar -xf $RELEASES_PACKAGE_NAME -C $RPM_BUILD
-ls -la
+echo ">>> wget source file"
+spectool -gR ./build/med.spec -g
 
-echo ">>>> copy spec & bin file to target"
-# cp $RELEASES_PACKAGE_NAME $RPM_BUILD_SOURCES
-cp $RPM_BUILD/med-0.6.0/med $HOME/rpmbuild
-
-echo ">>>> build the rpm"
-cd $HOME/rpmbuild
-# rpmbuild -ba --build-in-place --define "%_sourcedir %(pwd)/SOURCES" ./SPECS/med.spec
-rpmbuild --build-in-place --define "_topdir `pwd`" -v -ba ./SPECS/med.spec
+echo ">>> build the spec"
+cd ~/rpmbuild
+rpmbuild -ba ./SPECS/med.spec
+tree

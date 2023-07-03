@@ -4,14 +4,15 @@ Release:        1%{?dist}
 Summary:        A simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
 
 License:        Apache License 2.0
-URL:            https://github.com/jayhuang75/rust-cli-med/
-Source0:        https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86_64-unknown-linux-gnu-0.6.0.tar.gz
+URL:            https://github.com/jayhuang75/rust-cli-med
+Source0:        https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.0/test-med-x86-unknow-linux-gnu-0.6.0.tar.gz
 
 Requires:       bash
 
 %description
 A simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
 
+%global debug_package %{nil}
 %prep
 %setup -q
 
