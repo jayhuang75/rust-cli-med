@@ -14,9 +14,17 @@ This is a personal hobby project; based on the observation, sometimes we need a 
 
 ### Installation
 
+#### Download from github release
+
 The binary name for M.E.D. is med, it depends on the [med_core](../med_core/README.md).
 
 Archives of precompiled binaries for med are available for [Windows, macOS and Linux](https://github.com/jayhuang75/rust-cli-med/releases). Users of platforms not explicitly mentioned below are advised to download one of these archives.
+
+#### Fedora and Centos
+
+```bash
+dnf install med
+```
 
 ## Usage
 
