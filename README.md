@@ -27,6 +27,20 @@ There are 2 main crates in this package.
 - [Build a CLI Tool for Data Masking, Encryption, and Decryption With Rust](https://medium.com/better-programming/build-a-cli-tool-for-data-masking-encryption-and-decryption-with-rust-ad36bea27559)
 - [Reduce memory footprint by about 600% for M.E.D. — Performance Matters](https://medium.com/gitconnected/reduce-memory-footprint-by-about-600-for-m-e-d-performance-matters-bec407833e7c)
 
+## Installation
+
+### Download from github release
+
+The binary name for M.E.D. is med, it depends on the [med_core](../med_core/README.md).
+
+Archives of precompiled binaries for med are available for [Windows, macOS and Linux](https://github.com/jayhuang75/rust-cli-med/releases). Users of platforms not explicitly mentioned below are advised to download one of these archives.
+
+### Fedora and Centos
+
+```bash
+dnf install med
+```
+
 ## Benchmark
 
 ```bash
