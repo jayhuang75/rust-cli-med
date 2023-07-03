@@ -12,9 +12,8 @@ Requires:       bash
 %description
 A simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
 
-%global debug_package %{nil}
 %prep
-%setup -q #unpack tarball
+%setup -q
 
 %build
 
@@ -22,6 +21,9 @@ A simple enough CLI tool with auditable capability for Data Masking/Encyption/De
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{_bindir}
 cp %{name} $RPM_BUILD_ROOT/%{_bindir}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %{_bindir}/%{name}
