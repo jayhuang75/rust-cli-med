@@ -34,7 +34,7 @@ jobs:
                 echo ">>> build the spec"
                 cd ~/rpmbuild
                 tree
-                rpmbuild -ba --define "_topdir $(pwd)" ./SPECS/med.spec
+                rpmbuild -ba --build-in-place --define "%_topdir $(pwd)" ./SPECS/med.spec
 
 
 
