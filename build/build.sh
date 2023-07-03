@@ -16,9 +16,5 @@ cd ~/rpmbuild
 rpmbuild -ba ./SPECS/med.spec
 tree
 
-echo ">>> write to ~/.config/copr"
-touch ~/.config/copr
-echo $FEDORA_COPR >> ~/.config/copr
-
 echo ">>> update fedora corp"
 copr-cli build med ./SRPMS/med-*.src.rpm 

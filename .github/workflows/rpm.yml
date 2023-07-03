@@ -14,8 +14,11 @@ jobs:
             - name: build
               shell: bash
               run: |
+                echo ">>> write to ~/.config/copr"
+                touch ~/.config/copr
+                echo $FEDORA_COPR >> ~/.config/copr
+
                 echo ">>> running build script"
-                pwd
                 ./build/build.sh
               env:
                 FEDORA_COPR: ${{secrets.FEDORA_COPR}}
