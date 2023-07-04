@@ -1,0 +1,28 @@
+name: Crate.io build and deploy
+
+on:
+  pull_request:
+    branches: 
+      - main
+    types: [closed]
+
+jobs:
+    crate_io_publish:
+        name: Crate.io Publish
+        if: ${{ github.event.pull_request.merged }}
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout sources
+            uses: actions/checkout@v2
+          - name: Install stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+              profile: minimal
+              toolchain: stable
+              override: true
+          - name: publish med_core & med_cli
+            run: |
+              cargo publish -p med_core --token ${CRATE_TOKEN}
+              cargo publish -p med_cli --token ${CRATE_TOKEN}
+            env:
+              CRATE_TOKEN: ${{ secrets.CRATE_TOKEN }}
