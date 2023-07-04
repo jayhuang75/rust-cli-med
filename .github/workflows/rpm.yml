@@ -1,0 +1,32 @@
+name: Rpm build and deploy
+
+on:
+  pull_request:
+    branches: 
+      - main
+    types: [closed]
+
+jobs:
+    rpm_build:
+        name: rpm build and deploy
+        if: ${{ github.event.pull_request.merged }}
+        runs-on: ubuntu-latest
+        container: docker.io/fedora:latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@master
+
+            - name: build
+              shell: bash
+              run: |
+                echo ">>> write to ~/.config/copr"
+                printf "\nlogin = $FEDORA_LOGIN\n" >> ./build/fedora_conf
+                printf "username = $FEDORA_USERNAME\n" >> ./build/fedora_conf
+                printf "token = $FEDORA_TOKEN\n" >> ./build/fedora_conf
+                cat ./build/fedora_conf
+                echo ">>> running build script"
+                ./build/build.sh
+              env:
+                FEDORA_LOGIN : ${{ secrets.FEDORA_LOGIN }}
+                FEDORA_TOKEN : ${{ secrets.FEDORA_TOKEN }}
+                FEDORA_USERNAME: ${{ secrets.FEDORA_USERNAME }}
