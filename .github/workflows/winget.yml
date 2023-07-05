@@ -15,7 +15,7 @@ jobs:
           - name: tar
             run: |
               # $pwd
-              # cd D:\a\rust-cli-med\rust-cli-med\target\release
+              cd D:\a\rust-cli-med\rust-cli-med\target\release
               # $pwd
               New-Item -Path "D:\a\rust-cli-med\rust-cli-med\target\release" -Name "demo" -ItemType Directory
               # Copy-Item 'D:\a\rust-cli-med\rust-cli-med\demo\*' -Destination 'D:\a\rust-cli-med\rust-cli-med\target\release\demo\' -Recurse -Force
