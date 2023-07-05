@@ -18,12 +18,12 @@ jobs:
               # cd D:\a\rust-cli-med\rust-cli-med\target\release
               # $pwd
               New-Item -Path "D:\a\rust-cli-med\rust-cli-med\target\release" -Name "demo" -ItemType Directory
-              Copy-Item 'D:\a\rust-cli-med\rust-cli-med\demo\*' -Destination 'D:\a\rust-cli-med\rust-cli-med\target\release\demo\' -Recurse -Force
-              tar --directory=target/release -cf med-0.6.2-x86_64-windows-msvc.tar.gz med.exe
+              # Copy-Item 'D:\a\rust-cli-med\rust-cli-med\demo\*' -Destination 'D:\a\rust-cli-med\rust-cli-med\target\release\demo\' -Recurse -Force
+              # tar --directory=target/release -cf med-0.6.2-x86_64-windows-msvc.tar.gz med.exe
           - name: Upload binaries to release  
             uses: softprops/action-gh-release@v1
             with:
               tag_name: 0.6.2
-              files: 'med-0.6.2-x86_64-windows-msvc.tar.gz'
+              files: 'med.exe'
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
