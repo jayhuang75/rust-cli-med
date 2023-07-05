@@ -29,19 +29,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-  
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-  
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.15.0'
           args: '-- --test-threads 2'
-  
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -65,14 +62,12 @@ jobs:
           profile: minimal
           override: true
           target: ${{ matrix.target }}
-
       - name: Build target
         uses: actions-rs/cargo@v1
         with:
           use-cross: true
           command: build
           args: --release --target ${{ matrix.target }}
-
       - name: Package
         shell: bash
         run: |
@@ -102,9 +97,12 @@ jobs:
           cargo build --release
       - name: tar
         run: |
-          cp -R demo target/release/
-          cd D:\a\rust-cli-med\rust-cli-med\target\release
-          tar -cf win_msvc_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med.exe demo
+          # $pwd
+          # cd D:\a\rust-cli-med\rust-cli-med\target\release
+          # $pwd
+          New-Item -Path "D:\a\rust-cli-med\rust-cli-med\target\release" -Name "demo" -ItemType Directory
+          Copy-Item 'D:\a\rust-cli-med\rust-cli-med\demo\*' -Destination 'D:\a\rust-cli-med\rust-cli-med\target\release\demo\' -Recurse -Force
+          tar --directory=target/release -cf win_msvc_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med.exe demo
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
         with:
