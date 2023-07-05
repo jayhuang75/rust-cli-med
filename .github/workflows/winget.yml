@@ -17,8 +17,8 @@ jobs:
                 $pwd
                 # cd D:\a\rust-cli-med\rust-cli-med\target\release
                 # $pwd
-                Get-ChildItem
-                tar --directory=target/release -cf win_msvc_archive-0.6.2.tar.gz med.exe
+                Copy-Item 'D:\a\rust-cli-med\rust-cli-med\demo' -Destination 'D:\a\rust-cli-med\rust-cli-med\target\release'
+                tar --directory=target/release -cf win_msvc_archive-0.6.2.tar.gz med.exe demo
             - name: Upload binaries to release  
               uses: softprops/action-gh-release@v1
               with:
