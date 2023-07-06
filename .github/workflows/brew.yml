@@ -1,0 +1,20 @@
+name: Brew tap and deploy
+
+on: push
+#   pull_request:
+#     branches: 
+#       - main
+#     types: [closed]
+
+jobs:
+    brew_build:
+        name: brew tap and deploy
+        runs-on: macos-latest
+        container: docker.io/fedora:latest
+        steps:
+            - name: Bump Brew
+              env: 
+                HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                ./build/brew/brew_tap.sh
+                
