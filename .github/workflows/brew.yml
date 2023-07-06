@@ -17,5 +17,5 @@ jobs:
               env: 
                 HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                ./build/brew/brew_tap.sh
+                sudo ./build/brew/brew_tap.sh
                 
