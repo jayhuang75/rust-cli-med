@@ -10,7 +10,6 @@ jobs:
     brew_build:
         name: brew tap and deploy
         runs-on: macos-latest
-        container: docker.io/fedora:latest
         steps:
             - name: Bump Brew
               env: 
