@@ -21,5 +21,6 @@ jobs:
                 cd /Users/runner/work/rust-cli-med/rust-cli-med/build/brew
                 pwd
                 ls -la
-                sudo ./brew_tap.sh
+                chmod +x ./brew_tap.sh
+                ./brew_tap.sh
                 
