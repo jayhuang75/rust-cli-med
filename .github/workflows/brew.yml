@@ -16,7 +16,7 @@ jobs:
             - name: Bump Brew
               shell: bash
               env: 
-                HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.BREW_TOKEN }}
               run: |
                 cd /Users/runner/work/rust-cli-med/rust-cli-med/build/brew
                 pwd
