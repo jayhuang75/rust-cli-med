@@ -22,6 +22,7 @@ jobs:
               # tar --directory=target/release -cf med-0.6.2-x86_64-windows-msvc.tar.gz med.exe
               Compress-Archive -Path D:\a\rust-cli-med\rust-cli-med\target\release\med.exe -DestinationPath D:\a\rust-cli-med\rust-cli-med\target\release\med-0.6.2-x86_64-windows-msvc.zip
               $pwd
+              Get-ChildItem 
           - name: Upload binaries to release  
             uses: softprops/action-gh-release@v1
             with:
