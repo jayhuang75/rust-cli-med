@@ -1,0 +1,21 @@
+name: test set env
+
+on: push
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: write to env
+        run: |
+          ls la
+          pwd
+          printf "\nSHASUM = world hello to me\n" >> ./.github/variables/package.env
+      - name: Set Environment Variables
+        uses: ./.github/actions/setvars
+        with:
+          varFilePath: ./.github/variables/package.env
+
+
