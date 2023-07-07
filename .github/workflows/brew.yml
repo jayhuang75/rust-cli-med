@@ -31,11 +31,13 @@ jobs:
                 curl -LO https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_64-archive-${{ needs.crate_metadata.outputs.version }}.tar.gz > /home/runner/work/rust-cli-med/rust-cli-med/med-macos_x86_64-archive-${{ needs.crate_metadata.outputs.version }}.tar.gz
                 pwd
                 ls -la
+            
             - name: Set SHA
               id: shasum
               run: |
                 pwd
                 echo "sha=$(shasum -a 256 med-macos_x86_64-archive-${{ needs.crate_metadata.outputs.version }}.tar.gz | awk '{printf $1}')" >> $GITHUB_OUTPUT
+            
             - name: upload binaries x86 to release
               uses: softprops/action-gh-release@v1
               with:
@@ -44,14 +46,14 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
-            # - name: Bump brew
-            #   env: 
-            #       HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.BREW_TOKEN }}
-            #   run: |
-            #       echo ">>> brew tap"
-            #       brew tap jayhuang75/med
+            - name: Bump brew
+              env: 
+                  HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.BREW_TOKEN }}
+              run: |
+                  echo ">>> brew tap"
+                  brew tap jayhuang75/med
         
-            #       echo ">>> brew bump formula pr"
-            #       echo ${{ steps.shasum.outputs.sha }}
-            #       brew bump-formula-pr -v --version=${{ needs.crate_metadata.outputs.version }} --no-browse --no-audit --sha256=${{ steps.shasum.outputs.sha }} --url="https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_64-archive-${{ needs.crate_metadata.outputs.version }}.tar.gz" jayhuang75/med/med
+                  echo ">>> brew bump formula pr"
+                  echo ${{ steps.shasum.outputs.sha }}
+                  brew bump-formula-pr -v --version=${{ needs.crate_metadata.outputs.version }} --no-browse --no-audit --sha256=${{ steps.shasum.outputs.sha }} --url="https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_64-archive-${{ needs.crate_metadata.outputs.version }}.tar.gz" jayhuang75/med/med
             
