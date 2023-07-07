@@ -1,4 +1,4 @@
-name: test set env
+name: test_set_env
 
 on: push
 
