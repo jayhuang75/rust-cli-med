@@ -2,7 +2,7 @@ name: test use env
 
 on:
   workflow_run:
-    workflows: ["test set env"]
+    workflows: ["test_set_env"]
     types:
       - completed
     
