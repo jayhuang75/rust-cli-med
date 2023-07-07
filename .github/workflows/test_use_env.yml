@@ -12,9 +12,9 @@ jobs:
         name: use env
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout
-              uses: actions/checkout@master
             - name: Show
+              with:
+                ref: ${{ github.event.workflow_run.head_branch }}
               shell: bash
               run: |
                 echo ">>> use env trigger"
