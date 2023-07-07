@@ -28,6 +28,7 @@ jobs:
             - name: download mac x86_64 package with checksum
               shell: bash
               run: |
+                cd /home/runner/work/rust-cli-med/rust-cli-med
                 curl -s https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz
                 pwd
                 ls -la
