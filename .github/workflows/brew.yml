@@ -23,7 +23,7 @@ jobs:
         name: Bump up brew
         # if: ${{ github.event.pull_request.merged }}
         needs: [crate_metadata]
-        runs-on: ubuntu-latest
+        runs-on: macos-latest
         steps:
             - name: download mac x86_64 package with checksum
               shell: bash
