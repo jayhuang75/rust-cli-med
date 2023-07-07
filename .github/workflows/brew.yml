@@ -36,8 +36,7 @@ jobs:
               run: |
                 pwd
                 echo "sha=$(shasum -a 256 med-macos_x86_64-archive-0.6.3.tar.gz | awk '{printf $1}')" >> $GITHUB_OUTPUT
-                echo ${{ sha }}
-
+                echo ${{ steps.shasum.outputs.sha }}
             # - name: upload binaries x86 to release
             #   uses: softprops/action-gh-release@v1
             #   with:
