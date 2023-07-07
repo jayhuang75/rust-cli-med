@@ -42,7 +42,8 @@ jobs:
         - name: Set SHA
           id: shasum
           run: |
-            echo ::set-output name=sha::"$(shasum -a 256 target/release/macos_x86_archive-0.6.2.tar.gz | awk '{printf $1}')"
+            pwd
+            echo "sha=$(shasum -a 256 macos_x86_archive-0.6.2.tar.gz | awk '{printf $1}')" >> $GITHUB_OUTPUT
         - name: Upload binaries x86 to release  
           uses: softprops/action-gh-release@v1
           with:
