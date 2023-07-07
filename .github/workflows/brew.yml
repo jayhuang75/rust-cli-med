@@ -40,8 +40,8 @@ jobs:
               with:
                 tag_name: ${{ needs.crate_metadata.outputs.version }}
                 files: 'med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
             # - name: Bump brew
             #   env: 
