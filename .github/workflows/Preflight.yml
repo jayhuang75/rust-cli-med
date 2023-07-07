@@ -1,9 +1,9 @@
-name: test_set_env
+name: Preflight
 
 on: push
 
 jobs:
-    build:
+  preflight-job:
       runs-on: ubuntu-latest
       steps:
       - name: checkout
@@ -17,5 +17,3 @@ jobs:
         uses: ./.github/actions/setvars
         with:
           varFilePath: ./.github/variables/package.env
-
-
