@@ -15,17 +15,16 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@master
-
             - name: build
               shell: bash
               run: |
-                echo ">>> write to ~/.config/copr"
-                printf "\nlogin = $FEDORA_LOGIN\n" >> ./build/fedora_conf
-                printf "username = $FEDORA_USERNAME\n" >> ./build/fedora_conf
-                printf "token = $FEDORA_TOKEN\n" >> ./build/fedora_conf
-                cat ./build/fedora_conf
+                echo ">>> write to fedora_conf"
+                printf "\nlogin = $FEDORA_LOGIN\n" >> ./build/rpm/fedora_conf
+                printf "username = $FEDORA_USERNAME\n" >> ./build/rpm/fedora_conf
+                printf "token = $FEDORA_TOKEN\n" >> ./build/rpm/fedora_conf
+                cat ./build/rpm/fedora_conf
                 echo ">>> running build script"
-                ./build/build.sh
+                ./build/rpm/build.sh
               env:
                 FEDORA_LOGIN : ${{ secrets.FEDORA_LOGIN }}
                 FEDORA_TOKEN : ${{ secrets.FEDORA_TOKEN }}
