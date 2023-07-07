@@ -1,0 +1,56 @@
+name: Bump up brew
+
+on: push
+#   pull_request:
+#     branches: 
+#       - main
+#     types: [closed]
+
+jobs:
+    crate_metadata:
+        name: Extract crate metadata
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@master
+        - name: Extract crate information
+          id: crate_metadata
+          run: |
+            cargo metadata --no-deps --format-version 1 | jq -r '"version=" + .packages[0].version' | tee -a $GITHUB_OUTPUT
+        outputs:
+            version: ${{ steps.crate_metadata.outputs.version }}
+    
+    bump_up_brew:
+        name: Bump up brew
+        # if: ${{ github.event.pull_request.merged }}
+        needs: [crate_metadata]
+        runs-on: ubuntu-latest
+        steps:
+            - name: download mac x86_64 package with checksum
+              shell: bash
+              run: |
+                curl -sL https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz
+                ls 
+            - name: Set SHA
+              id: shasum
+              run: |
+                echo "sha=$(shasum -a 256 med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz | awk '{printf $1}')" >> $GITHUB_OUTPUT
+
+            - name: upload binaries x86 to release
+              uses: softprops/action-gh-release@v1
+              with:
+                tag_name: ${{ needs.crate_metadata.outputs.version }}
+                files: 'med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
+            # - name: Bump brew
+            #   env: 
+            #       HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.BREW_TOKEN }}
+            #   run: |
+            #       echo ">>> brew tap"
+            #       brew tap jayhuang75/med
+        
+            #       echo ">>> brew bump formula pr"
+            #       echo ${{ steps.shasum.outputs.sha }}
+            #       brew bump-formula-pr -v --version=${{ needs.crate_metadata.outputs.version }} --no-browse --no-audit --sha256=${{ steps.shasum.outputs.sha }} --url="https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz" jayhuang75/med/med
+            
