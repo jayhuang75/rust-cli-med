@@ -1,0 +1,22 @@
+name: test cache
+
+on: push
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+  
+      steps:
+      - uses: actions/checkout@v3
+  
+      - name: Cache
+        id: cache-shasum
+        uses: actions/cache@v3
+        with:
+          path: download-shasum
+          key: ${{ runner.os }}-shasum
+  
+      - name: Test Catch
+        if: steps.cache-shasum.outputs.cache-hit == 'true'
+        run: download-shasum
+

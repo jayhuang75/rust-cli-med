@@ -102,7 +102,6 @@ jobs:
           # Copy-Item 'D:\a\rust-cli-med\rust-cli-med\demo\*' -Destination 'D:\a\rust-cli-med\rust-cli-med\target\release\demo\' -Recurse -Force
           # tar --directory=target/release -cf med-0.6.2-x86_64-windows-msvc.tar.gz med.exe
           Compress-Archive -Path D:\a\rust-cli-med\rust-cli-med\target\release\med.exe -DestinationPath D:\a\rust-cli-med\rust-cli-med\med-${{ needs.crate_metadata.outputs.version }}-x86_64-windows-msvc.zip
-          $ pwd
           # Get-ChildItem 
       - name: Upload binaries to release  
         uses: softprops/action-gh-release@v1
