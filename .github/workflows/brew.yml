@@ -28,7 +28,7 @@ jobs:
             - name: download mac x86_64 package with checksum
               shell: bash
               run: |
-                curl https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.3/med-macos_x86_64-archive-0.6.3.tar.gz > /home/runner/work/rust-cli-med/rust-cli-med/med-macos_x86_64-archive-0.6.3.tar.gz
+                curl -LO https://github.com/jayhuang75/rust-cli-med/releases/download/0.6.3/med-macos_x86_64-archive-0.6.3.tar.gz > /home/runner/work/rust-cli-med/rust-cli-med/med-macos_x86_64-archive-0.6.3.tar.gz
                 pwd
                 ls -la
             - name: Set SHA
