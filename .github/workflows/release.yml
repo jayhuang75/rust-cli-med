@@ -128,14 +128,28 @@ jobs:
           cp -R demo target/release/ 
           mkdir target/release/med-${{ needs.crate_metadata.outputs.version }}
           mv target/release/med target/release/med-${{ needs.crate_metadata.outputs.version }}
-          tar --directory=target/release -cf macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med-${{ needs.crate_metadata.outputs.version }} demo/
+          tar --directory=target/release -cf med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz med-${{ needs.crate_metadata.outputs.version }} demo/
+      - name: Set SHA
+        id: shasum
+        run: |
+          echo "sha=$(shasum -a 256 med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz | awk '{printf $1}')" >> $GITHUB_OUTPUT
       - name: Upload binaries x86 to release  
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.crate_metadata.outputs.version }}
-          files: 'macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
+          files: 'med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Bump brew
+        env: 
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.BREW_TOKEN }}
+        run: |
+          echo ">>> brew tap"
+          brew tap jayhuang75/med
+
+          echo ">>> brew bump formula pr"
+          echo ${{ steps.shasum.outputs.sha }}
+          brew bump-formula-pr -v --version=${{ needs.crate_metadata.outputs.version }} --no-browse --no-audit --sha256=${{ steps.shasum.outputs.sha }} --url="https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz" jayhuang75/med/med
 
   macos-arm-release:
     name: release macos arm release
