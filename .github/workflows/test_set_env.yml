@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v3
       - name: write to env
         run: |
-          ls la
+          ls -la
           pwd
           printf "\nSHASUM = world hello to me\n" >> ./.github/variables/package.env
       - name: Set Environment Variables
