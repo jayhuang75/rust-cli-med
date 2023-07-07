@@ -28,11 +28,13 @@ jobs:
             - name: download mac x86_64 package with checksum
               shell: bash
               run: |
-                curl -sL https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz
-                ls 
+                curl -s https://github.com/jayhuang75/rust-cli-med/releases/download/${{ needs.crate_metadata.outputs.version }}/med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz
+                pwd
+                ls -la
             - name: Set SHA
               id: shasum
               run: |
+                pwd
                 echo "sha=$(shasum -a 256 med-macos_x86_archive-${{ needs.crate_metadata.outputs.version }}.tar.gz | awk '{printf $1}')" >> $GITHUB_OUTPUT
 
             - name: upload binaries x86 to release
