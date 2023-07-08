@@ -1,14 +1,15 @@
 name: Bump up brew
 
-on: push
-#   pull_request:
-#     branches: 
-#       - main
-#     types: [closed]
+on:
+  pull_request:
+    branches: 
+      - main
+    types: [closed]
 
 jobs:
     crate_metadata:
         name: Extract crate metadata
+        if: ${{ github.event.pull_request.merged }}
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@master
@@ -21,7 +22,7 @@ jobs:
     
     bump_up_brew:
         name: Bump up brew
-        # if: ${{ github.event.pull_request.merged }}
+        if: ${{ github.event.pull_request.merged }}
         needs: [crate_metadata]
         runs-on: macos-latest
         steps:
