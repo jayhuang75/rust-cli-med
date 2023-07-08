@@ -1,5 +1,5 @@
 Name:           med
-Version:        0.6.3
+Version:        0.6.4
 Release:        1%{?dist}
 Summary:        A simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
 
