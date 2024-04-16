@@ -1,5 +1,5 @@
 Name:           med
-Version:        0.6.4
+Version:        0.6.5
 Release:        1%{?dist}
 Summary:        A simple enough CLI tool with auditable capability for Data Masking/Encyption/Decryption for CSV/JSON files.
 
@@ -30,7 +30,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/%{name}
 
 %changelog
-* Fri Jun 30 2023 jayhuang75 <jayhuang75@gmail.com>
-- Rust powered performance.
-- Provide Masking, and Encyption/Decryption capabilities.
-- Auditable with build-in SQLite powered Audit table.
+* April 15th 2024 jayhuang75 <jayhuang75@gmail.com>
+- build for fedora 39.
